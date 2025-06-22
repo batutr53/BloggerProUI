@@ -1,0 +1,97 @@
+﻿@model List<BloggerProUI.Models.Post.PostListDto>
+
+@{
+    ViewData["Title"] = "Postlar";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Postlar</h1>
+    <a asp-area="Admin" asp-controller="Post" asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni Post Oluştur
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped" width="100%" cellspacing="0">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Başlık</th>
+                        <th>Yazar</th>
+                        <th>Açıklama</th>
+                        <th>Yayın Tarihi</th>
+                        <th style="width: 150px;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var post in Model)
+                    {
+                        <tr>
+                            <td>@post.Title</td>
+                            <td>@post.Author</td>
+                            <td>@post.Excerpt)</td>
+                            <td>@(post.PublishDate?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                            <td class="text-center">
+                                <a asp-action="Edit" asp-route-id="@post.Id" class="btn btn-sm btn-warning mr-1" title="Düzenle">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-danger btn-sm" onclick="deletePost('@post.Id')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function deletePost(id) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu post kalıcı olarak silinecek!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Evet, sil!',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "Post")',
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire('Silindi!', response.message, 'success').then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire('Hata!', response.message || 'Silme işlemi başarısız.', 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Hata!', 'Sunucuya ulaşılamadı.', 'error');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

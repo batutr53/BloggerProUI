@@ -1,0 +1,125 @@
+﻿@model BloggerProUI.Models.Post.PostCreateDto
+
+@{
+    ViewData["Title"] = "Yeni Post Oluştur";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var categories = ViewBag.Categories as List<SelectListItem> ?? new();
+    var tags = ViewBag.Tags as List<SelectListItem> ?? new();
+}
+
+<h1 class="h3 mb-4 text-gray-800">Yeni Post Oluştur</h1>
+
+<form asp-action="Create" method="post" class="needs-validation" novalidate>
+    <div class="form-group">
+        <label asp-for="Title">Başlık</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Slug">Slug (URL)</label>
+        <input asp-for="Slug" class="form-control" />
+        <span asp-validation-for="Slug" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Content">İçerik</label>
+        <textarea asp-for="Content" class="form-control" rows="6"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="FeaturedImage">Kapak Görseli URL</label>
+        <input asp-for="FeaturedImage" class="form-control" />
+        <span asp-validation-for="FeaturedImage" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="categoryIds">Kategoriler</label>
+        <select asp-for="CategoryIds" asp-items="categories" class="form-control" multiple></select>
+        <span asp-validation-for="CategoryIds" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="tagIds">Etiketler</label>
+        <select asp-for="TagIds" asp-items="tags" class="form-control" multiple></select>
+        <span asp-validation-for="TagIds" class="text-danger"></span>
+    </div>
+
+    <hr />
+    <h4>Modüller</h4>
+    <div id="modules-container">
+        <!-- Modül girişleri dinamik olarak buraya eklenecek -->
+    </div>
+    <button type="button" class="btn btn-outline-primary mb-3" onclick="addTextModule()">Metin Modülü Ekle</button>
+    <button type="button" class="btn btn-outline-secondary mb-3" onclick="addImageModule()">Görsel Modülü Ekle</button>
+
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+    <a asp-action="Index" class="btn btn-secondary">İptal</a>
+</form>
+
+@section Scripts {
+    <script>
+        let moduleIndex = 0;
+
+        function addTextModule() {
+            const html = `
+                <div class="card mb-3 p-3 border">
+                    <h5>Metin Modülü</h5>
+                    <input type="hidden" name="Modules[${moduleIndex}].Type" value="1" />
+                    <div class="form-group">
+                        <label>İçerik</label>
+                        <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Sıralama</label>
+                        <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Hizalama</label>
+                        <select name="Modules[${moduleIndex}].Alignment" class="form-control">
+                            <option value="left">Sol</option>
+                            <option value="center">Orta</option>
+                            <option value="right">Sağ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Genişlik</label>
+                        <input type="text" name="Modules[${moduleIndex}].Width" class="form-control" placeholder="örn: 100%" />
+                    </div>
+                </div>`;
+            $('#modules-container').append(html);
+            moduleIndex++;
+        }
+
+        function addImageModule() {
+            const html = `
+                <div class="card mb-3 p-3 border">
+                    <h5>Görsel Modülü</h5>
+                    <input type="hidden" name="Modules[${moduleIndex}].Type" value="3" />
+                    <div class="form-group">
+                        <label>Görsel URL</label>
+                        <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Sıralama</label>
+                        <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Hizalama</label>
+                        <select name="Modules[${moduleIndex}].Alignment" class="form-control">
+                            <option value="left">Sol</option>
+                            <option value="center">Orta</option>
+                            <option value="right">Sağ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Genişlik</label>
+                        <input type="text" name="Modules[${moduleIndex}].Width" class="form-control" placeholder="örn: 80%" />
+                    </div>
+                </div>`;
+            $('#modules-container').append(html);
+            moduleIndex++;
+        }
+    </script>
+}

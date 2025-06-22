@@ -1,36 +1,36 @@
 ﻿@{
     Layout = null;
+    var title = ViewData["Title"] ?? "BloggerPro Admin";
 }
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Yönetim Paneli</title>
-    <link href="~/sbadmin2/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" />
-    <link href="~/sbadmin2/css/sb-admin-2.min.css" rel="stylesheet" />
+    <title>@title</title>
+
+    @await Html.PartialAsync("_Styles")
+    @RenderSection("Head", required: false)
 </head>
 <body id="page-top">
     <div id="wrapper">
-
         @await Html.PartialAsync("_Sidebar")
 
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
-
                 @await Html.PartialAsync("_Topbar")
 
-                <div class="container-fluid pt-4">
+                <div class="container-fluid">
                     @RenderBody()
                 </div>
             </div>
-        </div>
 
+            @await Html.PartialAsync("_Footer")
+        </div>
     </div>
 
-    <script src="~/sbadmin2/vendor/jquery/jquery.min.js"></script>
-    <script src="~/sbadmin2/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/sbadmin2/vendor/jquery-easing/jquery.easing.min.js"></script>
-    <script src="~/sbadmin2/js/sb-admin-2.min.js"></script>
+    @await Html.PartialAsync("_Scripts")
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

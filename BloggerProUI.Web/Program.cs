@@ -1,6 +1,7 @@
 using BloggerProUI.Business.Handlers;
 using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Business.Services;
+using BloggerProUI.Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,15 +10,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<AuthTokenHandler>();
 
-builder.Services.AddHttpClient<IAuthApiService, AuthApiService>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
-})
-.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-});
 
+builder.Services.AddConfiguredHttpClients(builder.Configuration);
 
 var app = builder.Build();
 
@@ -41,7 +35,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
         name: "areas",
-        pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+        pattern: "{area:exists}/{controller=AdminDashboard}/{action=Index}/{id?}");
 
     endpoints.MapControllerRoute(
         name: "default",

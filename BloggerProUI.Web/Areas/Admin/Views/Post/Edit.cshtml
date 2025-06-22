@@ -1,0 +1,133 @@
+﻿@model BloggerProUI.Models.Post.PostUpdateDto
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Post Düzenle";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var moduleJson = Newtonsoft.Json.JsonConvert.SerializeObject(Model.Modules);
+}
+
+<h1 class="h3 mb-4 text-gray-800">Post Düzenle</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="row">
+        <div class="col-md-8">
+            <div class="form-group">
+                <label asp-for="Title"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Slug"></label>
+                <input asp-for="Slug" class="form-control" />
+                <span asp-validation-for="Slug" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Excerpt"></label>
+                <textarea asp-for="Excerpt" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Excerpt" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CoverImageUrl">Kapak Görseli (URL)</label>
+                <input asp-for="CoverImageUrl" class="form-control" />
+                <span asp-validation-for="CoverImageUrl" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Kategoriler</label>
+                <select asp-for="CategoryIds" asp-items="ViewBag.Categories" multiple class="form-control"></select>
+                <span asp-validation-for="CategoryIds" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Etiketler</label>
+                <select asp-for="TagIds" asp-items="ViewBag.Tags" multiple class="form-control"></select>
+                <span asp-validation-for="TagIds" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <h5>Modüller</h5>
+            <div id="moduleContainer"></div>
+            <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addTextModule()">+ Metin Modülü</button>
+            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addImageModule()">+ Görsel Modülü</button>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-4">Güncelle</button>
+    <a asp-action="Index" class="btn btn-secondary mt-4">İptal</a>
+</form>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        let modules = @Html.Raw(moduleJson);
+        let moduleIndex = 0;
+
+        function renderModules() {
+            modules.forEach(m => {
+                if (m.type === 1) addTextModule(m);
+                if (m.type === 3) addImageModule(m);
+            });
+        }
+
+        function addTextModule(data = {}) {
+            const html = `
+                <div class="card p-2 mb-2">
+                    <input type="hidden" name="Modules[\${moduleIndex}].Type" value="1" />
+                    <input type="hidden" name="Modules[\${moduleIndex}].Order" value="\${moduleIndex + 1}" />
+                    <div class="form-group">
+                        <label>İçerik</label>
+                        <textarea name="Modules[\${moduleIndex}].Content" class="form-control" rows="3">\${data.content || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Hizalama</label>
+                        <select name="Modules[\${moduleIndex}].Alignment" class="form-control">
+                            <option value="left" \${data.alignment === 'left' ? 'selected' : ''}>Sol</option>
+                            <option value="center" \${data.alignment === 'center' ? 'selected' : ''}>Orta</option>
+                            <option value="right" \${data.alignment === 'right' ? 'selected' : ''}>Sağ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Genişlik</label>
+                        <input type="text" name="Modules[\${moduleIndex}].Width" class="form-control" value="\${data.width || '100%'}" />
+                    </div>
+                </div>`;
+            $('#moduleContainer').append(html);
+            moduleIndex++;
+        }
+
+        function addImageModule(data = {}) {
+            const html = `
+                <div class="card p-2 mb-2">
+                    <input type="hidden" name="Modules[\${moduleIndex}].Type" value="3" />
+                    <input type="hidden" name="Modules[\${moduleIndex}].Order" value="\${moduleIndex + 1}" />
+                    <div class="form-group">
+                        <label>Görsel URL</label>
+                        <input type="text" name="Modules[\${moduleIndex}].MediaUrl" class="form-control" value="\${data.mediaUrl || ''}" />
+                    </div>
+                    <div class="form-group">
+                        <label>Hizalama</label>
+                        <select name="Modules[\${moduleIndex}].Alignment" class="form-control">
+                            <option value="left" \${data.alignment === 'left' ? 'selected' : ''}>Sol</option>
+                            <option value="center" \${data.alignment === 'center' ? 'selected' : ''}>Orta</option>
+                            <option value="right" \${data.alignment === 'right' ? 'selected' : ''}>Sağ</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Genişlik</label>
+                        <input type="text" name="Modules[\${moduleIndex}].Width" class="form-control" value="\${data.width || '100%'}" />
+                    </div>
+                </div>`;
+            $('#moduleContainer').append(html);
+            moduleIndex++;
+        }
+
+        $(document).ready(() => {
+            renderModules();
+        });
+    </script>
+}
