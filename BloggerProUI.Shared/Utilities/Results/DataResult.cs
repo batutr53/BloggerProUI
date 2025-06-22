@@ -1,25 +1,25 @@
-﻿using System.Text.Json.Serialization;
-
-namespace BloggerProUI.Shared.Utilities.Results;
+﻿using BloggerProUI.Shared.Utilities.Results;
 
 public class DataResult<T> : Result, IDataResult<T>
 {
-
-    public DataResult(T data, bool success, string message, int httpStatusCode, string statusCode) : base(success, message == null ? null : new[] { message }, httpStatusCode, statusCode)
-    {
-        Data = data;
-    }
-
-    public DataResult(T data, bool success, string[] message, int httpStatusCode, string statusCode) : base(success, message, httpStatusCode, statusCode)
-    {
-        Data = data;
-    }
-
-    [JsonConstructor]
-    public DataResult(T data, bool success, string[] message, int httpStatusCode, string statusCode, int count) : base(success, message, httpStatusCode, statusCode)
+    public DataResult() { } // Parametresiz constructor şart
+    public DataResult(T data, bool success, string[] message, int httpStatusCode, string statusCode, int count)
+    : base(success, message, httpStatusCode, statusCode)
     {
         Data = data;
         Count = count;
+    }
+
+    public DataResult(T data, bool success, string message, int httpStatusCode, string statusCode)
+        : base(success, message == null ? null : new[] { message }, httpStatusCode, statusCode)
+    {
+        Data = data;
+    }
+
+    public DataResult(T data, bool success, string[] message, int httpStatusCode, string statusCode)
+        : base(success, message, httpStatusCode, statusCode)
+    {
+        Data = data;
     }
 
     public DataResult(T data, bool success) : base(success)
@@ -32,6 +32,6 @@ public class DataResult<T> : Result, IDataResult<T>
         Data = data;
     }
 
-    public T Data { get; }
-    public int Count { get; }
+    public T Data { get; set; }  // !!! GET ve SET zorunlu
+    public int Count { get; set; } // Aynı şekilde
 }

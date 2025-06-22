@@ -21,7 +21,7 @@ namespace BloggerProUI.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginDto dto)
+        public async Task<IActionResult> Login([FromForm] LoginDto dto)
         {
             var result = await _authApiService.LoginAsync(dto);
             if (!result.Success)
@@ -30,7 +30,6 @@ namespace BloggerProUI.Web.Areas.Admin.Controllers
                 return View(dto);
             }
 
-            // Token cookie'ye yazılıyor
             Response.Cookies.Append("AuthToken", result.Data, new CookieOptions
             {
                 HttpOnly = true,
