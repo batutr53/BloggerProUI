@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BloggerProUI.Models\BloggerProUI.Models.csproj" />
     <ProjectReference Include="..\BloggerProUI.Shared\BloggerProUI.Shared.csproj" />
   </ItemGroup>

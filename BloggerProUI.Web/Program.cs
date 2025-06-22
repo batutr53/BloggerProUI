@@ -1,8 +1,24 @@
+using BloggerProUI.Business.Handlers;
+using BloggerProUI.Business.Interfaces;
+using BloggerProUI.Business.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddTransient<AuthTokenHandler>();
 
+builder.Services.AddHttpClient<IAuthApiService, AuthApiService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
+}); // bu handler'a token eklenmez
+
+builder.Services.AddHttpClient<IPostApiService, PostApiService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:BaseUrl"]);
+})
+.AddHttpMessageHandler<AuthTokenHandler>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,6 +40,13 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+      name: "areas",
+      pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+    );
+});
 
 
 app.Run();
