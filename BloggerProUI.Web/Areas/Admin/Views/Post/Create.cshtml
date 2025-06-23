@@ -51,8 +51,13 @@
     <div id="modules-container">
         <!-- Modül girişleri dinamik olarak buraya eklenecek -->
     </div>
-    <button type="button" class="btn btn-outline-primary mb-3" onclick="addTextModule()">Metin Modülü Ekle</button>
-    <button type="button" class="btn btn-outline-secondary mb-3" onclick="addImageModule()">Görsel Modülü Ekle</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="addParagraphModule()">Paragraf</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="addImageModule()">Görsel</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="addVideoModule()">Video</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="addIFrameModule()">IFrame</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="addQuoteModule()">Alıntı</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="addHeadingModule()">Başlık</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="addTextModule()">Serbest Metin</button>
 
     <button type="submit" class="btn btn-primary">Kaydet</button>
     <a asp-action="Index" class="btn btn-secondary">İptal</a>
@@ -60,66 +65,136 @@
 
 @section Scripts {
     <script>
+        let modules = [];
         let moduleIndex = 0;
 
+        function addParagraphModule() {
+            const html = `
+        <div class="card mb-3 p-3 border">
+            <h5>Paragraf Modülü</h5>
+            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Paragraph" />
+            <div class="form-group">
+                <label>İçerik</label>
+                <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Sıralama</label>
+                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
+            </div>
+        </div>`;
+            $('#modules-container').append(html);
+            moduleIndex++;
+        }
+        function addImageModule() {
+            const html = `
+        <div class="card mb-3 p-3 border">
+            <h5>Görsel Modülü</h5>
+            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Image" />
+            <div class="form-group">
+                <label>Görsel URL</label>
+                <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Sıralama</label>
+                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
+            </div>
+        </div>`;
+            $('#modules-container').append(html);
+            moduleIndex++;
+        }
+        function addVideoModule() {
+            const html = `
+        <div class="card mb-3 p-3 border">
+            <h5>Video Modülü</h5>
+            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Video" />
+            <div class="form-group">
+                <label>Video URL</label>
+                <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Sıralama</label>
+                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
+            </div>
+        </div>`;
+            $('#modules-container').append(html);
+            moduleIndex++;
+        }
+        function addIFrameModule() {
+            const html = `
+        <div class="card mb-3 p-3 border">
+            <h5>IFrame Modülü</h5>
+            <input type="hidden" name="Modules[${moduleIndex}].Type" value="IFrame" />
+            <div class="form-group">
+                <label>IFrame URL</label>
+                <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Genişlik</label>
+                <input type="text" name="Modules[${moduleIndex}].Width" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Yükseklik</label>
+                <input type="text" name="Modules[${moduleIndex}].Height" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Sıralama</label>
+                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
+            </div>
+        </div>`;
+            $('#modules-container').append(html);
+            moduleIndex++;
+        }
+        function addQuoteModule() {
+            const html = `
+        <div class="card mb-3 p-3 border">
+            <h5>Alıntı Modülü</h5>
+            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Quote" />
+            <div class="form-group">
+                <label>Alıntı</label>
+                <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Sıralama</label>
+                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
+            </div>
+        </div>`;
+            $('#modules-container').append(html);
+            moduleIndex++;
+        }
+        function addHeadingModule() {
+            const html = `
+        <div class="card mb-3 p-3 border">
+            <h5>Başlık Modülü</h5>
+            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Heading" />
+            <div class="form-group">
+                <label>Başlık</label>
+                <input type="text" name="Modules[${moduleIndex}].Content" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Sıralama</label>
+                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
+            </div>
+        </div>`;
+            $('#modules-container').append(html);
+            moduleIndex++;
+        }
         function addTextModule() {
             const html = `
-                <div class="card mb-3 p-3 border">
-                    <h5>Metin Modülü</h5>
-                    <input type="hidden" name="Modules[${moduleIndex}].Type" value="1" />
-                    <div class="form-group">
-                        <label>İçerik</label>
-                        <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Sıralama</label>
-                        <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label>Hizalama</label>
-                        <select name="Modules[${moduleIndex}].Alignment" class="form-control">
-                            <option value="left">Sol</option>
-                            <option value="center">Orta</option>
-                            <option value="right">Sağ</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Genişlik</label>
-                        <input type="text" name="Modules[${moduleIndex}].Width" class="form-control" placeholder="örn: 100%" />
-                    </div>
-                </div>`;
+        <div class="card mb-3 p-3 border">
+            <h5>Serbest Metin Modülü</h5>
+            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Text" />
+            <div class="form-group">
+                <label>İçerik</label>
+                <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Sıralama</label>
+                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
+            </div>
+        </div>`;
             $('#modules-container').append(html);
             moduleIndex++;
         }
 
-        function addImageModule() {
-            const html = `
-                <div class="card mb-3 p-3 border">
-                    <h5>Görsel Modülü</h5>
-                    <input type="hidden" name="Modules[${moduleIndex}].Type" value="3" />
-                    <div class="form-group">
-                        <label>Görsel URL</label>
-                        <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label>Sıralama</label>
-                        <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label>Hizalama</label>
-                        <select name="Modules[${moduleIndex}].Alignment" class="form-control">
-                            <option value="left">Sol</option>
-                            <option value="center">Orta</option>
-                            <option value="right">Sağ</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Genişlik</label>
-                        <input type="text" name="Modules[${moduleIndex}].Width" class="form-control" placeholder="örn: 80%" />
-                    </div>
-                </div>`;
-            $('#modules-container').append(html);
-            moduleIndex++;
-        }
     </script>
 }

@@ -1,127 +1,248 @@
-﻿@model BloggerProUI.Models.Post.PostUpdateDto
+﻿@model BloggerProUI.Models.Post.PostDetailDto
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
-    ViewData["Title"] = "Post Düzenle";
+    ViewData["Title"] = "Post Güncelle";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     var moduleJson = Newtonsoft.Json.JsonConvert.SerializeObject(Model.Modules);
 }
 
-<h1 class="h3 mb-4 text-gray-800">Post Düzenle</h1>
+<h1 class="h3 mb-4 text-gray-800">Post Güncelle</h1>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="row">
+        <!-- Sol Panel -->
         <div class="col-md-8">
             <div class="form-group">
-                <label asp-for="Title"></label>
+                <label asp-for="Title">Başlık</label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="Slug"></label>
+                <label asp-for="Slug">Slug</label>
                 <input asp-for="Slug" class="form-control" />
                 <span asp-validation-for="Slug" class="text-danger"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="Excerpt"></label>
+                <label asp-for="Excerpt">Özet</label>
                 <textarea asp-for="Excerpt" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Excerpt" class="text-danger"></span>
             </div>
-
             <div class="form-group">
-                <label asp-for="CoverImageUrl">Kapak Görseli (URL)</label>
-                <input asp-for="CoverImageUrl" class="form-control" />
-                <span asp-validation-for="CoverImageUrl" class="text-danger"></span>
+                <label asp-for="Content">İçerik (Ana)</label>
+                <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FeaturedImage">Kapak Görseli URL</label>
+                <input asp-for="FeaturedImage" class="form-control" />
+                <span asp-validation-for="FeaturedImage" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label>Kategoriler</label>
-                <select asp-for="CategoryIds" asp-items="ViewBag.Categories" multiple class="form-control"></select>
-                <span asp-validation-for="CategoryIds" class="text-danger"></span>
+                <select asp-for="Categories" asp-items="ViewBag.Categories" class="form-control" multiple></select>
             </div>
 
             <div class="form-group">
                 <label>Etiketler</label>
-                <select asp-for="TagIds" asp-items="ViewBag.Tags" multiple class="form-control"></select>
-                <span asp-validation-for="TagIds" class="text-danger"></span>
+                <select asp-for="Tags" asp-items="ViewBag.Tags" class="form-control" multiple></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Status">Yayın Durumu</label>
+                <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<BloggerProUI.Models.Enums.PostStatus>()"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Visibility">Görünürlük</label>
+                <select asp-for="Visibility" class="form-control" asp-items="Html.GetEnumSelectList<BloggerProUI.Models.Enums.PostVisibility>()"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="PublishDate">Yayın Tarihi</label>
+                <input asp-for="PublishDate" type="datetime-local" class="form-control" />
+                <span asp-validation-for="PublishDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-check">
+                <input asp-for="AllowComments" class="form-check-input" />
+                <label asp-for="AllowComments" class="form-check-label">Yorumlara izin ver</label>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="IsFeatured" class="form-check-input" />
+                <label asp-for="IsFeatured" class="form-check-label">Öne çıkar</label>
             </div>
         </div>
 
+        <!-- Sağ Panel -->
         <div class="col-md-4">
-            <h5>Modüller</h5>
+            <h5 class="mb-3">Modüller</h5>
             <div id="moduleContainer"></div>
-            <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addTextModule()">+ Metin Modülü</button>
-            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addImageModule()">+ Görsel Modülü</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="addParagraphModule()">Paragraf</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="addImageModule()">Görsel</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="addVideoModule()">Video</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="addIFrameModule()">IFrame</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="addQuoteModule()">Alıntı</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="addHeadingModule()">Başlık</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="addTextModule()">Serbest Metin</button>
+
+            <hr />
+            <h5 class="mt-4">İstatistik</h5>
+            <ul class="list-group mb-3">
+                <li class="list-group-item">Görüntülenme: <strong>@Model.ViewCount</strong></li>
+                <li class="list-group-item">Yorumlar: <strong>@Model.CommentCount</strong></li>
+                <li class="list-group-item">Beğeni: <strong>@Model.LikeCount</strong></li>
+                <li class="list-group-item">Ortalama Puan: <strong>@(Model.AverageRating?.ToString("0.0") ?? "Yok")</strong></li>
+            </ul>
+
+            <h5 class="mt-4">Yazar</h5>
+            <div class="d-flex align-items-center">
+                <img src="@Model.AuthorAvatar" alt="avatar" class="rounded-circle mr-2" width="50" />
+                <strong class="ml-2">@Model.AuthorName</strong>
+            </div>
         </div>
     </div>
 
     <button type="submit" class="btn btn-success mt-4">Güncelle</button>
     <a asp-action="Index" class="btn btn-secondary mt-4">İptal</a>
 </form>
-
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         let modules = @Html.Raw(moduleJson);
         let moduleIndex = 0;
 
         function renderModules() {
+            if (!modules || modules.length === 0) return;
             modules.forEach(m => {
-                if (m.type === 1) addTextModule(m);
-                if (m.type === 3) addImageModule(m);
+                switch (m.type) {
+                    case "Paragraph":
+                        addParagraphModule(m);
+                    case "Text":
+                        addTextModule(m);
+                        break;
+                    case "Image":
+                        addImageModule(m);
+                        break;
+                    case "Video":
+                        addVideoModule(m);
+                        break;
+                    case "Quote":
+                        addQuoteModule(m);
+                        break;
+                    case "IFrame":
+                        addIframeModule(m);
+                        break;
+                    case "Heading":
+                        addHeadingModule(m);
+                        break;
+                    default:
+                        console.warn("Desteklenmeyen modül tipi:", m.type);
+                }
             });
+        }
+
+        function removeModule(btn) {
+            $(btn).closest('.card').remove();
+        }
+
+        function generateCommonFields(type, order, data = {}) {
+            return `
+                <input type="hidden" name="Modules[${moduleIndex}].Type" value="${type}" />
+                <input type="hidden" name="Modules[${moduleIndex}].Order" value="${order}" />
+                <div class="form-group">
+                    <label>Hizalama</label>
+                    <select name="Modules[${moduleIndex}].Alignment" class="form-control">
+                        <option value="left" ${data.alignment === 'left' ? 'selected' : ''}>Sol</option>
+                        <option value="center" ${data.alignment === 'center' ? 'selected' : ''}>Orta</option>
+                        <option value="right" ${data.alignment === 'right' ? 'selected' : ''}>Sağ</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Genişlik</label>
+                    <input type="text" name="Modules[${moduleIndex}].Width" class="form-control" value="${data.width || '100%'}" />
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeModule(this)">Sil</button>
+            `;
         }
 
         function addTextModule(data = {}) {
             const html = `
-                <div class="card p-2 mb-2">
-                    <input type="hidden" name="Modules[\${moduleIndex}].Type" value="1" />
-                    <input type="hidden" name="Modules[\${moduleIndex}].Order" value="\${moduleIndex + 1}" />
-                    <div class="form-group">
-                        <label>İçerik</label>
-                        <textarea name="Modules[\${moduleIndex}].Content" class="form-control" rows="3">\${data.content || ''}</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Hizalama</label>
-                        <select name="Modules[\${moduleIndex}].Alignment" class="form-control">
-                            <option value="left" \${data.alignment === 'left' ? 'selected' : ''}>Sol</option>
-                            <option value="center" \${data.alignment === 'center' ? 'selected' : ''}>Orta</option>
-                            <option value="right" \${data.alignment === 'right' ? 'selected' : ''}>Sağ</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Genişlik</label>
-                        <input type="text" name="Modules[\${moduleIndex}].Width" class="form-control" value="\${data.width || '100%'}" />
-                    </div>
-                </div>`;
+            <div class="card p-3 mb-2">
+                ${generateCommonFields(1, moduleIndex + 1, data)}
+                <div class="form-group">
+                    <label>İçerik</label>
+                    <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="3">${data.content || ''}</textarea>
+                </div>
+            </div>`;
             $('#moduleContainer').append(html);
             moduleIndex++;
         }
 
         function addImageModule(data = {}) {
             const html = `
-                <div class="card p-2 mb-2">
-                    <input type="hidden" name="Modules[\${moduleIndex}].Type" value="3" />
-                    <input type="hidden" name="Modules[\${moduleIndex}].Order" value="\${moduleIndex + 1}" />
-                    <div class="form-group">
-                        <label>Görsel URL</label>
-                        <input type="text" name="Modules[\${moduleIndex}].MediaUrl" class="form-control" value="\${data.mediaUrl || ''}" />
-                    </div>
-                    <div class="form-group">
-                        <label>Hizalama</label>
-                        <select name="Modules[\${moduleIndex}].Alignment" class="form-control">
-                            <option value="left" \${data.alignment === 'left' ? 'selected' : ''}>Sol</option>
-                            <option value="center" \${data.alignment === 'center' ? 'selected' : ''}>Orta</option>
-                            <option value="right" \${data.alignment === 'right' ? 'selected' : ''}>Sağ</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Genişlik</label>
-                        <input type="text" name="Modules[\${moduleIndex}].Width" class="form-control" value="\${data.width || '100%'}" />
-                    </div>
-                </div>`;
+            <div class="card p-3 mb-2">
+                ${generateCommonFields(2, moduleIndex + 1, data)}
+                <div class="form-group">
+                    <label>Görsel URL</label>
+                    <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" value="${data.mediaUrl || ''}" />
+                </div>
+            </div>`;
+            $('#moduleContainer').append(html);
+            moduleIndex++;
+        }
+
+        function addVideoModule(data = {}) {
+            const html = `
+            <div class="card p-3 mb-2">
+                ${generateCommonFields(3, moduleIndex + 1, data)}
+                <div class="form-group">
+                    <label>Video URL</label>
+                    <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" value="${data.mediaUrl || ''}" />
+                </div>
+            </div>`;
+            $('#moduleContainer').append(html);
+            moduleIndex++;
+        }
+
+        function addQuoteModule(data = {}) {
+            const html = `
+            <div class="card p-3 mb-2">
+                ${generateCommonFields(4, moduleIndex + 1, data)}
+                <div class="form-group">
+                    <label>Alıntı</label>
+                    <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="2">${data.content || ''}</textarea>
+                </div>
+            </div>`;
+            $('#moduleContainer').append(html);
+            moduleIndex++;
+        }
+
+        function addIframeModule(data = {}) {
+            const html = `
+            <div class="card p-3 mb-2">
+                ${generateCommonFields(5, moduleIndex + 1, data)}
+                <div class="form-group">
+                    <label>Iframe URL</label>
+                    <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" value="${data.mediaUrl || ''}" />
+                </div>
+            </div>`;
+            $('#moduleContainer').append(html);
+            moduleIndex++;
+        }
+
+        function addHeadingModule(data = {}) {
+            const html = `
+            <div class="card p-3 mb-2">
+                ${generateCommonFields(6, moduleIndex + 1, data)}
+                <div class="form-group">
+                    <label>Başlık</label>
+                    <input type="text" name="Modules[${moduleIndex}].Content" class="form-control" value="${data.content || ''}" />
+                </div>
+            </div>`;
             $('#moduleContainer').append(html);
             moduleIndex++;
         }

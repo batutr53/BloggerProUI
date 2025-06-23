@@ -41,6 +41,12 @@ public static class HttpClientServiceCollectionExtensions
         {
             client.BaseAddress = baseAddress;
         })
+        .AddHttpMessageHandler<AuthTokenHandler>(); 
+
+services.AddHttpClient<IUserApiService, UserApiService>(client =>
+        {
+            client.BaseAddress = baseAddress;
+        })
         .AddHttpMessageHandler<AuthTokenHandler>();
 
         services.AddHttpClient<IAuthApiService, AuthApiService>(client =>

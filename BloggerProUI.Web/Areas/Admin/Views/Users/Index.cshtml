@@ -1,0 +1,304 @@
+﻿@model List<BloggerProUI.Models.User.UserListDto>
+@{
+    ViewData["Title"] = "Kullanıcılar";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1 class="h3 mb-4 text-gray-800">Kullanıcılar</h1>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Kullanıcı Adı</th>
+                        <th>Email</th>
+                        <th>Roller</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var user in Model)
+                        {
+                            <tr data-user-id="@user.Id">
+                                <td>@user.UserName</td>
+                                <td>@user.Email</td>
+                                <td>
+                                    @if (user.Roles != null && user.Roles.Any())
+                                    {
+                                        @foreach (var role in user.Roles)
+                                        {
+                                            <span class="badge badge-info mr-1">@role</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary">Rol Yok</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (user.IsBlocked)
+                                    {
+                                        <span class="badge badge-danger">Engelli</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-success">Aktif</span>
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning me-2"
+                                            onclick="toggleBlock('@user.Id', @Json.Serialize(!user.IsBlocked))"
+                                            data-user-id="@user.Id"
+                                            data-current-blocked="@user.IsBlocked">
+                                        @(user.IsBlocked ? "Engeli Kaldır" : "Engelle")
+                                    </button>
+                                    <button class="btn btn-sm btn-primary"
+                                            onclick='openRoleModal("@user.Id", "@user.UserName", @Html.Raw(Json.Serialize(user.Roles ?? new List<string>())))'
+                                            data-user-id="@user.Id">
+                                        Rol Ata
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Kullanıcı bulunamadı</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Rol Güncelleme Modalı -->
+<div class="modal fade" id="roleModal" tabindex="-1" role="dialog" aria-labelledby="roleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="roleForm">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="roleModalLabel">Rol Ata</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Kapat">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="roleUserId" name="userId" />
+                    <div class="form-group">
+                        <label>Kullanıcı:</label>
+                        <span id="roleUserName" class="font-weight-bold"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="rolesSelect">Roller</label>
+                        <select id="rolesSelect" name="roles" class="form-control" multiple>
+                            <option value="Admin">Admin</option>
+                            <option value="User">User</option>
+                            <option value="Editor">Editor</option>
+                        </select>
+                        <small class="form-text text-muted">Ctrl tuşuna basılı tutarak birden fazla rol seçebilirsiniz.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    <button type="submit" class="btn btn-primary" id="saveRolesBtn">
+                        <span class="btn-text">Kaydet</span>
+                        <span class="btn-loading d-none">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Kaydediliyor...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // CSRF token ayarla
+         
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            $.ajaxSetup({
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("RequestVerificationToken", token);
+                }
+            });
+        });
+
+        function toggleBlock(userId, block) {
+            if (!userId || userId === '') {
+                showAlert('Geçersiz kullanıcı ID', 'danger');
+                return;
+            }
+
+            // Buton durumunu değiştir
+            var btn = $(`button[data-user-id="${userId}"][data-current-blocked]`);
+            btn.prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("ToggleBlock", "Users")',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                data: JSON.stringify({
+                    userId: userId,
+                    block: block
+                }),
+                success: function (response) {
+                    if (response && response.success) {
+                        showAlert(block ? 'Kullanıcı engellendi' : 'Kullanıcı engeli kaldırıldı', 'success');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert(response.message || "İşlem başarısız", 'danger');
+                        btn.prop('disabled', false);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Toggle block error:', error);
+                    showAlert("Sunucu hatası oluştu", 'danger');
+                    btn.prop('disabled', false);
+                }
+            });
+        }
+
+        function openRoleModal(userId, userName, userRoles) {
+            if (!userId || userId === '') {
+                showAlert('Geçersiz kullanıcı ID', 'danger');
+                return;
+            }
+
+            // Modal verilerini temizle ve ayarla
+            $('#roleUserId').val(userId);
+            $('#roleUserName').text(userName || 'Bilinmiyor');
+
+            // Rolleri ayarla
+            $('#rolesSelect').val([]);
+            if (userRoles && Array.isArray(userRoles)) {
+                $('#rolesSelect').val(userRoles);
+            }
+
+            // Modalı aç
+            $('#roleModal').modal('show');
+        }
+
+        $('#roleForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var userId = $('#roleUserId').val();
+            var selectedRoles = $('#rolesSelect').val();
+
+            // Validasyon
+            if (!userId || userId === '') {
+                showAlert('Kullanıcı seçilmedi', 'danger');
+                return;
+            }
+
+            if (!selectedRoles || selectedRoles.length === 0) {
+                showAlert('En az bir rol seçilmelidir', 'warning');
+                return;
+            }
+
+            // Buton durumunu değiştir
+            var saveBtn = $('#saveRolesBtn');
+            saveBtn.prop('disabled', true);
+            saveBtn.find('.btn-text').addClass('d-none');
+            saveBtn.find('.btn-loading').removeClass('d-none');
+
+            var requestData = {
+                userId: userId,
+                roles: selectedRoles
+            };
+
+            console.log("Gönderilen veri:", requestData);
+
+            $.ajax({
+                url: '@Url.Action("UpdateRoles", "Users")',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                data: JSON.stringify(requestData),
+                success: function (response) {
+                    if (response && response.success) {
+                        showAlert('Roller başarıyla güncellendi', 'success');
+                        $('#roleModal').modal('hide');
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert(response.message || "Rol güncelleme başarısız", 'danger');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Update roles error:', error);
+                    console.error('Response:', xhr.responseText);
+                    showAlert("Sunucu hatası oluştu", 'danger');
+                },
+                complete: function() {
+                    // Buton durumunu sıfırla
+                    saveBtn.prop('disabled', false);
+                    saveBtn.find('.btn-text').removeClass('d-none');
+                    saveBtn.find('.btn-loading').addClass('d-none');
+                }
+            });
+        });
+
+        // Modal kapandığında formu temizle
+        $('#roleModal').on('hidden.bs.modal', function () {
+            $('#roleForm')[0].reset();
+            $('#roleUserId').val('');
+            $('#roleUserName').text('');
+            $('#rolesSelect').val([]);
+        });
+
+        function showAlert(message, type = 'info') {
+            // Önceki alertleri kaldır
+            $('.dynamic-alert').remove();
+
+            var alertClass = 'alert-' + type;
+            var iconClass = type === 'success' ? 'fa-check-circle' :
+                           type === 'danger' ? 'fa-exclamation-triangle' :
+                           type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+
+            var alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show dynamic-alert" role="alert">
+                    <i class="fas ${iconClass} me-2"></i>${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+
+            $('h1').after(alertHtml);
+
+            // 5 saniye sonra otomatik kapat
+            setTimeout(() => {
+                $('.dynamic-alert').fadeOut();
+            }, 5000);
+        }
+    </script>
+}

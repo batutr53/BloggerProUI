@@ -11,6 +11,7 @@ namespace BloggerProUI.Models.Post
         public string? Excerpt { get; set; }
         public string? Content { get; set; }
         public string? CoverImageUrl { get; set; }
+        public string? FeaturedImage { get; set; }
         public bool AllowComments { get; set; }
         public bool IsFeatured { get; set; }
         public int Status { get; set; }

@@ -1,8 +1,10 @@
 ﻿using BloggerProUI.Business.Interfaces;
+using BloggerProUI.Business.Services;
 using BloggerProUI.Models.Enums;
 using BloggerProUI.Models.Post;
 using BloggerProUI.Models.PostModule;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
@@ -11,10 +13,13 @@ namespace BloggerProUI.Web.Areas.Admin.Controllers;
 public class PostController : Controller
 {
     private readonly IPostApiService _postApiService;
-
-    public PostController(IPostApiService postApiService)
+    private readonly ICategoryApiService _categoryApiService;
+    private readonly ITagApiService _tagApiService;
+    public PostController(IPostApiService postApiService, ICategoryApiService categoryApiService, ITagApiService tagApiService)
     {
         _postApiService = postApiService;
+        _categoryApiService = categoryApiService;
+        _tagApiService = tagApiService;
     }
 
     // GET: /Admin/Post
@@ -26,7 +31,28 @@ public class PostController : Controller
     }
 
     // GET: /Admin/Post/Create
-    public IActionResult Create() => View();
+    public async Task<IActionResult> Create()
+    {
+        var categoryResult = await _categoryApiService.GetAllAsync();
+        var tagResult = await _tagApiService.GetAllAsync();
+
+        ViewBag.Categories = categoryResult.Data?
+            .Select(c => new SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.Name
+            }).ToList() ?? new List<SelectListItem>();
+
+        ViewBag.Tags = tagResult.Data?
+            .Select(t => new SelectListItem
+            {
+                Value = t.Id.ToString(),
+                Text = t.Name
+            }).ToList() ?? new List<SelectListItem>();
+
+        return View();
+    }
+
 
     // POST: /Admin/Post/Create
     [HttpPost]
@@ -43,25 +69,49 @@ public class PostController : Controller
         return RedirectToAction("Index");
     }
 
-    // GET: /Admin/Post/Edit/{id}
     public async Task<IActionResult> Edit(Guid id)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.GetPostByIdAsync(id, userId);
+        var result = await _postApiService.GetPostByIdAsync(id);
         if (!result.Success)
         {
             TempData["ErrorMessage"] = result.Message?.FirstOrDefault();
             return RedirectToAction("Index");
         }
-        return View(result.Data);
+
+        var post = result.Data;
+
+        var categoryList = await _categoryApiService.GetAllAsync();
+        var tagList = await _tagApiService.GetAllAsync();
+
+        var selectedCategoryIds = post.Categories.Select(x => x.ToString()).ToList();
+        var selectedTagIds = post.Tags.Select(x => x.ToString()).ToList();
+
+        ViewBag.Categories = categoryList.Data?
+            .Select(c => new SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.Name,
+                Selected = selectedCategoryIds.Contains(c.Id.ToString())
+            }).ToList();
+
+        ViewBag.Tags = tagList.Data?
+            .Select(t => new SelectListItem
+            {
+                Value = t.Id.ToString(),
+                Text = t.Name,
+                Selected = selectedTagIds.Contains(t.Id.ToString())
+            }).ToList();
+
+        return View(post);
     }
+
 
     // POST: /Admin/Post/Edit
     [HttpPost]
     public async Task<IActionResult> Edit(PostUpdateDto dto)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.UpdatePostAsync(dto, userId);
+        dto.CoverImageUrl = dto.FeaturedImage;
+        var result = await _postApiService.UpdatePostAsync(dto);
         if (!result.Success)
         {
             TempData["ErrorMessage"] = result.Message?.FirstOrDefault();
@@ -75,8 +125,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.DeletePostAsync(id, userId);
+        var result = await _postApiService.DeletePostAsync(id);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
@@ -84,8 +133,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> UpdateStatus(Guid id, PostStatus status, DateTime? publishDate = null)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.UpdatePostStatusAsync(id, status, userId, publishDate);
+        var result = await _postApiService.UpdatePostStatusAsync(id, status, publishDate);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
@@ -93,8 +141,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> UpdateVisibility(Guid id, PostVisibility visibility)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.UpdatePostVisibilityAsync(id, visibility, userId);
+        var result = await _postApiService.UpdatePostVisibilityAsync(id, visibility);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
@@ -102,8 +149,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> ToggleFeatured(Guid id)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.TogglePostFeaturedStatusAsync(id, userId);
+        var result = await _postApiService.TogglePostFeaturedStatusAsync(id);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
@@ -111,8 +157,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> AddModule(Guid postId, CreatePostModuleDto dto)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.AddModuleToPostAsync(postId, dto, userId);
+        var result = await _postApiService.AddModuleToPostAsync(postId, dto);
         return Json(new { success = result.Success, data = result.Data, message = result.Message?.FirstOrDefault() });
     }
 
@@ -120,8 +165,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> UpdateModule(Guid postId, UpdatePostModuleDto dto)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.UpdateModuleAsync(postId, dto, userId);
+        var result = await _postApiService.UpdateModuleAsync(postId, dto);
         return Json(new { success = result.Success, data = result.Data, message = result.Message?.FirstOrDefault() });
     }
 
@@ -129,8 +173,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> DeleteModule(Guid postId, Guid moduleId)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.RemoveModuleFromPostAsync(postId, moduleId, userId);
+        var result = await _postApiService.RemoveModuleFromPostAsync(postId, moduleId);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
@@ -138,8 +181,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> ReorderModules(Guid postId, List<ModuleSortOrderDto> newOrder)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.ReorderModulesAsync(postId, newOrder, userId);
+        var result = await _postApiService.ReorderModulesAsync(postId, newOrder);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
@@ -147,8 +189,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Like(Guid postId)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.LikePostAsync(postId, userId);
+        var result = await _postApiService.LikePostAsync(postId);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
@@ -156,8 +197,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Unlike(Guid postId)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.UnlikePostAsync(postId, userId);
+        var result = await _postApiService.UnlikePostAsync(postId);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
@@ -165,8 +205,7 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Rate(Guid postId, int score)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.RatePostAsync(postId, score, userId);
+        var result = await _postApiService.RatePostAsync(postId, score);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
@@ -174,16 +213,14 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> RemoveRating(Guid postId)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.RemoveRatingAsync(postId, userId);
+        var result = await _postApiService.RemoveRatingAsync(postId);
         return Json(new { success = result.Success, message = result.Message?.FirstOrDefault() });
     }
 
     // GET: /Admin/Post/Stats/{postId}
     public async Task<IActionResult> Stats(Guid postId)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.GetPostStatsAsync(postId, userId);
+        var result = await _postApiService.GetPostStatsAsync(postId);
         if (!result.Success)
         {
             TempData["ErrorMessage"] = result.Message?.FirstOrDefault();

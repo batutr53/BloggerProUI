@@ -23,10 +23,9 @@ public class PostApiService : IPostApiService
         return await response.Content.ReadFromJsonAsync<DataResult<string>>();
     }
 
-    public async Task<DataResult<PostDetailDto>> GetPostByIdAsync(Guid id, Guid? userId = null)
+    public async Task<DataResult<PostDetailDto>> GetPostByIdAsync(Guid id)
     {
-        var query = userId.HasValue ? $"?userId={userId}" : string.Empty;
-        var response = await _httpClient.GetAsync($"post/{id}{query}");
+        var response = await _httpClient.GetAsync($"post/{id}");
         return await response.Content.ReadFromJsonAsync<DataResult<PostDetailDto>>();
     }
 
@@ -46,19 +45,19 @@ public class PostApiService : IPostApiService
         return await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
     }
 
-    public async Task<Result> UpdatePostAsync(PostUpdateDto dto, Guid userId)
+    public async Task<Result> UpdatePostAsync(PostUpdateDto dto)
     {
-        var response = await _httpClient.PutAsJsonAsync($"post/update?userId={userId}", dto);
+        var response = await _httpClient.PutAsJsonAsync($"post", dto);
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result> DeletePostAsync(Guid id, Guid userId)
+    public async Task<Result> DeletePostAsync(Guid id)
     {
-        var response = await _httpClient.DeleteAsync($"post/{id}?userId={userId}");
+        var response = await _httpClient.DeleteAsync($"post/{id}");
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result> UpdatePostStatusAsync(Guid postId, PostStatus status, Guid userId, DateTime? publishDate = null)
+    public async Task<Result> UpdatePostStatusAsync(Guid postId, PostStatus status, DateTime? publishDate = null)
     {
         var payload = new
         {
@@ -66,100 +65,99 @@ public class PostApiService : IPostApiService
             Status = status,
             PublishDate = publishDate
         };
-        var response = await _httpClient.PutAsJsonAsync($"post/status?userId={userId}", payload);
+        var response = await _httpClient.PutAsJsonAsync($"post/status", payload);
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result> UpdatePostVisibilityAsync(Guid postId, PostVisibility visibility, Guid userId)
+    public async Task<Result> UpdatePostVisibilityAsync(Guid postId, PostVisibility visibility)
     {
         var payload = new { PostId = postId, Visibility = visibility };
-        var response = await _httpClient.PutAsJsonAsync($"post/visibility?userId={userId}", payload);
+        var response = await _httpClient.PutAsJsonAsync($"post/visibility", payload);
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result> TogglePostFeaturedStatusAsync(Guid postId, Guid userId)
+    public async Task<Result> TogglePostFeaturedStatusAsync(Guid postId)
     {
-        var response = await _httpClient.PutAsync($"post/featured-toggle/{postId}?userId={userId}", null);
+        var response = await _httpClient.PutAsync($"post/featured-toggle/{postId}", null);
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<DataResult<PostModuleDto>> AddModuleToPostAsync(Guid postId, CreatePostModuleDto dto, Guid userId)
+    public async Task<DataResult<PostModuleDto>> AddModuleToPostAsync(Guid postId, CreatePostModuleDto dto)
     {
-        var response = await _httpClient.PostAsJsonAsync($"post/{postId}/modules?userId={userId}", dto);
+        var response = await _httpClient.PostAsJsonAsync($"post/{postId}", dto);
         return await response.Content.ReadFromJsonAsync<DataResult<PostModuleDto>>();
     }
 
-    public async Task<DataResult<PostModuleDto>> UpdateModuleAsync(Guid postId, UpdatePostModuleDto dto, Guid userId)
+    public async Task<DataResult<PostModuleDto>> UpdateModuleAsync(Guid postId, UpdatePostModuleDto dto)
     {
-        var response = await _httpClient.PutAsJsonAsync($"post/{postId}/modules?userId={userId}", dto);
+        var response = await _httpClient.PutAsJsonAsync($"post/{postId}", dto);
         return await response.Content.ReadFromJsonAsync<DataResult<PostModuleDto>>();
     }
 
-    public async Task<Result> RemoveModuleFromPostAsync(Guid postId, Guid moduleId, Guid userId)
+    public async Task<Result> RemoveModuleFromPostAsync(Guid postId, Guid moduleId)
     {
-        var response = await _httpClient.DeleteAsync($"post/{postId}/modules/{moduleId}?userId={userId}");
+        var response = await _httpClient.DeleteAsync($"post/{postId}/modules/{moduleId}");
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result> ReorderModulesAsync(Guid postId, List<ModuleSortOrderDto> newOrder, Guid userId)
+    public async Task<Result> ReorderModulesAsync(Guid postId, List<ModuleSortOrderDto> newOrder)
     {
-        var response = await _httpClient.PutAsJsonAsync($"post/{postId}/modules/reorder?userId={userId}", newOrder);
+        var response = await _httpClient.PutAsJsonAsync($"post/{postId}/modules/reorder", newOrder);
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result> LikePostAsync(Guid postId, Guid userId)
+    public async Task<Result> LikePostAsync(Guid postId)
     {
-        var response = await _httpClient.PostAsync($"post/like/{postId}?userId={userId}", null);
+        var response = await _httpClient.PostAsync($"post/like/{postId}", null);
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result> UnlikePostAsync(Guid postId, Guid userId)
+    public async Task<Result> UnlikePostAsync(Guid postId)
     {
-        var response = await _httpClient.DeleteAsync($"post/unlike/{postId}?userId={userId}");
+        var response = await _httpClient.DeleteAsync($"post/unlike/{postId}");
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result> RatePostAsync(Guid postId, int score, Guid userId)
+    public async Task<Result> RatePostAsync(Guid postId, int score)
     {
         var payload = new { Score = score };
-        var response = await _httpClient.PostAsJsonAsync($"post/rate/{postId}?userId={userId}", payload);
+        var response = await _httpClient.PostAsJsonAsync($"post/rate/{postId}", payload);
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<Result> RemoveRatingAsync(Guid postId, Guid userId)
+    public async Task<Result> RemoveRatingAsync(Guid postId)
     {
-        var response = await _httpClient.DeleteAsync($"post/unrate/{postId}?userId={userId}");
+        var response = await _httpClient.DeleteAsync($"post/unrate/{postId}");
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
-    public async Task<bool> CanUserEditPostAsync(Guid postId, Guid userId)
+    public async Task<bool> CanUserEditPostAsync(Guid postId)
     {
-        var response = await _httpClient.GetAsync($"post/can-edit/{postId}?userId={userId}");
+        var response = await _httpClient.GetAsync($"post/can-edit/{postId}");
         return await response.Content.ReadFromJsonAsync<bool>();
     }
 
-    public async Task<bool> IsPostOwnerAsync(Guid postId, Guid userId)
+    public async Task<bool> IsPostOwnerAsync(Guid postId)
     {
-        var response = await _httpClient.GetAsync($"post/is-owner/{postId}?userId={userId}");
+        var response = await _httpClient.GetAsync($"post/is-owner/{postId}");
         return await response.Content.ReadFromJsonAsync<bool>();
     }
 
-    public async Task<bool> CanUserViewPostAsync(Guid postId, Guid? userId)
+    public async Task<bool> CanUserViewPostAsync(Guid postId)
     {
-        var query = userId.HasValue ? $"?userId={userId}" : "";
-        var response = await _httpClient.GetAsync($"post/can-view/{postId}{query}");
+        var response = await _httpClient.GetAsync($"post/can-view/{postId}");
         return await response.Content.ReadFromJsonAsync<bool>();
     }
 
-    public async Task<DataResult<PostStatsDto>> GetPostStatsAsync(Guid postId, Guid userId)
+    public async Task<DataResult<PostStatsDto>> GetPostStatsAsync(Guid postId)
     {
-        var response = await _httpClient.GetAsync($"post/{postId}/stats?userId={userId}");
+        var response = await _httpClient.GetAsync($"post/{postId}/stats");
         return await response.Content.ReadFromJsonAsync<DataResult<PostStatsDto>>();
     }
 
-    public async Task<DataResult<UserPostStatsDto>> GetUserPostStatsAsync(Guid userId)
+    public async Task<DataResult<UserPostStatsDto>> GetUserPostStatsAsync()
     {
-        var response = await _httpClient.GetAsync($"post/user-stats/{userId}");
+        var response = await _httpClient.GetAsync($"post/user-stat");
         return await response.Content.ReadFromJsonAsync<DataResult<UserPostStatsDto>>();
     }
 }

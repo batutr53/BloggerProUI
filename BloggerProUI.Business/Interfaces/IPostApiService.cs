@@ -10,32 +10,32 @@ namespace BloggerProUI.Business.Interfaces
     {
         Task<DataResult<PaginatedResultDto<PostListDto>>> GetAllPostsAsync(int page = 1, int pageSize = 20);
         Task<DataResult<string>> CreatePostAsync(PostCreateDto dto);
-        Task<DataResult<PostDetailDto>> GetPostByIdAsync(Guid id, Guid? userId = null);
+        Task<DataResult<PostDetailDto>> GetPostByIdAsync(Guid id);
         Task<DataResult<PaginatedResultDto<PostListDto>>> GetPostsByAuthorIdAsync(Guid authorId, PostFilterDto filter, int page = 1, int pageSize = 10);
         Task<DataResult<PaginatedResultDto<PostListDto>>> GetAllPostsAsync(PostFilterDto filter, int page = 1, int pageSize = 10);
-        Task<Result> UpdatePostAsync(PostUpdateDto dto, Guid userId);
-        Task<Result> DeletePostAsync(Guid id, Guid userId);
+        Task<Result> UpdatePostAsync(PostUpdateDto dto);
+        Task<Result> DeletePostAsync(Guid id);
 
-        Task<Result> UpdatePostStatusAsync(Guid postId, PostStatus status, Guid userId, DateTime? publishDate = null);
-        Task<Result> UpdatePostVisibilityAsync(Guid postId, PostVisibility visibility, Guid userId);
-        Task<Result> TogglePostFeaturedStatusAsync(Guid postId, Guid userId);
+        Task<Result> UpdatePostStatusAsync(Guid postId, PostStatus status, DateTime? publishDate = null);
+        Task<Result> UpdatePostVisibilityAsync(Guid postId, PostVisibility visibility);
+        Task<Result> TogglePostFeaturedStatusAsync(Guid postId);
 
-        Task<DataResult<PostModuleDto>> AddModuleToPostAsync(Guid postId, CreatePostModuleDto dto, Guid userId);
-        Task<DataResult<PostModuleDto>> UpdateModuleAsync(Guid postId, UpdatePostModuleDto dto, Guid userId);
-        Task<Result> RemoveModuleFromPostAsync(Guid postId, Guid moduleId, Guid userId);
-        Task<Result> ReorderModulesAsync(Guid postId, List<ModuleSortOrderDto> newOrder, Guid userId);
+        Task<DataResult<PostModuleDto>> AddModuleToPostAsync(Guid postId, CreatePostModuleDto dto);
+        Task<DataResult<PostModuleDto>> UpdateModuleAsync(Guid postId, UpdatePostModuleDto dto);
+        Task<Result> RemoveModuleFromPostAsync(Guid postId, Guid moduleId);
+        Task<Result> ReorderModulesAsync(Guid postId, List<ModuleSortOrderDto> newOrder);
 
-        Task<Result> LikePostAsync(Guid postId, Guid userId);
-        Task<Result> UnlikePostAsync(Guid postId, Guid userId);
-        Task<Result> RatePostAsync(Guid postId, int score, Guid userId);
-        Task<Result> RemoveRatingAsync(Guid postId, Guid userId);
+        Task<Result> LikePostAsync(Guid postId);
+        Task<Result> UnlikePostAsync(Guid postId);
+        Task<Result> RatePostAsync(Guid postId, int score);
+        Task<Result> RemoveRatingAsync(Guid postId);
 
-        Task<bool> CanUserEditPostAsync(Guid postId, Guid userId);
-        Task<bool> IsPostOwnerAsync(Guid postId, Guid userId);
-        Task<bool> CanUserViewPostAsync(Guid postId, Guid? userId);
+        Task<bool> CanUserEditPostAsync(Guid postId);
+        Task<bool> IsPostOwnerAsync(Guid postId);
+        Task<bool> CanUserViewPostAsync(Guid postId);
 
-        Task<DataResult<PostStatsDto>> GetPostStatsAsync(Guid postId, Guid userId);
-        Task<DataResult<UserPostStatsDto>> GetUserPostStatsAsync(Guid userId);
+        Task<DataResult<PostStatsDto>> GetPostStatsAsync(Guid postId);
+        Task<DataResult<UserPostStatsDto>> GetUserPostStatsAsync();
     }
 
 }
