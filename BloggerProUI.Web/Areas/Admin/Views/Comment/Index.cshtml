@@ -1,0 +1,55 @@
+﻿@using BloggerProUI.Models.Comment
+@model List<CommentListDto>
+@{
+    ViewData["Title"] = "Yorumlar";
+    var postId = ViewBag.PostId;
+}
+<h3>Yorumlar</h3>
+
+<form asp-action="Add" method="post">
+    <input type="hidden" name="PostId" value="@postId" />
+    <div class="form-group">
+        <textarea name="Content" class="form-control" placeholder="Yorum yazınız..." required></textarea>
+    </div>
+    <button class="btn btn-primary">Yorumu Ekle</button>
+</form>
+
+<hr />
+
+<div class="comment-list">
+    @foreach (var comment in Model)
+    {
+        <partial name="_CommentItem" model="comment" />
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function deleteComment(commentId, postId) {
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Yorum kalıcı olarak silinecek!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Evet, sil!',
+                cancelButtonText: 'Vazgeç'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Admin/Comment/Delete',
+                        type: 'POST',
+                        data: { id: commentId, postId: postId },
+                        success: function (response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                Swal.fire('Hata', response.message, 'error');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

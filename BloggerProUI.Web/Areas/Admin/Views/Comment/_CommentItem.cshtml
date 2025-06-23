@@ -1,0 +1,18 @@
+﻿@model BloggerProUI.Models.Comment.CommentListDto
+<div class="border p-2 my-2">
+    <strong>@Model.Username</strong> - <small>@Model.CreatedAt.ToString("g")</small>
+    <p>@Model.Content</p>
+    <button class="btn btn-sm btn-danger" onclick="deleteComment('@Model.Id', '@ViewBag.PostId')">
+        <i class="fas fa-trash"></i> Sil
+    </button>
+
+    @if (Model.Replies != null && Model.Replies.Any())
+    {
+        <div class="ml-4">
+            @foreach (var reply in Model.Replies)
+            {
+                <partial name="_CommentItem" model="reply" />
+            }
+        </div>
+    }
+</div>

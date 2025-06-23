@@ -3,6 +3,7 @@ using BloggerProUI.Models.Enums;
 using BloggerProUI.Models.Post;
 using BloggerProUI.Models.PostModule;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
@@ -19,7 +20,7 @@ public class PostController : Controller
     // GET: /Admin/Post
     public async Task<IActionResult> Index()
     {
-        var result = await _postApiService.GetAllPostsAsync(new PostFilterDto(), 1, 100);
+        var result = await _postApiService.GetAllPostsAsync(1, 100);
         if (!result.Success) TempData["ErrorMessage"] = result.Message?.FirstOrDefault();
         return View(result.Data?.Items ?? new List<PostListDto>());
     }
@@ -32,7 +33,7 @@ public class PostController : Controller
     public async Task<IActionResult> Create(PostCreateDto dto)
     {
         var userId = GetCurrentUserId();
-        var result = await _postApiService.CreatePostAsync(dto, userId);
+        var result = await _postApiService.CreatePostAsync(dto);
         if (!result.Success)
         {
             TempData["ErrorMessage"] = result.Message?.FirstOrDefault();
@@ -193,8 +194,15 @@ public class PostController : Controller
 
     private Guid GetCurrentUserId()
     {
-        // Cookie veya token'dan kullanıcıyı al (basit demo amaçlı, gerektiğinde değiştir)
-        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId");
+        var token = Request.Cookies["AuthToken"];
+        if (string.IsNullOrEmpty(token))
+            return Guid.Empty;
+
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+
+        var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub");
         return userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var id) ? id : Guid.Empty;
+
     }
 }

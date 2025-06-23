@@ -17,10 +17,10 @@ public class PostApiService : IPostApiService
         _httpClient = httpClient;
     }
 
-    public async Task<DataResult<Guid>> CreatePostAsync(PostCreateDto dto, Guid authorId)
+    public async Task<DataResult<string>> CreatePostAsync(PostCreateDto dto)
     {
-        var response = await _httpClient.PostAsJsonAsync($"post/create?authorId={authorId}", dto);
-        return await response.Content.ReadFromJsonAsync<DataResult<Guid>>();
+        var response = await _httpClient.PostAsJsonAsync($"post", dto);
+        return await response.Content.ReadFromJsonAsync<DataResult<string>>();
     }
 
     public async Task<DataResult<PostDetailDto>> GetPostByIdAsync(Guid id, Guid? userId = null)
@@ -35,7 +35,11 @@ public class PostApiService : IPostApiService
         var response = await _httpClient.PostAsJsonAsync($"post/all?page={page}&pageSize={pageSize}", filter);
         return await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
     }
-
+    public async Task<DataResult<PaginatedResultDto<PostListDto>>> GetAllPostsAsync(int page = 1, int pageSize = 10)
+    {
+        var response = await _httpClient.PostAsJsonAsync($"post/GetAllPost?page={page}&pageSize={pageSize}", "");
+        return await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
+    }
     public async Task<DataResult<PaginatedResultDto<PostListDto>>> GetPostsByAuthorIdAsync(Guid authorId, PostFilterDto filter, int page = 1, int pageSize = 10)
     {
         var response = await _httpClient.PostAsJsonAsync($"post/author/{authorId}?page={page}&pageSize={pageSize}", filter);
