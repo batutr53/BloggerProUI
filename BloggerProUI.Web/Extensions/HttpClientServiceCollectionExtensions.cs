@@ -22,35 +22,31 @@ public static class HttpClientServiceCollectionExtensions
         {
             client.BaseAddress = baseAddress;
         })
-        .AddHttpMessageHandler<AuthTokenHandler>()
-        .ConfigurePrimaryHttpMessageHandler(() => insecureHandler);
+        .AddHttpMessageHandler<AuthTokenHandler>();
+
 
         services.AddHttpClient<ICategoryApiService, CategoryApiService>(client =>
         {
             client.BaseAddress = baseAddress;
         })
-        .AddHttpMessageHandler<AuthTokenHandler>()
-        .ConfigurePrimaryHttpMessageHandler(() => insecureHandler);
+        .AddHttpMessageHandler<AuthTokenHandler>();
 
         services.AddHttpClient<ITagApiService, TagApiService>(client =>
         {
             client.BaseAddress = baseAddress;
         })
-        .AddHttpMessageHandler<AuthTokenHandler>()
-        .ConfigurePrimaryHttpMessageHandler(() => insecureHandler);
+        .AddHttpMessageHandler<AuthTokenHandler>();
 
         services.AddHttpClient<IPostApiService, PostApiService>(client =>
         {
             client.BaseAddress = baseAddress;
         })
-        .AddHttpMessageHandler<AuthTokenHandler>()
-        .ConfigurePrimaryHttpMessageHandler(() => insecureHandler);
+        .AddHttpMessageHandler<AuthTokenHandler>();
 
         services.AddHttpClient<IAuthApiService, AuthApiService>(client =>
         {
             client.BaseAddress = baseAddress;
-        })
-        .ConfigurePrimaryHttpMessageHandler(() => insecureHandler);
+        });
 
         return services;
     }
