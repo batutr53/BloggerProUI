@@ -1,0 +1,149 @@
+@{
+    ViewData["Title"] = "İletişim";
+}
+
+<!-- Main Content -->
+<main class="content-container">
+    <!-- Page Header -->
+    <section class="page-header" style="text-align: center; margin-bottom: 60px;">
+        <h1 class="page-title">İletişim</h1>
+        <p class="page-subtitle">Bizimle iletişime geçin</p>
+    </section>
+
+    <!-- Contact Content -->
+    <div class="latest-layout">
+        <div class="articles-left">
+            <!-- Contact Form -->
+            <section style="background: #f8f8f8; padding: 40px; margin-bottom: 40px;">
+                <h2 class="section-title" style="margin-bottom: 30px; text-align: left; border: none; padding: 0;">Mesaj Gönderin</h2>
+                
+                <form class="profile-form" style="gap: 20px;" onsubmit="handleContactForm(event)">
+                    <div class="form-group">
+                        <label class="form-label">Adınız *</label>
+                        <input type="text" class="form-input" placeholder="Adınızı girin" required name="name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">E-posta *</label>
+                        <input type="email" class="form-input" placeholder="E-posta adresinizi girin" required name="email">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label class="form-label">Konu *</label>
+                        <input type="text" class="form-input" placeholder="Mesaj konusu" required name="subject">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label class="form-label">Mesajınız *</label>
+                        <textarea class="form-textarea" placeholder="Mesajınızı yazın..." style="height: 150px;" required name="message"></textarea>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <button type="submit" class="save-btn">Mesaj Gönder</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Contact Info -->
+            <section>
+                <h2 class="section-title" style="margin-bottom: 30px;">İletişim Bilgileri</h2>
+                
+                <div class="article-text">
+                    <p><strong>Adres:</strong><br>
+                    Q. Studio<br>
+                    Levent Mahallesi, Büyükdere Caddesi No: 123<br>
+                    34330 Beşiktaş/İstanbul</p>
+                    
+                    <p><strong>E-posta:</strong><br>
+                    info@qstudio.com<br>
+                    editör@qstudio.com</p>
+                    
+                    <p><strong>Telefon:</strong><br>
+                    +90 212 555 01 23</p>
+                    
+                    <p><strong>Çalışma Saatleri:</strong><br>
+                    Pazartesi - Cuma: 09:00 - 18:00<br>
+                    Cumartesi: 10:00 - 16:00<br>
+                    Pazar: Kapalı</p>
+                </div>
+            </section>
+        </div>
+        
+        <aside class="sidebar">
+            <!-- Social Media -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Sosyal Medya</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #666; transition: color 0.3s ease;">
+                        <i class="fab fa-instagram" style="font-size: 18px;"></i>
+                        <span>@@qstudio_official</span>
+                    </a>
+                    
+                    <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #666; transition: color 0.3s ease;">
+                        <i class="fab fa-twitter" style="font-size: 18px;"></i>
+                        <span>@@qstudio</span>
+                    </a>
+                    
+                    <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #666; transition: color 0.3s ease;">
+                        <i class="fab fa-linkedin" style="font-size: 18px;"></i>
+                        <span>Q. Studio</span>
+                    </a>
+                    
+                    <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #666; transition: color 0.3s ease;">
+                        <i class="fab fa-youtube" style="font-size: 18px;"></i>
+                        <span>Q Studio Channel</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Hızlı Linkler</h3>
+                
+                <ul class="footer-links">
+                    <li><a href="@Url.Action("Index", "Home")">Ana Sayfa</a></li>
+                    <li><a href="@Url.Action("Index", "Blog")">Blog</a></li>
+                    <li><a href="@Url.Action("About", "Home")">Hakkımızda</a></li>
+                    <li><a href="@Url.Action("Privacy", "Home")">Gizlilik Politikası</a></li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<script>
+function handleContactForm(event) {
+    event.preventDefault();
+    
+    // Get form data
+    const formData = new FormData(event.target);
+    const data = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        subject: formData.get('subject'),
+        message: formData.get('message')
+    };
+    
+    // Simple validation
+    if (!data.name || !data.email || !data.subject || !data.message) {
+        alert('Lütfen tüm zorunlu alanları doldurun.');
+        return;
+    }
+    
+    // Simulate form submission
+    const submitBtn = event.target.querySelector('.save-btn');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = 'Gönderiliyor...';
+    submitBtn.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+        alert('Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.');
+        event.target.reset();
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }, 1500);
+}
+</script>

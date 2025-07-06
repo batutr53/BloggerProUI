@@ -1,0 +1,258 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_DashboardLayout";
+}
+
+<!-- Dashboard Container -->
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2 class="sidebar-title">Menü</h2>
+        <ul class="sidebar-menu">
+            <li><a href="#" class="active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+            <li><a href="#" data-tab="reading"><i class="fas fa-book"></i> Okuma Listesi</a></li>
+            <li><a href="#" data-tab="bookmarks"><i class="fas fa-bookmark"></i> Yer İmleri</a></li>
+            <li><a href="#" data-tab="profile"><i class="fas fa-user"></i> Profil Ayarları</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="page-header">
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-subtitle">Hoş geldin! İşte aktivitelerinin özeti.</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" data-target="47">0</div>
+                    <div class="stat-label">Okunan Makale</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="12">0</div>
+                    <div class="stat-label">Yer İmi</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="8">0</div>
+                    <div class="stat-label">Okuma Listesi</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="156">0</div>
+                    <div class="stat-label">Okuma Süresi (dk)</div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="activity-section">
+                <h2 class="section-title">Son Aktiviteler</h2>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">"Helmut Newton Photobook" makalesini okudun</div>
+                            <div class="activity-time">2 saat önce</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-bookmark"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">"Modern Sanatın Dijital Evrimi" makalesini yer imlerine ekledin</div>
+                            <div class="activity-time">5 saat önce</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">"Minimalizmin Yükselişi" makalesini beğendin</div>
+                            <div class="activity-time">1 gün önce</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-share"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">"Sürdürülebilir Mimari" makalesini paylaştın</div>
+                            <div class="activity-time">2 gün önce</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reading List Tab -->
+        <div id="reading" class="tab-content">
+            <div class="page-header">
+                <h1 class="page-title">Okuma Listesi</h1>
+                <p class="page-subtitle">Daha sonra okumak için kaydettiğin makaleler</p>
+            </div>
+
+            <div class="content-grid">
+                <div class="reading-list">
+                    <div class="book-item-small">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Book Cover" class="book-cover-small" loading="lazy">
+                        <div class="book-info">
+                            <h4 class="book-title-small">Portre Fotoğrafçılığında Işık Kullanımı</h4>
+                            <div class="book-author-small">Fatma Şen</div>
+                            <div class="reading-progress">
+                                <div class="progress-bar" data-width="75"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="book-item-small">
+                        <img src="https://images.unsplash.com/photo-1456885284447-7dd4bb8720bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Book Cover" class="book-cover-small" loading="lazy">
+                        <div class="book-info">
+                            <h4 class="book-title-small">Çağdaş Türk Sanatçıları</h4>
+                            <div class="book-author-small">Oğuz Kaan</div>
+                            <div class="reading-progress">
+                                <div class="progress-bar" data-width="45"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="book-item-small">
+                        <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Book Cover" class="book-cover-small" loading="lazy">
+                        <div class="book-info">
+                            <h4 class="book-title-small">Grafik Tasarımda Renk Teorisi</h4>
+                            <div class="book-author-small">Seda Acar</div>
+                            <div class="reading-progress">
+                                <div class="progress-bar" data-width="90"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="book-item-small">
+                        <img src="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Book Cover" class="book-cover-small" loading="lazy">
+                        <div class="book-info">
+                            <h4 class="book-title-small">Yılın Fotoğraf Sergisi</h4>
+                            <div class="book-author-small">Editör</div>
+                            <div class="reading-progress">
+                                <div class="progress-bar" data-width="20"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bookmarks-section">
+                    <h3 class="section-title">Favori Yazarlar</h3>
+                    <a href="#" class="bookmark-item">
+                        <div class="bookmark-title">Alice Smith</div>
+                        <div class="bookmark-url">Fotoğraf Uzmanı</div>
+                    </a>
+                    <a href="#" class="bookmark-item">
+                        <div class="bookmark-title">Mehmet Yılmaz</div>
+                        <div class="bookmark-url">Sanat Tarihçisi</div>
+                    </a>
+                    <a href="#" class="bookmark-item">
+                        <div class="bookmark-title">Ayşe Kaya</div>
+                        <div class="bookmark-url">Tasarım Uzmanı</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookmarks Tab -->
+        <div id="bookmarks" class="tab-content">
+            <div class="page-header">
+                <h1 class="page-title">Yer İmleri</h1>
+                <p class="page-subtitle">Kaydettiğin makaleler ve bağlantılar</p>
+            </div>
+
+            <div class="bookmarks-section">
+                <a href="@Url.Action("Detail", "Blog")" class="bookmark-item">
+                    <div class="bookmark-title">The Definitive Helmut Newton Photobook</div>
+                    <div class="bookmark-url">qstudio.com/blog/helmut-newton-photobook</div>
+                </a>
+                
+                <a href="#" class="bookmark-item">
+                    <div class="bookmark-title">Modern Sanatın Dijital Evrimi</div>
+                    <div class="bookmark-url">qstudio.com/blog/digital-art-evolution</div>
+                </a>
+                
+                <a href="#" class="bookmark-item">
+                    <div class="bookmark-title">Minimalizmin Yükselişi</div>
+                    <div class="bookmark-url">qstudio.com/blog/rise-of-minimalism</div>
+                </a>
+                
+                <a href="#" class="bookmark-item">
+                    <div class="bookmark-title">Sürdürülebilir Mimari</div>
+                    <div class="bookmark-url">qstudio.com/blog/sustainable-architecture</div>
+                </a>
+                
+                <a href="#" class="bookmark-item">
+                    <div class="bookmark-title">Sokak Fotoğrafçılığının Altın Kuralları</div>
+                    <div class="bookmark-url">qstudio.com/blog/street-photography-rules</div>
+                </a>
+                
+                <a href="#" class="bookmark-item">
+                    <div class="bookmark-title">2025 Moda Trendleri</div>
+                    <div class="bookmark-url">qstudio.com/blog/fashion-trends-2025</div>
+                </a>
+                
+                <a href="#" class="bookmark-item">
+                    <div class="bookmark-title">Yapay Zeka ve Yaratıcılık</div>
+                    <div class="bookmark-url">qstudio.com/blog/ai-creativity</div>
+                </a>
+                
+                <a href="#" class="bookmark-item">
+                    <div class="bookmark-title">Portre Fotoğrafçılığında Işık Kullanımı</div>
+                    <div class="bookmark-url">qstudio.com/blog/portrait-lighting</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="profile" class="tab-content">
+            <div class="page-header">
+                <h1 class="page-title">Profil Ayarları</h1>
+                <p class="page-subtitle">Hesap bilgilerini ve tercihlerini yönet</p>
+            </div>
+
+            <form class="profile-form">
+                <div class="form-group">
+                    <label class="form-label">Ad</label>
+                    <input type="text" class="form-input" name="firstName" value="Kullanıcı">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Soyad</label>
+                    <input type="text" class="form-input" name="lastName" value="Adı">
+                </div>
+                
+                <div class="form-group full-width">
+                    <label class="form-label">E-posta</label>
+                    <input type="email" class="form-input" name="email" value="kullanici@example.com">
+                </div>
+                
+                <div class="form-group full-width">
+                    <label class="form-label">Biyografi</label>
+                    <textarea class="form-textarea" name="bio" placeholder="Kendin hakkında kısa bir açıklama yaz..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Website</label>
+                    <input type="url" class="form-input" name="website" placeholder="https://example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Telefon</label>
+                    <input type="tel" class="form-input" name="phone" placeholder="+90 555 123 45 67">
+                </div>
+                
+                <div class="form-group full-width">
+                    <button type="submit" class="save-btn">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>

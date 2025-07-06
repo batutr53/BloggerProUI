@@ -4,6 +4,7 @@ using BloggerProUI.Models.Pagination;
 using BloggerProUI.Models.Post;
 using BloggerProUI.Models.PostModule;
 using BloggerProUI.Models.User;
+using BloggerProUI.Shared.Utilities.Results;
 using System.Net.Http.Json;
 
 namespace BloggerProUI.Business.Services;
@@ -25,8 +26,23 @@ public class PostApiService : IPostApiService
 
     public async Task<DataResult<PostDetailDto>> GetPostByIdAsync(Guid id)
     {
-        var response = await _httpClient.GetAsync($"post/{id}");
-        return await response.Content.ReadFromJsonAsync<DataResult<PostDetailDto>>();
+        try
+        {
+            var response = await _httpClient.GetAsync($"Post/{id}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<DataResult<PostDetailDto>>();
+                return result ?? new ErrorDataResult<PostDetailDto>("Boş response döndü.");
+            }
+            
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return new ErrorDataResult<PostDetailDto>($"API hatası: {response.StatusCode} - {errorContent}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorDataResult<PostDetailDto>($"Servis hatası: {ex.Message}");
+        }
     }
 
     public async Task<DataResult<PaginatedResultDto<PostListDto>>> GetAllPostsAsync(PostFilterDto filter, int page = 1, int pageSize = 10)
@@ -34,11 +50,28 @@ public class PostApiService : IPostApiService
         var response = await _httpClient.PostAsJsonAsync($"post/all?page={page}&pageSize={pageSize}", filter);
         return await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
     }
+    
     public async Task<DataResult<PaginatedResultDto<PostListDto>>> GetAllPostsAsync(int page = 1, int pageSize = 10)
     {
-        var response = await _httpClient.PostAsJsonAsync($"post/GetAllPost?page={page}&pageSize={pageSize}", "");
-        return await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync($"post/GetAllPost?page={page}&pageSize={pageSize}", "");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
+                return result ?? new ErrorDataResult<PaginatedResultDto<PostListDto>>("Boş response döndü.");
+            }
+            
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"API hatası: {response.StatusCode} - {errorContent}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"Servis hatası: {ex.Message}");
+        }
     }
+    
     public async Task<DataResult<PaginatedResultDto<PostListDto>>> GetPostsByAuthorIdAsync(Guid authorId, PostFilterDto filter, int page = 1, int pageSize = 10)
     {
         var response = await _httpClient.PostAsJsonAsync($"post/author/{authorId}?page={page}&pageSize={pageSize}", filter);

@@ -3,6 +3,7 @@ using BloggerProUI.Models.Pagination;
 using BloggerProUI.Models.Post;
 using BloggerProUI.Models.PostModule;
 using BloggerProUI.Models.User;
+using BloggerProUI.Shared.Utilities.Results;
 
 namespace BloggerProUI.Business.Interfaces
 {
@@ -37,5 +38,4 @@ namespace BloggerProUI.Business.Interfaces
         Task<DataResult<PostStatsDto>> GetPostStatsAsync(Guid postId);
         Task<DataResult<UserPostStatsDto>> GetUserPostStatsAsync();
     }
-
 }

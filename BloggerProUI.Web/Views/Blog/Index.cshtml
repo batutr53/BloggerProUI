@@ -1,0 +1,199 @@
+@model BloggerProUI.Models.Pagination.PaginatedResultDto<BloggerProUI.Models.Post.PostListDto>
+@{
+    ViewData["Title"] = "Blog";
+}
+
+<!-- Main Content -->
+<main class="content-container">
+    <!-- Blog Header -->
+    <section class="page-header" style="text-align: center; margin-bottom: 60px;">
+        <h1 class="page-title">Blog</h1>
+        <p class="page-subtitle">Sanat, tasarım ve fotoğrafçılık dünyasından son yazılar</p>
+    </section>
+
+    <!-- Featured Posts Grid -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">Öne Çıkan Yazılar</h2>
+        </div>
+        
+        <div class="trending-grid">
+            @if (Model?.Items != null && Model.Items.Any())
+            {
+                @foreach (var post in Model.Items.Take(3))
+                {
+                    <a href="@Url.Action("Detail", "Blog", new { id = post.Id })" class="trending-item">
+                        <img src="@(!string.IsNullOrEmpty(post.FeaturedImage) ? post.FeaturedImage : "https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80")" 
+                             alt="@post.Title" class="trending-image" loading="lazy">
+                        <div class="trending-meta">
+                            @if (post.Categories != null && post.Categories.Any())
+                            {
+                                @string.Join(", ", post.Categories).ToUpper()
+                            }
+                            else
+                            {
+                                <text>GENEL</text>
+                            }
+                            · @(post.PublishDate?.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR")) ?? post.CreatedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR")))
+                        </div>
+                        <h3 class="trending-title">@post.Title</h3>
+                        <div class="trending-author">Yazan: @(post.Author?.Username?.ToUpper() ?? "BİLİNMEYEN")</div>
+                    </a>
+                }
+            }
+            else
+            {
+                <!-- Fallback static content when no posts are available -->
+                <a href="#" class="trending-item">
+                    <img src="https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="No Posts" class="trending-image" loading="lazy">
+                    <div class="trending-meta">BİLGİ · @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</div>
+                    <h3 class="trending-title">Henüz yazı bulunmuyor</h3>
+                    <div class="trending-author">BloggerPro</div>
+                </a>
+                <a href="#" class="trending-item">
+                    <img src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Coming Soon" class="trending-image" loading="lazy">
+                    <div class="trending-meta">BİLGİ · @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</div>
+                    <h3 class="trending-title">İçerik yakında eklenecek</h3>
+                    <div class="trending-author">BloggerPro</div>
+                </a>
+                <a href="#" class="trending-item">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Stay Tuned" class="trending-image" loading="lazy">
+                    <div class="trending-meta">BİLGİ · @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))</div>
+                    <h3 class="trending-title">Takipte kalın</h3>
+                    <div class="trending-author">BloggerPro</div>
+                </a>
+            }
+        </div>
+    </section>
+
+    <!-- All Posts Section -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">Tüm Yazılar</h2>
+        </div>
+        
+        <div class="latest-layout">
+            <div class="articles-left">
+                @if (Model?.Items != null && Model.Items.Any())
+                {
+                    @foreach (var post in Model.Items)
+                    {
+                        <a href="@Url.Action("Detail", "Blog", new { id = post.Id })" class="article-item">
+                            <img src="@(!string.IsNullOrEmpty(post.FeaturedImage) ? post.FeaturedImage : "https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80")" 
+                                 alt="@post.Title" class="article-image" loading="lazy">
+                            <div class="article-content">
+                                <div class="article-meta">
+                                    @if (post.Categories != null && post.Categories.Any())
+                                    {
+                                        @string.Join(", ", post.Categories).ToUpper()
+                                    }
+                                    else
+                                    {
+                                        <text>GENEL</text>
+                                    }
+                                    · @(post.PublishDate?.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR")) ?? post.CreatedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR")))
+                                </div>
+                                <h3 class="article-title">@post.Title</h3>
+                                <div class="article-author">Yazan: @(post.Author?.Username?.ToUpper() ?? "BİLİNMEYEN")</div>
+                                <p class="article-excerpt">
+                                    @if (!string.IsNullOrEmpty(post.Excerpt))
+                                    {
+                                        @(post.Excerpt.Length > 150 ? post.Excerpt.Substring(0, 150) + "..." : post.Excerpt)
+                                    }
+                                    else
+                                    {
+                                        <text>Bu yazının özeti henüz eklenmemiş.</text>
+                                    }
+                                </p>
+                                <div class="article-stats" style="margin-top: 10px; color: #999; font-size: 14px;">
+                                    <span style="margin-right: 15px;">👁 @post.ViewCount</span>
+                                    <span style="margin-right: 15px;">❤️ @post.LikeCount</span>
+                                    <span>💬 @post.CommentCount</span>
+                                </div>
+                            </div>
+                        </a>
+                    }
+                    
+                    <!-- Pagination -->
+                    @if (Model.TotalPages > 1)
+                    {
+                        <div class="pagination-wrapper" style="margin-top: 40px; text-align: center;">
+                            <div class="pagination">
+                                @if (Model.HasPreviousPage)
+                                {
+                                    <a href="@Url.Action("Index", new { page = Model.PageNumber - 1 })" class="pagination-btn">‹ Önceki</a>
+                                }
+                                
+                                @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                                {
+                                    if (i == Model.PageNumber)
+                                    {
+                                        <span class="pagination-current">@i</span>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("Index", new { page = i })" class="pagination-btn">@i</a>
+                                    }
+                                }
+                                
+                                @if (Model.HasNextPage)
+                                {
+                                    <a href="@Url.Action("Index", new { page = Model.PageNumber + 1 })" class="pagination-btn">Sonraki ›</a>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="no-posts" style="text-align: center; padding: 60px 20px; color: #666;">
+                        <h3>Henüz yazı bulunmuyor</h3>
+                        <p>Blog sayfası yakında içeriklerle doldurulacak.</p>
+                    </div>
+                }
+            </div>
+            
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Kategoriler</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Fotoğrafçılık (24)</a></li>
+                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Sanat (18)</a></li>
+                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Tasarım (15)</a></li>
+                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Moda (12)</a></li>
+                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Mimari (8)</a></li>
+                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Teknoloji (6)</a></li>
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Popüler Etiketler</h3>
+                    <div class="tags">
+                        <a href="#" class="tag">Fotoğrafçılık</a>
+                        <a href="#" class="tag">Sanat</a>
+                        <a href="#" class="tag">Tasarım</a>
+                        <a href="#" class="tag">Moda</a>
+                        <a href="#" class="tag">Portre</a>
+                        <a href="#" class="tag">Minimalizm</a>
+                        <a href="#" class="tag">Modern</a>
+                        <a href="#" class="tag">Dijital</a>
+                    </div>
+                </div>
+                
+                <!-- Newsletter Signup -->
+                <div class="sidebar-section">
+                    <div class="newsletter-sidebar">
+                        <h3 class="newsletter-sidebar-title">E-Bülten</h3>
+                        <p class="newsletter-sidebar-text">
+                            Blog yazılarımızdan haberdar olmak için e-bültenimize abone olun.
+                        </p>
+                        <div class="newsletter-sidebar-input">
+                            <input type="email" placeholder="E-posta adresiniz">
+                        </div>
+                        <button class="newsletter-sidebar-btn">Abone Ol</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+</main>
