@@ -1,8 +1,99 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@using BloggerProUI.Models.Post
+@using BloggerProUI.Models.Category
+@using BloggerProUI.Models.Tag
+
+@{
+    ViewData["Title"] = "Home";
+    
+    var featuredPost = ViewData["FeaturedPost"] as PostDetailDto;
+    var categories = ViewData["Categories"] as List<CategoryDto>;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Hero Section with Featured Post -->
+@if (featuredPost != null)
+{
+    <section class="hero-section">
+        <div class="container">
+            <div class="featured-post">
+                <div class="featured-post-content">
+                    @if (featuredPost.Categories?.Any() == true)
+                    {
+                        <div class="post-categories">
+                            @foreach (var category in featuredPost.Categories.Take(2))
+                            {
+                                @*<a href="#" class="category-tag">@category.Name</a>*@
+                            }
+                        </div>
+                    }
+                    <h1 class="featured-post-title">
+                        <a href="/post/@featuredPost.Slug">
+                            @featuredPost.Title
+                        </a>
+                    </h1>
+                    <p class="featured-post-excerpt">@featuredPost.Excerpt</p>
+                    <div class="post-meta">
+                        <div class="post-author">
+                            <img src="@featuredPost.FeaturedImage" alt="@featuredPost.AuthorName" class="author-avatar">
+                            <span>By @featuredPost.AuthorName</span>
+                        </div>
+                        <span class="post-date">@featuredPost.PublishDate</span>
+                        <span class="post-read-time">@(Math.Ceiling((double)featuredPost.Content.Length / 250)) min read</span>
+                    </div>
+                </div>
+                <div class="featured-post-image">
+                    <img src="@featuredPost.FeaturedImage" alt="@featuredPost.Title" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- Categories Section -->
+@if (categories?.Any() == true)
+{
+    <section class="categories-section py-5">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2 class="section-title">Browse Categories</h2>
+                <p class="section-subtitle">Explore our wide range of categories</p>
+            </div>
+            
+            <div class="row">
+                @foreach (var category in categories.Take(6))
+                {
+                    <div class="col-md-4 col-lg-2 mb-4">
+                        <a href="/category/@category.Slug" class="category-card">
+                            <div class="category-card-inner">
+                                <div class="category-icon">
+                                    <i class="fas fa-folder"></i>
+                                </div>
+                                <h3 class="category-name">@category.Name</h3>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<!-- Newsletter Section -->
+<section class="newsletter-section py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-3">Subscribe to Our Newsletter</h2>
+                <p class="mb-4">Get the latest posts delivered right to your inbox. No spam, ever.</p>
+                
+                <form class="newsletter-form">
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Enter your email address">
+                        <button class="btn btn-light" type="submit">Subscribe</button>
+                    </div>
+                </form>
+                
+                <div class="form-text mt-2">We respect your privacy. Unsubscribe at any time.</div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -8,10 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddTransient<AuthTokenHandler>();
-
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddConfiguredHttpClients(builder.Configuration);
+
+builder.Services.AddTransient<AuthTokenHandler>();
 
 var app = builder.Build();
 
