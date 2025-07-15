@@ -74,10 +74,6 @@ else
             {
                 @Html.Raw(Model.Content)
             }
-            else if (!string.IsNullOrEmpty(Model?.Excerpt))
-            {
-                <p>@Model.Excerpt</p>
-            }
             else
             {
                 <div class="no-content" style="text-align: center; padding: 40px 20px; color: #666;">
@@ -278,6 +274,114 @@ else
                 </div>
             </div>
         </div>
+
+        <!-- Comments Section -->
+        <section id="comments-section" class="comments-section" style="margin: 40px 0;">
+            <h2>Yorumlar (@(ViewBag.Comments != null ? ((List<BloggerProUI.Models.Comment.CommentListDto>)ViewBag.Comments).Count : 0))</h2>
+            
+            @if (Model?.AllowComments == true)
+            {
+                <!-- Add Comment Form -->
+                <div class="add-comment-form" style="margin: 30px 0; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                    <h3>Yorum Yap</h3>
+                    <form id="commentForm">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="commentContent">Yorumunuz:</label>
+                            <textarea id="commentContent" name="content" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Yorumunuzu buraya yazın..."></textarea>
+                        </div>
+                        <button type="submit" style="background: #333; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+                            Yorum Ekle
+                        </button>
+                    </form>
+                </div>
+            }
+            
+            <!-- Comments List -->
+            <div class="comments-list">
+                @if (ViewBag.Comments != null)
+                {
+                    var comments = ViewBag.Comments as List<BloggerProUI.Models.Comment.CommentListDto>;
+                    if (comments != null && comments.Any())
+                    {
+                        @foreach (var comment in comments)
+                        {
+                            <div class="comment" style="margin: 20px 0; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+                                <div class="comment-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <div class="comment-author" style="font-weight: bold; color: #333;">
+                                        @comment.Username
+                                    </div>
+                                    <div class="comment-date" style="color: #666; font-size: 14px;">
+                                        @comment.CreatedAt.ToString("dd MMMM yyyy HH:mm")
+                                    </div>
+                                </div>
+                                <div class="comment-content" style="margin: 10px 0; line-height: 1.5;">
+                                    @comment.Content
+                                </div>
+                                <div class="comment-actions" style="display: flex; gap: 10px; margin-top: 10px;">
+                                    <button class="comment-like-btn" onclick="likeComment('@comment.Id')" style="background: none; border: none; color: #666; cursor: pointer;">
+                                        ❤️ @comment.LikeCount
+                                    </button>
+                                    <button class="comment-reply-btn" onclick="replyToComment('@comment.Id')" style="background: none; border: none; color: #666; cursor: pointer;">
+                                        💬 Yanıtla
+                                    </button>
+                                </div>
+                                
+                                <!-- Reply Form (Initially Hidden) -->
+                                <div id="replyForm_@comment.Id" class="reply-form" style="display: none; margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+                                    <textarea id="replyContent_@comment.Id" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" placeholder="Yanıtınızı yazın..."></textarea>
+                                    <div style="margin-top: 10px;">
+                                        <button onclick="submitReply('@comment.Id')" style="background: #333; color: #fff; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                                            Yanıtla
+                                        </button>
+                                        <button onclick="cancelReply('@comment.Id')" style="background: #ccc; color: #333; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                                            İptal
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Replies -->
+                                @if (comment.Replies != null && comment.Replies.Any())
+                                {
+                                    <div class="replies" style="margin-top: 15px; padding-left: 20px; border-left: 2px solid #eee;">
+                                        @foreach (var reply in comment.Replies)
+                                        {
+                                            <div class="reply" style="margin: 15px 0; padding: 15px; background: #f8f8f8; border-radius: 6px;">
+                                                <div class="reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                                    <div class="reply-author" style="font-weight: bold; color: #333; font-size: 14px;">
+                                                        @reply.Username
+                                                    </div>
+                                                    <div class="reply-date" style="color: #666; font-size: 12px;">
+                                                        @reply.CreatedAt.ToString("dd MMMM yyyy HH:mm")
+                                                    </div>
+                                                </div>
+                                                <div class="reply-content" style="margin: 8px 0; line-height: 1.5; font-size: 14px;">
+                                                    @reply.Content
+                                                </div>
+                                                <div class="reply-actions" style="margin-top: 8px;">
+                                                    <button class="reply-like-btn" onclick="likeComment('@reply.Id')" style="background: none; border: none; color: #666; cursor: pointer; font-size: 12px;">
+                                                        ❤️ @reply.LikeCount
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-comments" style="text-align: center; padding: 40px; color: #666;">
+                            <p>Henüz yorum bulunmamaktadır.</p>
+                            @if (Model?.AllowComments == true)
+                            {
+                                <p>İlk yorumu siz yapın!</p>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </section>
     </article>
 
     <!-- Sidebar -->
@@ -286,12 +390,22 @@ else
         <div class="sidebar-section">
             <h3 class="sidebar-title">İlgili Yazılar</h3>
             
-            <a href="#" class="related-article">
-                <img src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Related Article" class="related-image" loading="lazy">
-                <div class="related-meta">FOTOĞRAF · 12 Ocak 2025</div>
-                <h4 class="related-title">Richard Avedon'un Moda Fotoğrafçılığındaki Devrimi</h4>
-                <div class="related-author">Yazan: JOHN DOE</div>
-            </a>
+            @if (ViewBag.RelatedPosts != null)
+            {
+                var relatedPosts = ViewBag.RelatedPosts as List<BloggerProUI.Models.Post.PostListDto>;
+                if (relatedPosts != null && relatedPosts.Any())
+                {
+                    @foreach (var post in relatedPosts)
+                    {
+                        <a href="@Url.Action("Detail", "Blog", new { id = post.Id })" class="related-article">
+                            <img src="@(string.IsNullOrEmpty(post.FeaturedImage) ? "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" : post.FeaturedImage)" alt="@post.Title" class="related-image" loading="lazy">
+                            <div class="related-meta">@post.Categories?.FirstOrDefault()?.ToUpper() · @post.CreatedAt.ToString("dd MMMM yyyy")</div>
+                            <h4 class="related-title">@post.Title</h4>
+                            <div class="related-author">Yazan: @post.Author?.DisplayName?.ToUpper()</div>
+                        </a>
+                    }
+                }
+            }
             
             <a href="@Url.Action("Index", "Home")" class="related-article">
                 <img src="https://images.unsplash.com/photo-1556075798-4825dfaaf498?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Related Article" class="related-image" loading="lazy">
@@ -326,24 +440,51 @@ else
         <div class="sidebar-section">
             <h3 class="sidebar-title">Popüler Etiketler</h3>
             <div class="tags">
-                <a href="#" class="tag">Fotoğrafçılık</a>
-                <a href="#" class="tag">Moda</a>
-                <a href="#" class="tag">Sanat</a>
-                <a href="#" class="tag">Portre</a>
-                <a href="#" class="tag">Siyah-Beyaz</a>
-                <a href="#" class="tag">Tasarım</a>
-                <a href="#" class="tag">Mimari</a>
-                <a href="#" class="tag">Street Photography</a>
+                @if (ViewBag.AllTags != null)
+                {
+                    var allTags = ViewBag.AllTags as List<BloggerProUI.Models.Tag.TagDto>;
+                    if (allTags != null && allTags.Any())
+                    {
+                        @foreach (var tag in allTags)
+                        {
+                            <a href="@Url.Action("Index", "Blog", new { tag = tag.Name })" class="tag">@tag.Name</a>
+                        }
+                    }
+                    else
+                    {
+                        <span class="tag" style="background: #f0f0f0; color: #999;">Etiket bulunmamaktadır</span>
+                    }
+                }
+                else
+                {
+                    <a href="#" class="tag">Fotoğrafçılık</a>
+                    <a href="#" class="tag">Moda</a>
+                    <a href="#" class="tag">Sanat</a>
+                    <a href="#" class="tag">Portre</a>
+                    <a href="#" class="tag">Siyah-Beyaz</a>
+                    <a href="#" class="tag">Tasarım</a>
+                    <a href="#" class="tag">Mimari</a>
+                    <a href="#" class="tag">Street Photography</a>
+                }
             </div>
         </div>
     </aside>
 </main>
 
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 // Copy to clipboard function
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
-        alert('Link panoya kopyalandı!');
+        Swal.fire({
+            title: 'Başarılı!',
+            text: 'Link panoya kopyalandı!',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
     }, function(err) {
         console.error('Panoya kopyalama hatası: ', err);
         // Fallback for older browsers
@@ -353,7 +494,13 @@ function copyToClipboard(text) {
         textArea.select();
         document.execCommand('copy');
         document.body.removeChild(textArea);
-        alert('Link panoya kopyalandı!');
+        Swal.fire({
+            title: 'Başarılı!',
+            text: 'Link panoya kopyalandı!',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+        });
     });
 }
 
@@ -376,12 +523,19 @@ async function toggleLike(postId) {
             likeBtn.style.color = '#fff';
         }
         
-        // Here you would make an API call to toggle the like
-        // const response = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
-        // if (!response.ok) {
-        //     // Revert the UI changes if the API call failed
-        //     location.reload();
-        // }
+        // Make API call to toggle like
+        const endpoint = isCurrentlyLiked ? `/Blog/UnlikePost/${postId}` : `/Blog/LikePost/${postId}`;
+        const response = await fetch(endpoint, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        if (!response.ok) {
+            // Revert the UI changes if the API call failed
+            location.reload();
+        }
         
         console.log(`Toggle like for post: ${postId}`);
     } catch (error) {
@@ -391,6 +545,154 @@ async function toggleLike(postId) {
     }
 }
 
+// Add Comment function
+async function addComment(event) {
+    event.preventDefault();
+    
+    const postId = '@Model?.Id';
+    const content = document.getElementById('commentContent').value.trim();
+    
+    if (!content) {
+        Swal.fire({
+            title: 'Hata!',
+            text: 'Lütfen yorum içeriğini girin.',
+            icon: 'warning',
+            confirmButtonText: 'Tamam'
+        });
+        return;
+    }
+    
+    try {
+        const response = await fetch('/Blog/AddComment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                postId: postId,
+                content: content
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            Swal.fire({
+                title: 'Başarılı!',
+                text: 'Yorum başarıyla eklendi!',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                location.reload(); // Refresh to show new comment
+            });
+        } else {
+            Swal.fire({
+                title: 'Hata!',
+                text: result.message || 'Yorum eklenirken bir hata oluştu.',
+                icon: 'error',
+                confirmButtonText: 'Tamam'
+            });
+        }
+    } catch (error) {
+        console.error('Yorum ekleme hatası:', error);
+        Swal.fire({
+            title: 'Hata!',
+            text: 'Yorum eklenirken bir hata oluştu.',
+            icon: 'error',
+            confirmButtonText: 'Tamam'
+        });
+    }
+}
+
+// Reply to Comment function
+function replyToComment(commentId) {
+    const replyForm = document.getElementById(`replyForm_${commentId}`);
+    if (replyForm) {
+        replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// Cancel Reply function
+function cancelReply(commentId) {
+    const replyForm = document.getElementById(`replyForm_${commentId}`);
+    if (replyForm) {
+        replyForm.style.display = 'none';
+        document.getElementById(`replyContent_${commentId}`).value = '';
+    }
+}
+
+// Submit Reply function
+async function submitReply(parentCommentId) {
+    const postId = '@Model?.Id';
+    const content = document.getElementById(`replyContent_${parentCommentId}`).value.trim();
+    
+    if (!content) {
+        Swal.fire({
+            title: 'Hata!',
+            text: 'Lütfen yanıt içeriğini girin.',
+            icon: 'warning',
+            confirmButtonText: 'Tamam'
+        });
+        return;
+    }
+    
+    try {
+        const response = await fetch('/Blog/AddComment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                postId: postId,
+                content: content,
+                parentCommentId: parentCommentId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            Swal.fire({
+                title: 'Başarılı!',
+                text: 'Yanıt başarıyla eklendi!',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => {
+                location.reload(); // Refresh to show new reply
+            });
+        } else {
+            Swal.fire({
+                title: 'Hata!',
+                text: result.message || 'Yanıt eklenirken bir hata oluştu.',
+                icon: 'error',
+                confirmButtonText: 'Tamam'
+            });
+        }
+    } catch (error) {
+        console.error('Yanıt ekleme hatası:', error);
+        Swal.fire({
+            title: 'Hata!',
+            text: 'Yanıt eklenirken bir hata oluştu.',
+            icon: 'error',
+            confirmButtonText: 'Tamam'
+        });
+    }
+}
+
+// Like Comment function
+async function likeComment(commentId) {
+    // This would be implemented if there's a comment like API
+    console.log(`Like comment: ${commentId}`);
+    Swal.fire({
+        title: 'Bilgi',
+        text: 'Yorum beğenme özelliği henüz aktif değil.',
+        icon: 'info',
+        confirmButtonText: 'Tamam'
+    });
+}
+
 // Scroll to comments function
 function scrollToComments() {
     // This would scroll to a comments section if it exists
@@ -398,7 +700,12 @@ function scrollToComments() {
     if (commentsSection) {
         commentsSection.scrollIntoView({ behavior: 'smooth' });
     } else {
-        alert('Yorum bölümü bu sayfada mevcut değil.');
+        Swal.fire({
+            title: 'Hata!',
+            text: 'Yorum bölümü bu sayfada mevcut değil.',
+            icon: 'error',
+            confirmButtonText: 'Tamam'
+        });
     }
 }
 
@@ -440,6 +747,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+    
+    // Add event listener for comment form
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+        commentForm.addEventListener('submit', addComment);
+    }
 });
 </script>
 }

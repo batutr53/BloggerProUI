@@ -10,6 +10,7 @@ namespace BloggerProUI.Business.Interfaces
     public interface IPostApiService
     {
         Task<DataResult<PaginatedResultDto<PostListDto>>> GetAllPostsAsync(int page = 1, int pageSize = 20);
+        Task<DataResult<List<PostListDto>>> GetFeaturedPostsAsync(int count = 5);
         Task<DataResult<string>> CreatePostAsync(PostCreateDto dto);
         Task<DataResult<PostDetailDto>> GetPostByIdAsync(Guid id);
         Task<DataResult<PaginatedResultDto<PostListDto>>> GetPostsByAuthorIdAsync(Guid authorId, PostFilterDto filter, int page = 1, int pageSize = 10);

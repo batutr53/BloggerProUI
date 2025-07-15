@@ -8,7 +8,28 @@
     <!-- Blog Header -->
     <section class="page-header" style="text-align: center; margin-bottom: 60px;">
         <h1 class="page-title">Blog</h1>
-        <p class="page-subtitle">Sanat, tasarım ve fotoğrafçılık dünyasından son yazılar</p>
+        <p class="page-subtitle">
+            @if (!string.IsNullOrEmpty(ViewBag.CurrentCategory as string))
+            {
+                <text>@ViewBag.CurrentCategory kategorisindeki yazılar</text>
+            }
+            else if (!string.IsNullOrEmpty(ViewBag.CurrentTag as string))
+            {
+                <text>@ViewBag.CurrentTag etiketindeki yazılar</text>
+            }
+            else
+            {
+                <text>Sanat, tasarım ve fotoğrafçılık dünyasından son yazılar</text>
+            }
+        </p>
+        @if (!string.IsNullOrEmpty(ViewBag.CurrentCategory as string) || !string.IsNullOrEmpty(ViewBag.CurrentTag as string))
+        {
+            <div style="margin-top: 20px;">
+                <a href="@Url.Action("Index")" style="color: #666; text-decoration: none; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px;">
+                    ← Tüm Yazılar
+                </a>
+            </div>
+        }
     </section>
 
     <!-- Featured Posts Grid -->
@@ -157,26 +178,66 @@
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">Kategoriler</h3>
                     <ul style="list-style: none; padding: 0;">
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Fotoğrafçılık (24)</a></li>
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Sanat (18)</a></li>
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Tasarım (15)</a></li>
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Moda (12)</a></li>
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Mimari (8)</a></li>
-                        <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Teknoloji (6)</a></li>
+                        @if (ViewBag.Categories != null)
+                        {
+                            var categories = ViewBag.Categories as List<BloggerProUI.Models.Category.CategoryDto>;
+                            if (categories != null && categories.Any())
+                            {
+                                @foreach (var category in categories)
+                                {
+                                    <li style="margin-bottom: 10px;">
+                                        <a href="@Url.Action("Index", new { category = category.Slug })" style="color: #666; text-decoration: none;">
+                                            @category.Name
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li style="margin-bottom: 10px; color: #999;">Kategori bulunmamaktadır.</li>
+                            }
+                        }
+                        else
+                        {
+                            <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Fotoğrafçılık</a></li>
+                            <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Sanat</a></li>
+                            <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Tasarım</a></li>
+                            <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Moda</a></li>
+                            <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Mimari</a></li>
+                            <li style="margin-bottom: 10px;"><a href="#" style="color: #666; text-decoration: none;">Teknoloji</a></li>
+                        }
                     </ul>
                 </div>
                 
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">Popüler Etiketler</h3>
                     <div class="tags">
-                        <a href="#" class="tag">Fotoğrafçılık</a>
-                        <a href="#" class="tag">Sanat</a>
-                        <a href="#" class="tag">Tasarım</a>
-                        <a href="#" class="tag">Moda</a>
-                        <a href="#" class="tag">Portre</a>
-                        <a href="#" class="tag">Minimalizm</a>
-                        <a href="#" class="tag">Modern</a>
-                        <a href="#" class="tag">Dijital</a>
+                        @if (ViewBag.Tags != null)
+                        {
+                            var tags = ViewBag.Tags as List<BloggerProUI.Models.Tag.TagDto>;
+                            if (tags != null && tags.Any())
+                            {
+                                @foreach (var tag in tags)
+                                {
+                                    <a href="@Url.Action("Index", new { tag = tag.Name })" class="tag">@tag.Name</a>
+                                }
+                            }
+                            else
+                            {
+                                <span class="tag" style="background: #f0f0f0; color: #999;">Etiket bulunmamaktadır</span>
+                            }
+                        }
+                        else
+                        {
+                            <a href="#" class="tag">Fotoğrafçılık</a>
+                            <a href="#" class="tag">Sanat</a>
+                            <a href="#" class="tag">Tasarım</a>
+                            <a href="#" class="tag">Moda</a>
+                            <a href="#" class="tag">Portre</a>
+                            <a href="#" class="tag">Minimalizm</a>
+                            <a href="#" class="tag">Modern</a>
+                            <a href="#" class="tag">Dijital</a>
+                        }
                     </div>
                 </div>
                 

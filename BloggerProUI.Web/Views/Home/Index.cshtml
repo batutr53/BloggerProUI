@@ -1,6 +1,9 @@
 @using BloggerProUI.Models.Post
 @using BloggerProUI.Models.Category
 @using BloggerProUI.Models.Tag
+@using BloggerProUI.Models.Pagination
+@using BloggerProUI.Models.Comment
+@model PaginatedResultDto<PostListDto>
 
 @{
     ViewData["Title"] = "Ana Sayfa";
@@ -10,215 +13,222 @@
 <main class="content-container">
     <!-- Featured Article Section -->
     <section class="featured-section">
-        <article class="featured-article">
-            <a href="@Url.Action("Detail", "Blog")" style="text-decoration: none; color: inherit;">
-                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Featured Article" class="featured-image" loading="lazy">
-                <div class="featured-meta">KAPAK HİKAYESİ · 4 Temmuz 2025</div>
-                <h1 class="featured-title">The Definitive Helmut Newton Photobook</h1>
-                <div class="featured-author">Yazan: ALICE SMITH</div>
-                <p class="featured-excerpt">
-                    Helmut Newton'un ikonik fotoğraflarının bir araya geldiği bu kapsamlı koleksiyon, 
-                    asta fotoğrafçının kariyerinin en önemli eserlerini sunuyor. Moda, portre ve 
-                    sanat fotoğrafçılığında devrim yaratan Newton'un benzersiz tarzı...
-                </p>
-            </a>
-        </article>
+        @if (Model?.Items?.Any() == true)
+        {
+            var featuredPost = Model.Items.FirstOrDefault();
+            if (featuredPost != null)
+            {
+                <article class="featured-article">
+                    <a href="@Url.Action("Detail", "Blog", new { id = featuredPost.Id })" style="text-decoration: none; color: inherit;">
+                        <img src="@(string.IsNullOrEmpty(featuredPost.FeaturedImage) ? "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" : featuredPost.FeaturedImage)" alt="@featuredPost.Title" class="featured-image" loading="lazy">
+                        <div class="featured-meta">@featuredPost.Categories?.FirstOrDefault()?.ToUpper() â€¢ @featuredPost.CreatedAt.ToString("dd MMMM yyyy")</div>
+                        <h1 class="featured-title">@featuredPost.Title</h1>
+                        <div class="featured-author">Yazan: @featuredPost.Author?.DisplayName?.ToUpper()</div>
+                        <p class="featured-excerpt">
+                            @Html.Raw(featuredPost.Content)
+                        </p>
+                    </a>
+                </article>
+            }
+        }
+        else
+        {
+          
+        }
         
         <aside class="sidebar">
-            <a href="#" class="sidebar-article">
-                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Sidebar Article" class="sidebar-image" loading="lazy">
-                <div class="sidebar-meta">SANAT · 14 Ocak 2025</div>
-                <h3 class="sidebar-title">Modern Sanatın Dijital Evrimi</h3>
-                <div class="sidebar-author">Yazan: MEHMET YILMAZ</div>
-                <p class="sidebar-excerpt">
-                    Dijital teknolojilerin sanat dünyasına etkisi ve çağdaş sanatçıların 
-                    bu yeni araçları nasıl kullandığı...
-                </p>
-            </a>
-            
-            <a href="#" class="sidebar-article">
-                <img src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Sidebar Article" class="sidebar-image" loading="lazy">
-                <div class="sidebar-meta">TASARIM · 13 Ocak 2025</div>
-                <h3 class="sidebar-title">Minimalizmin Yükselişi</h3>
-                <div class="sidebar-author">Yazan: AYŞE KAYA</div>
-                <p class="sidebar-excerpt">
-                    Modern tasarım anlayışında minimalizmin artan etkisi ve 
-                    bu yaklaşımın günlük yaşama yansımaları...
-                </p>
-            </a>
-            
-            <a href="#" class="sidebar-article">
-                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Sidebar Article" class="sidebar-image" loading="lazy">
-                <div class="sidebar-meta">MIMARI · 12 Ocak 2025</div>
-                <h3 class="sidebar-title">Sürdürülebilir Mimari</h3>
-                <div class="sidebar-author">Yazan: ALI DEMIR</div>
-                <p class="sidebar-excerpt">
-                    Çevre dostu yapı malzemeleri ve enerji verimliliği 
-                    odaklı mimari projeler...
-                </p>
-            </a>
+            @if (Model?.Items?.Count() > 1)
+            {
+                @foreach (var sidebarPost in Model.Items.Skip(1).Take(3))
+                {
+                    <a href="@Url.Action("Detail", "Blog", new { id = sidebarPost.Id })" class="sidebar-article">
+                        <img src="@(string.IsNullOrEmpty(sidebarPost.FeaturedImage) ? "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" : sidebarPost.FeaturedImage)" alt="@sidebarPost.Title" class="sidebar-image" loading="lazy">
+                        <div class="sidebar-meta">@sidebarPost.Categories?.FirstOrDefault()?.ToUpper() â€¢ @sidebarPost.CreatedAt.ToString("dd MMMM yyyy")</div>
+                        <h3 class="sidebar-title">@sidebarPost.Title</h3>
+                        <div class="sidebar-author">Yazan: @sidebarPost.Author?.DisplayName?.ToUpper()</div>
+                        <p class="sidebar-excerpt">
+                            @(sidebarPost.Excerpt?.Length > 100 ? sidebarPost.Excerpt.Substring(0, 100) + "..." : sidebarPost.Excerpt)
+                        </p>
+                    </a>
+                }
+            }
+            else
+            {
+              
+            }
         </aside>
     </section>
 
     <!-- Today's Trending Section -->
     <section>
         <div class="section-header">
-            <h2 class="section-title">Bugünün Öne Çıkanları</h2>
-            <a href="@Url.Action("Index", "Blog")" class="view-all">Tümünü Gör</a>
+            <h2 class="section-title">BugÃ¼nÃ¼n Ã–ne Ã‡Ä±kanlarÄ±</h2>
+            <a href="@Url.Action("Index", "Blog")" class="view-all">TÃ¼mÃ¼nÃ¼ GÃ¶r</a>
         </div>
         
         <div class="trending-grid">
-            <a href="@Url.Action("Detail", "Blog")" class="trending-item">
-                <img src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Trending Article" class="trending-image" loading="lazy">
-                <div class="trending-meta">FOTOĞRAF · 15 Ocak 2025</div>
-                <h3 class="trending-title">Sokak Fotoğrafçılığının Altın Kuralları</h3>
-                <div class="trending-author">Yazan: EMRE ÖZKAN</div>
-            </a>
-            
-            <a href="#" class="trending-item">
-                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Trending Article" class="trending-image" loading="lazy">
-                <div class="trending-meta">MODA · 14 Ocak 2025</div>
-                <h3 class="trending-title">2025 Moda Trendleri</h3>
-                <div class="trending-author">Yazan: ZEYNEP AKTAŞ</div>
-            </a>
-            
-            <a href="#" class="trending-item">
-                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Trending Article" class="trending-image" loading="lazy">
-                <div class="trending-meta">TEKNOLOJI · 13 Ocak 2025</div>
-                <h3 class="trending-title">Yapay Zeka ve Yaratıcılık</h3>
-                <div class="trending-author">Yazan: CAN YILDIRIM</div>
-            </a>
+            @if (ViewBag.FeaturedPosts != null)
+            {
+                var featuredPosts = ViewBag.FeaturedPosts as List<PostListDto>;
+                if (featuredPosts != null && featuredPosts.Any())
+                {
+                    @foreach (var trendingPost in featuredPosts)
+                    {
+                        <a href="@Url.Action("Detail", "Blog", new { id = trendingPost.Id })" class="trending-item">
+                            <img src="@(string.IsNullOrEmpty(trendingPost.FeaturedImage) ? "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" : trendingPost.FeaturedImage)" alt="@trendingPost.Title" class="trending-image" loading="lazy">
+                            <div class="trending-meta">@trendingPost.Categories?.FirstOrDefault()?.ToUpper() â€¢ @trendingPost.CreatedAt.ToString("dd MMMM yyyy")</div>
+                            <h3 class="trending-title">@trendingPost.Title</h3>
+                            <div class="trending-author">Yazan: @trendingPost.Author?.DisplayName?.ToUpper()</div>
+                        </a>
+                    }
+                }
+            }
+            else
+            {
+              
+            }
         </div>
     </section>
 
     <!-- Latest Articles Section -->
     <section>
         <div class="section-header">
-            <h2 class="section-title">Son Yazılar</h2>
-            <a href="#" class="view-all">Tümünü Gör</a>
+            <h2 class="section-title">Son YazÄ±lar</h2>
+            <a href="@Url.Action("Index", "Blog")" class="view-all">TÃ¼mÃ¼nÃ¼ GÃ¶r</a>
         </div>
         
         <div class="latest-layout">
             <div class="articles-left">
-                <a href="#" class="article-item">
-                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Article" class="article-image" loading="lazy">
-                    <div class="article-content">
-                        <div class="article-meta">PORTRE · 15 Ocak 2025</div>
-                        <h3 class="article-title">Portre Fotoğrafçılığında Işık Kullanımı</h3>
-                        <div class="article-author">Yazan: FATMA ŞEN</div>
-                        <p class="article-excerpt">
-                            Doğal ve yapay ışık kaynaklarını kullanarak etkileyici portreler 
-                            çekmenin yolları ve teknikleri hakkında detaylı rehber...
-                        </p>
-                    </div>
-                </a>
-                
-                <a href="#" class="article-item">
-                    <img src="https://images.unsplash.com/photo-1456885284447-7dd4bb8720bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Article" class="article-image" loading="lazy">
-                    <div class="article-content">
-                        <div class="article-meta">SANAT · 14 Ocak 2025</div>
-                        <h3 class="article-title">Çağdaş Türk Sanatçıları</h3>
-                        <div class="article-author">Yazan: OĞUZ KAAN</div>
-                        <p class="article-excerpt">
-                            Uluslararası sanat sahnesinde öne çıkan Türk sanatçılar ve 
-                            eserleriyle yarattıkları etki üzerine bir inceleme...
-                        </p>
-                    </div>
-                </a>
-                
-                <a href="#" class="article-item">
-                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Article" class="article-image" loading="lazy">
-                    <div class="article-content">
-                        <div class="article-meta">TASARIM · 13 Ocak 2025</div>
-                        <h3 class="article-title">Grafik Tasarımda Renk Teorisi</h3>
-                        <div class="article-author">Yazan: SEDA ACAR</div>
-                        <p class="article-excerpt">
-                            Görsel iletişimde renklerin psikolojik etkisi ve 
-                            tasarım projelerinde doğru renk paletlerinin seçimi...
-                        </p>
-                    </div>
-                </a>
+                @if (Model?.Items?.Count() > 7)
+                {
+                    @foreach (var latestPost in Model.Items.Skip(7).Take(3))
+                    {
+                        <a href="@Url.Action("Detail", "Blog", new { id = latestPost.Id })" class="article-item">
+                            <img src="@(string.IsNullOrEmpty(latestPost.FeaturedImage) ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" : latestPost.FeaturedImage)" alt="@latestPost.Title" class="article-image" loading="lazy">
+                            <div class="article-content">
+                                <div class="article-meta">@latestPost.Categories?.FirstOrDefault()?.ToUpper() â€¢ @latestPost.CreatedAt.ToString("dd MMMM yyyy")</div>
+                                <h3 class="article-title">@latestPost.Title</h3>
+                                <div class="article-author">Yazan: @latestPost.Author?.DisplayName?.ToUpper()</div>
+                                <p class="article-excerpt">
+                                    @(latestPost.Excerpt?.Length > 150 ? latestPost.Excerpt.Substring(0, 150) + "..." : latestPost.Excerpt)
+                                </p>
+                            </div>
+                        </a>
+                    }
+                }
+                else
+                {
+                   
+                }
             </div>
             
             <aside class="sidebar">
                 <a href="#" class="sidebar-article">
                     <img src="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Editor's Pick" class="sidebar-image" loading="lazy">
-                    <div class="sidebar-meta">EDİTÖRÜN SEÇİMİ · 15 Ocak 2025</div>
-                    <h3 class="sidebar-title">Yılın Fotoğraf Sergisi</h3>
-                    <div class="sidebar-author">Yazan: EDITÖR</div>
+                    <div class="sidebar-meta">EDÄ°TÃ–RÃœN SEÃ‡Ä°MÄ° â€¢ 15 Ocak 2025</div>
+                    <h3 class="sidebar-title">YÄ±lÄ±n FotoÄŸraf Sergisi</h3>
+                    <div class="sidebar-author">Yazan: EDÄ°TÃ–R</div>
                     <p class="sidebar-excerpt">
-                        Bu yılın en etkileyici fotoğraf sergilerinden birini 
-                        kaçırmayın...
+                        Bu yÄ±lÄ±n en etkileyici fotoÄŸraf sergilerinden birini 
+                        kaÃ§Ä±rmayÄ±n...
                     </p>
                 </a>
                 
                 <a href="#" class="sidebar-article">
                     <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Popular Article" class="sidebar-image" loading="lazy">
-                    <div class="sidebar-meta">POPÜLER · 14 Ocak 2025</div>
-                    <h3 class="sidebar-title">En Çok Okunan Makale</h3>
+                    <div class="sidebar-meta">POPÃœLER â€¢ 14 Ocak 2025</div>
+                    <h3 class="sidebar-title">En Ã‡ok Okunan Makale</h3>
                     <div class="sidebar-author">Yazan: TEAM</div>
                     <p class="sidebar-excerpt">
-                        Okuyucularımızın en çok ilgi gösterdiği 
-                        içeriklerden biri...
+                        OkuyucularÄ±mÄ±zÄ±n en Ã§ok ilgi gÃ¶sterdiÄŸi 
+                        iÃ§eriklerden biri...
                     </p>
                 </a>
             </aside>
         </div>
     </section>
 
-    <!-- Latest Podcasts Section -->
+    <!-- Latest Comments Section -->
     <section>
         <div class="section-header">
-            <h2 class="section-title">Son Podcast'ler</h2>
-            <a href="#" class="view-all">Tümünü Gör</a>
+            <h2 class="section-title">Son Yorumlar</h2>
+            <a href="@Url.Action("Index", "Blog")" class="view-all">TÃ¼mÃ¼nÃ¼ GÃ¶r</a>
         </div>
         
         <div class="articles-left">
-            <a href="#" class="podcast-item">
-                <div class="podcast-image" style="position: relative;">
-                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Fashion Podcast" style="width: 100%; height: 100%; object-fit: cover;">
-                    <div class="play-button">
-                        <i class="fas fa-play" style="margin-left: 3px;"></i>
+            @if (ViewBag.RecentComments != null)
+            {
+                var recentComments = ViewBag.RecentComments as List<BloggerProUI.Models.Comment.RecentCommentDto>;
+                if (recentComments != null && recentComments.Any())
+                {
+                    @foreach (var comment in recentComments)
+                    {
+                        <div class="podcast-item" style="display: flex; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
+                            <div class="podcast-image" style="position: relative; width: 100px; height: 100px; overflow: hidden; flex-shrink: 0; border-radius: 8px;">
+                                <a href="@Url.Action("Detail", "Blog", new { slug = comment.Post.Slug })">
+                                    <img src="@(string.IsNullOrEmpty(comment.Post.ImageUrl) ? "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" : comment.Post.ImageUrl)" alt="@comment.Post.Title" style="width: 100%; height: 100%; object-fit: cover;">
+                                </a>
+                            </div>
+                            <div class="podcast-content" style="flex: 1; margin-left: 15px;">
+                                <h3 class="podcast-title" style="font-size: 16px; margin: 0 0 8px 0;">
+                                    <a href="@Url.Action("Detail", "Blog", new { slug = comment.Post.Slug })" style="color: #333; text-decoration: none;">
+                                        @comment.Post.Title
+                                    </a>
+                                </h3>
+                                <div class="podcast-meta" style="color: #666; font-size: 14px; margin-bottom: 8px;">
+                                    @comment.UserName â€¢ @comment.CreatedAt.ToString("dd MMMM yyyy")
+                                </div>
+                                <p class="podcast-description" style="color: #666; font-size: 14px; line-height: 1.4; margin: 0;">
+                                    @(comment.Content.Length > 120 ? comment.Content.Substring(0, 120) + "..." : comment.Content)
+                                </p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="podcast-item" style="text-align: center; padding: 40px 20px; color: #666;">
+                        <div class="podcast-image" style="position: relative; margin: 0 auto 20px; width: 80px; height: 80px;">
+                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="No Comments" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        </div>
+                        <div class="podcast-content">
+                            <div class="podcast-meta">BÄ°LGÄ° â€¢ @DateTime.Now.ToString("dd MMMM yyyy")</div>
+                            <h3 class="podcast-title">HenÃ¼z Yorum Bulunmuyor</h3>
+                            <div class="article-author">BloggerPro</div>
+                            <p class="podcast-description">
+                                Blog yazÄ±larÄ±na yapÄ±lan yorumlar burada gÃ¶rÃ¼ntÃ¼lenecektir.
+                                Ä°lk yorumu siz yapÄ±n!
+                            </p>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="podcast-item" style="text-align: center; padding: 40px 20px; color: #666;">
+                    <div class="podcast-image" style="position: relative; margin: 0 auto 20px; width: 80px; height: 80px;">
+                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Loading" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    </div>
+                    <div class="podcast-content">
+                        <div class="podcast-meta">YÃœKLENIYOR â€¢ @DateTime.Now.ToString("dd MMMM yyyy")</div>
+                        <h3 class="podcast-title">Yorumlar YÃ¼kleniyor</h3>
+                        <div class="article-author">BloggerPro</div>
+                        <p class="podcast-description">
+                            Son yorumlar yÃ¼kleniyor...
+                        </p>
                     </div>
                 </div>
-                <div class="podcast-content">
-                    <div class="podcast-meta">PODCAST · 15 Ocak 2025 · 45 dk</div>
-                    <h3 class="podcast-title">Modada Maskülen ve Feminen Sınırları Nasıl Siliyor?</h3>
-                    <div class="article-author">Konuk: MODA UZMANLAR</div>
-                    <p class="podcast-description">
-                        Çağdaş moda dünyasında cinsiyet sınırlarının bulanıklaşması 
-                        ve bu değişimin toplumsal etkileri üzerine derin bir sohbet...
-                    </p>
-                </div>
-            </a>
-            
-            <a href="#" class="podcast-item">
-                <div class="podcast-image" style="position: relative;">
-                    <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Art Podcast" style="width: 100%; height: 100%; object-fit: cover;">
-                    <div class="play-button">
-                        <i class="fas fa-play" style="margin-left: 3px;"></i>
-                    </div>
-                </div>
-                <div class="podcast-content">
-                    <div class="podcast-meta">PODCAST · 12 Ocak 2025 · 38 dk</div>
-                    <h3 class="podcast-title">Sanatın Dijital Dönüşümü</h3>
-                    <div class="article-author">Konuk: SANAT TARİHÇİLERİ</div>
-                    <p class="podcast-description">
-                        NFT'lerden sanal gerçeklik sergilerine, sanat dünyasının 
-                        teknoloji ile buluşması üzerine kapsamlı bir değerlendirme...
-                    </p>
-                </div>
-            </a>
+            }
         </div>
     </section>
 </main>
 
 <!-- Newsletter Section -->
 <section class="newsletter-section">
-    <h2 class="newsletter-title">Daha Fazlası İçin Abone Olun</h2>
+    <h2 class="newsletter-title">Daha FazlasÄ± Ä°Ã§in Abone Olun</h2>
     <p class="newsletter-description">
-        Sanat, tasarım ve fotoğrafçılık dünyasından en güncel haberler, 
-        özel içerikler ve eksklüzif röportajlar için e-bültenimize katılın.
+        Sanat, tasarÄ±m ve fotoÄŸrafÃ§Ä±lÄ±k dÃ¼nyasÄ±ndan en gÃ¼ncel haberler, 
+        Ã¶zel iÃ§erikler ve eksklÃ¼zif rÃ¶portajlar iÃ§in e-bÃ¼ltenimize katÄ±lÄ±n.
     </p>
     
     <div class="newsletter-buttons">
@@ -228,3 +238,32 @@
         </div>
     </div>
 </section>
+
+@if (Model?.TotalPages > 1)
+{
+    <div class="pagination-container" style="text-align: center; margin: 40px 0;">
+        <div class="pagination">
+            @if (Model.PageNumber > 1)
+            {
+                <a href="@Url.Action("Index", new { page = Model.PageNumber - 1, pageSize = Model.PageSize })" class="pagination-btn">â† Ã–nceki</a>
+            }
+            
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                if (i == Model.PageNumber)
+                {
+                    <span class="pagination-current">@i</span>
+                }
+                else
+                {
+                    <a href="@Url.Action("Index", new { page = i, pageSize = Model.PageSize })" class="pagination-btn">@i</a>
+                }
+            }
+            
+            @if (Model.PageNumber < Model.TotalPages)
+            {
+                <a href="@Url.Action("Index", new { page = Model.PageNumber + 1, pageSize = Model.PageSize })" class="pagination-btn">Sonraki â†’</a>
+            }
+        </div>
+    </div>
+}

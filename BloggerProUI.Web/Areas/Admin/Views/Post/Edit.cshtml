@@ -3,8 +3,14 @@
 @{
     ViewData["Title"] = "Post Güncelle";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-    var moduleJson = Newtonsoft.Json.JsonConvert.SerializeObject(Model.Modules);
 }
+
+<!-- SweetAlert2 CDN -->
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Admin Post Create Styles -->
+<link href="~/css/admin-post-create.css" rel="stylesheet" />
 
 <h1 class="h3 mb-4 text-gray-800">Post Güncelle</h1>
 
@@ -26,13 +32,8 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="Excerpt">Özet</label>
-                <textarea asp-for="Excerpt" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Excerpt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="Content">İçerik (Ana)</label>
-                <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+                <textarea asp-for="Content" id="editor"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -80,18 +81,7 @@
 
         <!-- Sağ Panel -->
         <div class="col-md-4">
-            <h5 class="mb-3">Modüller</h5>
-            <div id="moduleContainer"></div>
-            <button type="button" class="btn btn-outline-secondary" onclick="addParagraphModule()">Paragraf</button>
-            <button type="button" class="btn btn-outline-secondary" onclick="addImageModule()">Görsel</button>
-            <button type="button" class="btn btn-outline-secondary" onclick="addVideoModule()">Video</button>
-            <button type="button" class="btn btn-outline-secondary" onclick="addIFrameModule()">IFrame</button>
-            <button type="button" class="btn btn-outline-secondary" onclick="addQuoteModule()">Alıntı</button>
-            <button type="button" class="btn btn-outline-secondary" onclick="addHeadingModule()">Başlık</button>
-            <button type="button" class="btn btn-outline-secondary" onclick="addTextModule()">Serbest Metin</button>
-
-            <hr />
-            <h5 class="mt-4">İstatistik</h5>
+            <h5 class="mb-3">İstatistik</h5>
             <ul class="list-group mb-3">
                 <li class="list-group-item">Görüntülenme: <strong>@Model.ViewCount</strong></li>
                 <li class="list-group-item">Yorumlar: <strong>@Model.CommentCount</strong></li>
@@ -111,144 +101,95 @@
     <a asp-action="Index" class="btn btn-secondary mt-4">İptal</a>
 </form>
 @section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.3.2/classic/ckeditor.js"></script>
     <script>
-        let modules = @Html.Raw(moduleJson);
-        let moduleIndex = 0;
+        class MyUploadAdapter {
+            constructor(loader) {
+                this.loader = loader;
+            }
 
-        function renderModules() {
-            if (!modules || modules.length === 0) return;
-            modules.forEach(m => {
-                switch (m.type) {
-                    case "Paragraph":
-                        addParagraphModule(m);
-                    case "Text":
-                        addTextModule(m);
-                        break;
-                    case "Image":
-                        addImageModule(m);
-                        break;
-                    case "Video":
-                        addVideoModule(m);
-                        break;
-                    case "Quote":
-                        addQuoteModule(m);
-                        break;
-                    case "IFrame":
-                        addIframeModule(m);
-                        break;
-                    case "Heading":
-                        addHeadingModule(m);
-                        break;
-                    default:
-                        console.warn("Desteklenmeyen modül tipi:", m.type);
+            upload() {
+                return this.loader.file
+                    .then(file => new Promise((resolve, reject) => {
+                        const data = new FormData();
+                        data.append('upload', file);
+
+                        fetch('/Admin/Image/Upload', {
+                            method: 'POST',
+                            body: data
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                reject(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(result => {
+                            if (result.uploaded) {
+                                resolve({
+                                    default: result.url
+                                });
+                            } else {
+                                reject(result.error.message);
+                            }
+                        })
+                        .catch(error => {
+                            reject(error);
+                        });
+                    }));
+            }
+
+            abort() {
+                // Abort logic if needed
+            }
+        }
+
+        function MyCustomUploadAdapterPlugin(editor) {
+            editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                return new MyUploadAdapter(loader);
+            };
+        }
+
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                extraPlugins: [MyCustomUploadAdapterPlugin],
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', '|',
+                        'link', 'uploadImage', 'mediaEmbed', '|',
+                        'alignment', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                image: {
+                    toolbar: [
+                        'imageStyle:inline',
+                        'imageStyle:block',
+                        'imageStyle:side',
+                        '|',
+                        'toggleImageCaption',
+                        'imageTextAlternative'
+                    ]
                 }
+            })
+            .catch(error => {
+                console.error(error);
             });
+
+        function generateSlug(title) {
+            return title.toString().toLowerCase()
+                .replace(/\s+/g, '-')           // Replace spaces with -
+                .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+                .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+                .replace(/^-+/, '')             // Trim - from start of text
+                .replace(/-+$/, '');            // Trim - from end of text
         }
 
-        function removeModule(btn) {
-            $(btn).closest('.card').remove();
-        }
-
-        function generateCommonFields(type, order, data = {}) {
-            return `
-                <input type="hidden" name="Modules[${moduleIndex}].Type" value="${type}" />
-                <input type="hidden" name="Modules[${moduleIndex}].Order" value="${order}" />
-                <div class="form-group">
-                    <label>Hizalama</label>
-                    <select name="Modules[${moduleIndex}].Alignment" class="form-control">
-                        <option value="left" ${data.alignment === 'left' ? 'selected' : ''}>Sol</option>
-                        <option value="center" ${data.alignment === 'center' ? 'selected' : ''}>Orta</option>
-                        <option value="right" ${data.alignment === 'right' ? 'selected' : ''}>Sağ</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Genişlik</label>
-                    <input type="text" name="Modules[${moduleIndex}].Width" class="form-control" value="${data.width || '100%'}" />
-                </div>
-                <button type="button" class="btn btn-danger btn-sm" onclick="removeModule(this)">Sil</button>
-            `;
-        }
-
-        function addTextModule(data = {}) {
-            const html = `
-            <div class="card p-3 mb-2">
-                ${generateCommonFields(1, moduleIndex + 1, data)}
-                <div class="form-group">
-                    <label>İçerik</label>
-                    <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="3">${data.content || ''}</textarea>
-                </div>
-            </div>`;
-            $('#moduleContainer').append(html);
-            moduleIndex++;
-        }
-
-        function addImageModule(data = {}) {
-            const html = `
-            <div class="card p-3 mb-2">
-                ${generateCommonFields(2, moduleIndex + 1, data)}
-                <div class="form-group">
-                    <label>Görsel URL</label>
-                    <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" value="${data.mediaUrl || ''}" />
-                </div>
-            </div>`;
-            $('#moduleContainer').append(html);
-            moduleIndex++;
-        }
-
-        function addVideoModule(data = {}) {
-            const html = `
-            <div class="card p-3 mb-2">
-                ${generateCommonFields(3, moduleIndex + 1, data)}
-                <div class="form-group">
-                    <label>Video URL</label>
-                    <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" value="${data.mediaUrl || ''}" />
-                </div>
-            </div>`;
-            $('#moduleContainer').append(html);
-            moduleIndex++;
-        }
-
-        function addQuoteModule(data = {}) {
-            const html = `
-            <div class="card p-3 mb-2">
-                ${generateCommonFields(4, moduleIndex + 1, data)}
-                <div class="form-group">
-                    <label>Alıntı</label>
-                    <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="2">${data.content || ''}</textarea>
-                </div>
-            </div>`;
-            $('#moduleContainer').append(html);
-            moduleIndex++;
-        }
-
-        function addIframeModule(data = {}) {
-            const html = `
-            <div class="card p-3 mb-2">
-                ${generateCommonFields(5, moduleIndex + 1, data)}
-                <div class="form-group">
-                    <label>Iframe URL</label>
-                    <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" value="${data.mediaUrl || ''}" />
-                </div>
-            </div>`;
-            $('#moduleContainer').append(html);
-            moduleIndex++;
-        }
-
-        function addHeadingModule(data = {}) {
-            const html = `
-            <div class="card p-3 mb-2">
-                ${generateCommonFields(6, moduleIndex + 1, data)}
-                <div class="form-group">
-                    <label>Başlık</label>
-                    <input type="text" name="Modules[${moduleIndex}].Content" class="form-control" value="${data.content || ''}" />
-                </div>
-            </div>`;
-            $('#moduleContainer').append(html);
-            moduleIndex++;
-        }
-
-        $(document).ready(() => {
-            renderModules();
+        $('#Title').on('input', function() {
+            var title = $(this).val();
+            var slug = generateSlug(title);
+            $('#Slug').val(slug);
         });
     </script>
 }

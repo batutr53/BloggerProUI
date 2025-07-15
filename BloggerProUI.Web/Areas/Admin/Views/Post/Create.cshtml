@@ -7,194 +7,264 @@
     var tags = ViewBag.Tags as List<SelectListItem> ?? new();
 }
 
-<h1 class="h3 mb-4 text-gray-800">Yeni Post Oluştur</h1>
+<!-- SweetAlert2 CDN -->
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<form asp-action="Create" method="post" class="needs-validation" novalidate>
-    <div class="form-group">
-        <label asp-for="Title">Başlık</label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
+<!-- Admin Post Create Styles -->
+<link href="~/css/admin-post-create.css" rel="stylesheet" />
+
+<div class="admin-modern-form-container">
+    <div class="admin-form-header">
+        <h1>✨ Yeni Post Oluştur</h1>
+        <p class="admin-subtitle">Harika içerikler oluşturmak için modern editörü kullanın</p>
     </div>
 
-    <div class="form-group">
-        <label asp-for="Slug">Slug (URL)</label>
-        <input asp-for="Slug" class="form-control" />
-        <span asp-validation-for="Slug" class="text-danger"></span>
-    </div>
+    <form asp-action="Create" method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+        <div class="admin-form-body">
+            <div class="admin-form-section">
+                <h3>Temel Bilgiler</h3>
+                
+                <div class="admin-form-group">
+                    <label asp-for="Title">📝 Başlık</label>
+                    <input asp-for="Title" class="form-control" placeholder="Post başlığınızı girin..." />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
 
-    <div class="form-group">
-        <label asp-for="Content">İçerik</label>
-        <textarea asp-for="Content" class="form-control" rows="6"></textarea>
-        <span asp-validation-for="Content" class="text-danger"></span>
-    </div>
+                <div class="admin-form-group">
+                    <label asp-for="Slug">🔗 Slug (URL)</label>
+                    <input asp-for="Slug" class="form-control" placeholder="url-slug-ornek" />
+                    <span asp-validation-for="Slug" class="text-danger"></span>
+                </div>
 
-    <div class="form-group">
-        <label asp-for="FeaturedImage">Kapak Görseli URL</label>
-        <input asp-for="FeaturedImage" class="form-control" />
-        <span asp-validation-for="FeaturedImage" class="text-danger"></span>
-    </div>
+                <div class="admin-form-group">
+                    <label asp-for="Content">📄 İçerik</label>
+                    <textarea asp-for="Content" id="editor"></textarea>
+                    <span asp-validation-for="Content" class="text-danger"></span>
+                </div>
+            </div>
 
-    <div class="form-group">
-        <label for="categoryIds">Kategoriler</label>
-        <select asp-for="CategoryIds" asp-items="categories" class="form-control" multiple></select>
-        <span asp-validation-for="CategoryIds" class="text-danger"></span>
-    </div>
+            <div class="admin-form-section admin-media-section">
+                <h3>Kapak Görseli</h3>
+                
+                <div class="admin-image-upload-container" onclick="document.getElementById('imageFileInput').click()">
+                    <div class="admin-upload-icon">📸</div>
+                    <div class="admin-upload-text">Görsel yüklemek için tıklayın veya sürükleyin</div>
+                    <div class="admin-upload-subtext">PNG, JPG, GIF, WEBP desteklenir (Max: 5MB)</div>
+                    <input type="file" id="imageFileInput" name="FeaturedImageFile" accept="image/*" style="display: none;" />
+                    <img id="imagePreview" class="admin-image-preview" style="display: none;" />
+                </div>
+            </div>
 
-    <div class="form-group">
-        <label for="tagIds">Etiketler</label>
-        <select asp-for="TagIds" asp-items="tags" class="form-control" multiple></select>
-        <span asp-validation-for="TagIds" class="text-danger"></span>
-    </div>
+            <div class="admin-form-section admin-taxonomy-section">
+                <h3>Kategoriler ve Etiketler</h3>
+                
+                <div class="admin-form-group">
+                    <label for="categoryIds">📁 Kategoriler</label>
+                    <select asp-for="CategoryIds" asp-items="categories" class="form-control select2-multiple" multiple></select>
+                    <span asp-validation-for="CategoryIds" class="text-danger"></span>
+                </div>
 
-    <hr />
-    <h4>Modüller</h4>
-    <div id="modules-container">
-        <!-- Modül girişleri dinamik olarak buraya eklenecek -->
-    </div>
-    <button type="button" class="btn btn-outline-secondary" onclick="addParagraphModule()">Paragraf</button>
-    <button type="button" class="btn btn-outline-secondary" onclick="addImageModule()">Görsel</button>
-    <button type="button" class="btn btn-outline-secondary" onclick="addVideoModule()">Video</button>
-    <button type="button" class="btn btn-outline-secondary" onclick="addIFrameModule()">IFrame</button>
-    <button type="button" class="btn btn-outline-secondary" onclick="addQuoteModule()">Alıntı</button>
-    <button type="button" class="btn btn-outline-secondary" onclick="addHeadingModule()">Başlık</button>
-    <button type="button" class="btn btn-outline-secondary" onclick="addTextModule()">Serbest Metin</button>
-
-    <button type="submit" class="btn btn-primary">Kaydet</button>
-    <a asp-action="Index" class="btn btn-secondary">İptal</a>
-</form>
+                <div class="admin-form-group">
+                    <label for="tagIds">🏷️ Etiketler</label>
+                    <select asp-for="TagIds" asp-items="tags" class="form-control select2-multiple" multiple></select>
+                    <span asp-validation-for="TagIds" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="admin-action-buttons">
+            <button type="submit" class="admin-btn-primary">💾 Kaydet</button>
+            <a asp-action="Index" class="admin-btn-secondary">❌ İptal</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/35.3.2/classic/ckeditor.js"></script>
     <script>
-        let modules = [];
-        let moduleIndex = 0;
+        class MyUploadAdapter {
+            constructor(loader) {
+                this.loader = loader;
+            }
 
-        function addParagraphModule() {
-            const html = `
-        <div class="card mb-3 p-3 border">
-            <h5>Paragraf Modülü</h5>
-            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Paragraph" />
-            <div class="form-group">
-                <label>İçerik</label>
-                <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="4"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Sıralama</label>
-                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
-            </div>
-        </div>`;
-            $('#modules-container').append(html);
-            moduleIndex++;
-        }
-        function addImageModule() {
-            const html = `
-        <div class="card mb-3 p-3 border">
-            <h5>Görsel Modülü</h5>
-            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Image" />
-            <div class="form-group">
-                <label>Görsel URL</label>
-                <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Sıralama</label>
-                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
-            </div>
-        </div>`;
-            $('#modules-container').append(html);
-            moduleIndex++;
-        }
-        function addVideoModule() {
-            const html = `
-        <div class="card mb-3 p-3 border">
-            <h5>Video Modülü</h5>
-            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Video" />
-            <div class="form-group">
-                <label>Video URL</label>
-                <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Sıralama</label>
-                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
-            </div>
-        </div>`;
-            $('#modules-container').append(html);
-            moduleIndex++;
-        }
-        function addIFrameModule() {
-            const html = `
-        <div class="card mb-3 p-3 border">
-            <h5>IFrame Modülü</h5>
-            <input type="hidden" name="Modules[${moduleIndex}].Type" value="IFrame" />
-            <div class="form-group">
-                <label>IFrame URL</label>
-                <input type="text" name="Modules[${moduleIndex}].MediaUrl" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Genişlik</label>
-                <input type="text" name="Modules[${moduleIndex}].Width" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Yükseklik</label>
-                <input type="text" name="Modules[${moduleIndex}].Height" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Sıralama</label>
-                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
-            </div>
-        </div>`;
-            $('#modules-container').append(html);
-            moduleIndex++;
-        }
-        function addQuoteModule() {
-            const html = `
-        <div class="card mb-3 p-3 border">
-            <h5>Alıntı Modülü</h5>
-            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Quote" />
-            <div class="form-group">
-                <label>Alıntı</label>
-                <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Sıralama</label>
-                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
-            </div>
-        </div>`;
-            $('#modules-container').append(html);
-            moduleIndex++;
-        }
-        function addHeadingModule() {
-            const html = `
-        <div class="card mb-3 p-3 border">
-            <h5>Başlık Modülü</h5>
-            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Heading" />
-            <div class="form-group">
-                <label>Başlık</label>
-                <input type="text" name="Modules[${moduleIndex}].Content" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label>Sıralama</label>
-                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
-            </div>
-        </div>`;
-            $('#modules-container').append(html);
-            moduleIndex++;
-        }
-        function addTextModule() {
-            const html = `
-        <div class="card mb-3 p-3 border">
-            <h5>Serbest Metin Modülü</h5>
-            <input type="hidden" name="Modules[${moduleIndex}].Type" value="Text" />
-            <div class="form-group">
-                <label>İçerik</label>
-                <textarea name="Modules[${moduleIndex}].Content" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Sıralama</label>
-                <input type="number" name="Modules[${moduleIndex}].Order" class="form-control" />
-            </div>
-        </div>`;
-            $('#modules-container').append(html);
-            moduleIndex++;
+            upload() {
+                return this.loader.file
+                    .then(file => new Promise((resolve, reject) => {
+                        const data = new FormData();
+                        data.append('upload', file);
+
+                        fetch('/Admin/Image/Upload', {
+                            method: 'POST',
+                            body: data
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                reject(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(result => {
+                            if (result.uploaded) {
+                                resolve({
+                                    default: result.url
+                                });
+                            } else {
+                                reject(result.error.message);
+                            }
+                        })
+                        .catch(error => {
+                            reject(error);
+                        });
+                    }));
+            }
+
+            abort() {
+                // Abort logic if needed
+            }
         }
 
+        function MyCustomUploadAdapterPlugin(editor) {
+            editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                return new MyUploadAdapter(loader);
+            };
+        }
+
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                extraPlugins: [MyCustomUploadAdapterPlugin],
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', '|',
+                        'link', 'uploadImage', 'mediaEmbed', '|',
+                        'alignment', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                image: {
+                    toolbar: [
+                        'imageStyle:inline',
+                        'imageStyle:block',
+                        'imageStyle:side',
+                        '|',
+                        'toggleImageCaption',
+                        'imageTextAlternative'
+                    ]
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+        // Initialize Select2 for multiple selects
+        $(document).ready(function() {
+            $('.select2-multiple').select2({
+                placeholder: 'Seçiniz...',
+                allowClear: true
+            });
+        });
+
+        // File upload functionality
+        function handleFileChange(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    Swal.fire({
+                        title: 'Hata!',
+                        text: 'Dosya boyutu 5MB\'dan büyük olamaz.',
+                        icon: 'error'
+                    });
+                    e.target.value = ''; // Clear the input
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    
+                    // Update upload container text and icon
+                    const uploadIcon = document.querySelector('.admin-upload-icon');
+                    const uploadText = document.querySelector('.admin-upload-text');
+                    
+                    if (uploadIcon) uploadIcon.textContent = '✅';
+                    if (uploadText) uploadText.textContent = `Görsel yüklendi: ${file.name}`;
+                    
+                    // Show success message
+                    Swal.fire({
+                        title: 'Başarılı!',
+                        text: 'Görsel başarıyla yüklendi.',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        position: 'top-end',
+                        toast: true
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        document.getElementById('imageFileInput').addEventListener('change', handleFileChange);
+        
+        // Drag and drop functionality
+        function initializeDragDrop() {
+            const uploadContainer = document.querySelector('.admin-image-upload-container');
+            
+            uploadContainer.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('admin-dragover');
+            });
+            
+            uploadContainer.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('admin-dragover');
+            });
+            
+            uploadContainer.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('admin-dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type.startsWith('image/')) {
+                        const fileInput = document.getElementById('imageFileInput');
+                        fileInput.files = files;
+                        fileInput.dispatchEvent(new Event('change'));
+                    } else {
+                        Swal.fire({
+                            title: 'Hata!',
+                            text: 'Lütfen sadece resim dosyası seçin.',
+                            icon: 'error'
+                        });
+                    }
+                }
+            });
+        }
+        
+        initializeDragDrop();
+
+        function generateSlug(title) {
+            return title.toString().toLowerCase()
+                .replace(/\s+/g, '-')           // Replace spaces with -
+                .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+                .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+                .replace(/^-+/, '')             // Trim - from start of text
+                .replace(/-+$/, '');            // Trim - from end of text
+        }
+
+        $('#Title').on('input', function() {
+            var title = $(this).val();
+            var slug = generateSlug(title);
+            $('#Slug').val(slug);
+        });
     </script>
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 }

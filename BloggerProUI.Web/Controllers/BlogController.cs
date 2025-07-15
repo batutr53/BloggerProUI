@@ -4,6 +4,7 @@ using BloggerProUI.Web.Models;
 using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Pagination;
 using BloggerProUI.Models.Post;
+using BloggerProUI.Models.Comment;
 
 namespace BloggerProUI.Web.Controllers;
 
@@ -12,30 +13,50 @@ public class BlogController : Controller
 {
     private readonly ILogger<BlogController> _logger;
     private readonly IPostApiService _postApiService;
+    private readonly ICommentApiService _commentApiService;
+    private readonly ICategoryApiService _categoryApiService;
+    private readonly ITagApiService _tagApiService;
 
-    public BlogController(ILogger<BlogController> logger, IPostApiService postApiService)
+    public BlogController(ILogger<BlogController> logger, IPostApiService postApiService, ICommentApiService commentApiService, ICategoryApiService categoryApiService, ITagApiService tagApiService)
     {
         _logger = logger;
         _postApiService = postApiService;
+        _commentApiService = commentApiService;
+        _categoryApiService = categoryApiService;
+        _tagApiService = tagApiService;
     }
 
     [HttpGet("")]
     [HttpGet("Index")]
-    public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
+    public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string? category = null, string? tag = null)
     {
         try
         {
-            // Get all posts from API
-            var response = await _postApiService.GetAllPostsAsync(page, pageSize);
+            // Fetch posts, categories, and tags in parallel
+            var postsTask = _postApiService.GetAllPostsAsync(page, pageSize);
+            var categoriesTask = _categoryApiService.GetAllAsync();
+            var tagsTask = _tagApiService.GetAllAsync();
             
-            if (response.Success && response.Data != null)
+            await Task.WhenAll(postsTask, categoriesTask, tagsTask);
+            
+            var postsResponse = postsTask.Result;
+            var categoriesResponse = categoriesTask.Result;
+            var tagsResponse = tagsTask.Result;
+            
+            // Pass additional data to view
+            ViewBag.Categories = categoriesResponse?.Success == true ? categoriesResponse.Data : new List<BloggerProUI.Models.Category.CategoryDto>();
+            ViewBag.Tags = tagsResponse?.Success == true ? tagsResponse.Data : new List<BloggerProUI.Models.Tag.TagDto>();
+            ViewBag.CurrentCategory = category;
+            ViewBag.CurrentTag = tag;
+            
+            if (postsResponse.Success && postsResponse.Data != null)
             {
-                return View(response.Data);
+                return View(postsResponse.Data);
             }
             else
             {
                 // Log error and return empty result
-                _logger.LogError("Failed to fetch posts: {Messages}", string.Join(", ", response.Message ?? new[] { "Unknown error" }));
+                _logger.LogError("Failed to fetch posts: {Messages}", string.Join(", ", postsResponse.Message ?? new[] { "Unknown error" }));
                 var emptyResult = new PaginatedResultDto<PostListDto>();
                 return View(emptyResult);
             }
@@ -52,14 +73,36 @@ public class BlogController : Controller
     [HttpGet("Post/{id}")]  // Alternative route
     public async Task<IActionResult> Detail(string id)
     {
-        
         try
         {
-            var response = await _postApiService.GetPostByIdAsync(guidId);
-            
-            if (response?.Success == true && response.Data != null)
+            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out var postId))
             {
-                return View(response.Data);
+                return NotFound();
+            }
+            
+            var guid = Guid.Parse(id);
+            
+            // Fetch post details, comments, related posts, and tags in parallel
+            var postTask = _postApiService.GetPostByIdAsync(guid);
+            var commentsTask = _commentApiService.GetCommentsByPostAsync(guid);
+            var relatedPostsTask = _postApiService.GetAllPostsAsync(1, 3); // Get 3 related posts
+            var tagsTask = _tagApiService.GetAllAsync(); // Get all tags for sidebar
+            
+            await Task.WhenAll(postTask, commentsTask, relatedPostsTask, tagsTask);
+            
+            var postResponse = postTask.Result;
+            var commentsResponse = commentsTask.Result;
+            var relatedPostsResponse = relatedPostsTask.Result;
+            var tagsResponse = tagsTask.Result;
+            
+            if (postResponse?.Success == true && postResponse.Data != null)
+            {
+                // Pass additional data to view
+                ViewBag.Comments = commentsResponse?.Success == true ? commentsResponse.Data : new List<CommentListDto>();
+                ViewBag.RelatedPosts = relatedPostsResponse?.Success == true ? relatedPostsResponse.Data?.Items?.Take(3).ToList() : new List<PostListDto>();
+                ViewBag.AllTags = tagsResponse?.Success == true ? tagsResponse.Data : new List<BloggerProUI.Models.Tag.TagDto>();
+                
+                return View(postResponse.Data);
             }
             else
             {
@@ -68,7 +111,124 @@ public class BlogController : Controller
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error occurred while fetching post details");
             return NotFound();
         }
     }
+
+    [HttpPost("LikePost/{id}")]
+    public async Task<IActionResult> LikePost(string id)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out var postId))
+            {
+                return BadRequest();
+            }
+            
+            var guid = Guid.Parse(id);
+            var result = await _postApiService.LikePostAsync(guid);
+            
+            if (result.Success)
+            {
+                return Ok(new { success = true, message = "Post beğenildi" });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = string.Join(", ", result.Message ?? new[] { "Beğeni işlemi başarısız" }) });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while liking post");
+            return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
+    [HttpPost("UnlikePost/{id}")]
+    public async Task<IActionResult> UnlikePost(string id)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out var postId))
+            {
+                return BadRequest();
+            }
+            
+            var guid = Guid.Parse(id);
+            var result = await _postApiService.UnlikePostAsync(guid);
+            
+            if (result.Success)
+            {
+                return Ok(new { success = true, message = "Beğeni kaldırıldı" });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = string.Join(", ", result.Message ?? new[] { "Beğeni kaldırma işlemi başarısız" }) });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while unliking post");
+            return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
+    [HttpPost("AddComment")]
+    public async Task<IActionResult> AddComment([FromBody] CommentCreateDto commentDto)
+    {
+        try
+        {
+            if (commentDto == null)
+            {
+                return BadRequest(new { success = false, message = "Geçersiz yorum verisi" });
+            }
+            
+            var result = await _commentApiService.AddCommentAsync(commentDto);
+            
+            if (result.Success)
+            {
+                return Ok(new { success = true, message = "Yorum eklendi", commentId = result.Data });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = string.Join(", ", result.Message ?? new[] { "Yorum eklenemedi" }) });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while adding comment");
+            return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
+    [HttpPost("DeleteComment/{id}")]
+    public async Task<IActionResult> DeleteComment(string id)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out var commentId))
+            {
+                return BadRequest();
+            }
+            
+            var guid = Guid.Parse(id);
+            var result = await _commentApiService.DeleteCommentAsync(guid);
+            
+            if (result.Success)
+            {
+                return Ok(new { success = true, message = "Yorum silindi" });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = string.Join(", ", result.Message ?? new[] { "Yorum silinemedi" }) });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while deleting comment");
+            return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
 }

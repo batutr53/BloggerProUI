@@ -1,4 +1,5 @@
 ﻿using BloggerProUI.Models.PostModule;
+using Microsoft.AspNetCore.Http;
 
 namespace BloggerProUI.Models.Post
 {
@@ -17,7 +18,7 @@ namespace BloggerProUI.Models.Post
         public int Status { get; set; }
         public int Visibility { get; set; }
         public DateTime? PublishDate { get; set; }
-
+        public IFormFile? FeaturedImageFile { get; set; }
         public List<Guid>? TagIds { get; set; }
         public List<Guid>? CategoryIds { get; set; }
 

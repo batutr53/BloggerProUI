@@ -33,23 +33,7 @@ public class PostController : Controller
     // GET: /Admin/Post/Create
     public async Task<IActionResult> Create()
     {
-        var categoryResult = await _categoryApiService.GetAllAsync();
-        var tagResult = await _tagApiService.GetAllAsync();
-
-        ViewBag.Categories = categoryResult.Data?
-            .Select(c => new SelectListItem
-            {
-                Value = c.Id.ToString(),
-                Text = c.Name
-            }).ToList() ?? new List<SelectListItem>();
-
-        ViewBag.Tags = tagResult.Data?
-            .Select(t => new SelectListItem
-            {
-                Value = t.Id.ToString(),
-                Text = t.Name
-            }).ToList() ?? new List<SelectListItem>();
-
+        await PopulateViewBagForCreate();
         return View();
     }
 
@@ -58,15 +42,74 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(PostCreateDto dto)
     {
-        var userId = GetCurrentUserId();
-        var result = await _postApiService.CreatePostAsync(dto);
-        if (!result.Success)
+        try
         {
-            TempData["ErrorMessage"] = result.Message?.FirstOrDefault();
+            // File upload handling
+            if (dto.FeaturedImageFile != null)
+            {
+                // Validate file
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var fileExtension = Path.GetExtension(dto.FeaturedImageFile.FileName).ToLowerInvariant();
+                
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    TempData["ErrorMessage"] = "Desteklenmeyen dosya formatı. Sadece JPG, PNG, GIF, WEBP dosyaları yükleyebilirsiniz.";
+                    return View(dto);
+                }
+
+                if (dto.FeaturedImageFile.Length > 5 * 1024 * 1024) // 5MB limit
+                {
+                    TempData["ErrorMessage"] = "Dosya boyutu 5MB'dan büyük olamaz.";
+                    return View(dto);
+                }
+
+                // Create unique filename
+                var fileName = $"{Guid.NewGuid()}{fileExtension}";
+                var uploadsPath = Path.Combine("wwwroot", "uploads", "posts");
+                
+                // Create directory if it doesn't exist
+                if (!Directory.Exists(uploadsPath))
+                {
+                    Directory.CreateDirectory(uploadsPath);
+                }
+
+                var filePath = Path.Combine(uploadsPath, fileName);
+                
+                // Save file
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.FeaturedImageFile.CopyToAsync(stream);
+                }
+                
+                // Set the URL for the uploaded file
+                dto.FeaturedImage = $"/uploads/posts/{fileName}";
+            }
+
+            // If no file uploaded and no URL provided, set a default or leave empty
+            if (string.IsNullOrEmpty(dto.FeaturedImage))
+            {
+                dto.FeaturedImage = null; // API will handle this
+            }
+
+            var userId = GetCurrentUserId();
+            var result = await _postApiService.CreatePostAsync(dto);
+            if (!result.Success)
+            {
+                TempData["ErrorMessage"] = result.Message?.FirstOrDefault();
+                
+                // Re-populate ViewBag for form
+                await PopulateViewBagForCreate();
+                return View(dto);
+            }
+            TempData["SuccessMessage"] = "Post başarıyla oluşturuldu.";
+            return RedirectToAction("Index");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "Dosya yüklenirken bir hata oluştu: " + ex.Message;
+            await PopulateViewBagForCreate();
             return View(dto);
         }
-        TempData["SuccessMessage"] = "Post başarıyla oluşturuldu.";
-        return RedirectToAction("Index");
     }
 
     public async Task<IActionResult> Edit(Guid id)
@@ -110,6 +153,34 @@ public class PostController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(PostUpdateDto dto)
     {
+        if (dto.FeaturedImageFile != null)
+        {
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var fileExtension = Path.GetExtension(dto.FeaturedImageFile.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                TempData["ErrorMessage"] = "Desteklenmeyen dosya formatı. Sadece JPG, PNG, GIF, WEBP dosyaları yükleyebilirsiniz.";
+                return View(dto);
+            }
+            if (dto.FeaturedImageFile.Length > 5 * 1024 * 1024) // 5MB limit
+            {
+                TempData["ErrorMessage"] = "Dosya boyutu 5MB'dan büyük olamaz.";
+                return View(dto);
+            }
+            var fileName = $"{Guid.NewGuid()}{fileExtension}";
+            var uploadsPath = Path.Combine("wwwroot", "uploads", "posts");
+            if (!Directory.Exists(uploadsPath))
+            {
+                Directory.CreateDirectory(uploadsPath);
+            }
+            var filePath = Path.Combine(uploadsPath, fileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await dto.FeaturedImageFile.CopyToAsync(stream);
+            }
+            dto.FeaturedImage = $"/uploads/posts/{fileName}";
+        }
+
         dto.CoverImageUrl = dto.FeaturedImage;
         var result = await _postApiService.UpdatePostAsync(dto);
         if (!result.Success)
@@ -227,6 +298,26 @@ public class PostController : Controller
             return RedirectToAction("Index");
         }
         return View(result.Data);
+    }
+
+    private async Task PopulateViewBagForCreate()
+    {
+        var categoryResult = await _categoryApiService.GetAllAsync();
+        var tagResult = await _tagApiService.GetAllAsync();
+
+        ViewBag.Categories = categoryResult.Data?
+            .Select(c => new SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.Name
+            }).ToList() ?? new List<SelectListItem>();
+
+        ViewBag.Tags = tagResult.Data?
+            .Select(t => new SelectListItem
+            {
+                Value = t.Id.ToString(),
+                Text = t.Name
+            }).ToList() ?? new List<SelectListItem>();
     }
 
     private Guid GetCurrentUserId()

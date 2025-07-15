@@ -1,0 +1,391 @@
+/* Admin Post Create Page Styles */
+.admin-modern-form-container {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.admin-form-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+}
+
+.admin-form-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="%23ffffff20"/><circle cx="80" cy="80" r="2" fill="%23ffffff20"/><circle cx="40" cy="60" r="1" fill="%23ffffff30"/></svg>');
+    opacity: 0.3;
+}
+
+.admin-form-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-form-header .admin-subtitle {
+    margin-top: 10px;
+    opacity: 0.9;
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.admin-form-body {
+    padding: 40px;
+}
+
+.admin-form-section {
+    margin-bottom: 40px;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.admin-form-section h3 {
+    color: #495057;
+    margin-bottom: 25px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-form-section h3::before {
+    content: '📝';
+    font-size: 1.2rem;
+}
+
+.admin-form-section.admin-media-section h3::before {
+    content: '🖼️';
+}
+
+.admin-form-section.admin-taxonomy-section h3::before {
+    content: '🏷️';
+}
+
+.admin-form-section.admin-modules-section h3::before {
+    content: '🧩';
+}
+
+.admin-form-group {
+    margin-bottom: 25px;
+}
+
+.admin-form-group label {
+    display: block;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.admin-form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+    width: 100%;
+}
+
+.admin-form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    outline: none;
+}
+
+.admin-image-upload-container {
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.admin-image-upload-container:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+.admin-image-upload-container.admin-dragover {
+    border-color: #667eea;
+    background: #e8f0fe;
+}
+
+.admin-upload-icon {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.admin-upload-text {
+    color: #495057;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.admin-upload-subtext {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.admin-image-preview {
+    max-width: 300px;
+    max-height: 200px;
+    border-radius: 8px;
+    margin-top: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-url-input-toggle {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+}
+
+.admin-url-input-toggle:hover {
+    background: #5a6fd8;
+}
+
+.admin-url-input-section {
+    margin-top: 15px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.admin-module-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.admin-module-btn {
+    padding: 12px 20px;
+    border: 2px solid #667eea;
+    background: white;
+    color: #667eea;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-module-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.admin-module-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.admin-module-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #667eea;
+    border-radius: 4px 0 0 4px;
+}
+
+.admin-module-card h5 {
+    color: #495057;
+    margin-bottom: 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.admin-module-remove-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.admin-module-remove-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.admin-action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    padding: 30px;
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+.admin-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.admin-btn-secondary {
+    background: #6c757d;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+    color: white;
+}
+
+.admin-select2-container--default .select2-selection--multiple {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 8px;
+    min-height: 45px;
+}
+
+.admin-select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: #667eea;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-form-body {
+        padding: 20px;
+    }
+    
+    .admin-form-section {
+        padding: 20px;
+    }
+    
+    .admin-module-buttons {
+        flex-direction: column;
+    }
+    
+    .admin-action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .admin-form-header h1 {
+        font-size: 2rem;
+    }
+    
+    .admin-form-header .admin-subtitle {
+        font-size: 1rem;
+    }
+}
+
+/* Override Bootstrap form-control styles specifically for admin */
+.admin-form-section .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.admin-form-section .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    outline: none;
+}
+
+/* Select2 customization for admin */
+.admin-form-section .select2-container .select2-selection--multiple {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 8px;
+    min-height: 45px;
+}
+
+.admin-form-section .select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: #667eea;
+}
+
+.admin-form-section .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+.admin-form-section .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: white;
+}
+
+.admin-form-section .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #ffcccc;
+}

@@ -43,7 +43,19 @@ public static class HttpClientServiceCollectionExtensions
         })
         .AddHttpMessageHandler<AuthTokenHandler>(); 
 
-services.AddHttpClient<IUserApiService, UserApiService>(client =>
+        services.AddHttpClient<ICommentApiService, CommentApiService>(client =>
+        {
+            client.BaseAddress = baseAddress;
+        })
+        .AddHttpMessageHandler<AuthTokenHandler>();
+        
+        services.AddHttpClient<IImageApiService, ImageApiService>(client =>
+        {
+            client.BaseAddress = baseAddress;
+        })
+        .AddHttpMessageHandler<AuthTokenHandler>();
+
+        services.AddHttpClient<IUserApiService, UserApiService>(client =>
         {
             client.BaseAddress = baseAddress;
         })

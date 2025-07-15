@@ -8,5 +8,7 @@
         public DateTime CreatedAt { get; set; }
         public int LikeCount { get; set; }
         public List<CommentListDto> Replies { get; set; } = new();
+        public Guid? PostId { get; set; }
+        public string? PostTitle { get; set; }
     }
 }

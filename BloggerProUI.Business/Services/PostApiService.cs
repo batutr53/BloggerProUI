@@ -6,6 +6,7 @@ using BloggerProUI.Models.PostModule;
 using BloggerProUI.Models.User;
 using BloggerProUI.Shared.Utilities.Results;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace BloggerProUI.Business.Services;
 
@@ -20,8 +21,32 @@ public class PostApiService : IPostApiService
 
     public async Task<DataResult<string>> CreatePostAsync(PostCreateDto dto)
     {
-        var response = await _httpClient.PostAsJsonAsync($"post", dto);
-        return await response.Content.ReadFromJsonAsync<DataResult<string>>();
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync($"post", dto);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return new ErrorDataResult<string>($"API Error: {response.StatusCode} - {errorContent}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new ErrorDataResult<string>("Empty response from API");
+            }
+
+            return await response.Content.ReadFromJsonAsync<DataResult<string>>();
+        }
+        catch (JsonException ex)
+        {
+            return new ErrorDataResult<string>($"JSON parsing error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorDataResult<string>($"Service error: {ex.Message}");
+        }
     }
 
     public async Task<DataResult<PostDetailDto>> GetPostByIdAsync(Guid id)
@@ -47,8 +72,32 @@ public class PostApiService : IPostApiService
 
     public async Task<DataResult<PaginatedResultDto<PostListDto>>> GetAllPostsAsync(PostFilterDto filter, int page = 1, int pageSize = 10)
     {
-        var response = await _httpClient.PostAsJsonAsync($"post/all?page={page}&pageSize={pageSize}", filter);
-        return await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync($"post/all?page={page}&pageSize={pageSize}", filter);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"API Error: {response.StatusCode} - {errorContent}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new ErrorDataResult<PaginatedResultDto<PostListDto>>("Empty response from API");
+            }
+
+            return await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
+        }
+        catch (JsonException ex)
+        {
+            return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"JSON parsing error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"Service error: {ex.Message}");
+        }
     }
     
     public async Task<DataResult<PaginatedResultDto<PostListDto>>> GetAllPostsAsync(int page = 1, int pageSize = 10)
@@ -71,42 +120,183 @@ public class PostApiService : IPostApiService
             return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"Servis hatası: {ex.Message}");
         }
     }
-    
+
+    public async Task<DataResult<List<PostListDto>>> GetFeaturedPostsAsync(int count = 5)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"posts/featured?count={count}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<DataResult<List<PostListDto>>>();
+                return result ?? new ErrorDataResult<List<PostListDto>>("Boş response döndü.");
+            }
+
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return new ErrorDataResult<List<PostListDto>>($"API hatası: {response.StatusCode} - {errorContent}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorDataResult<List<PostListDto>>($"Servis hatası: {ex.Message}");
+        }
+    }
+
     public async Task<DataResult<PaginatedResultDto<PostListDto>>> GetPostsByAuthorIdAsync(Guid authorId, PostFilterDto filter, int page = 1, int pageSize = 10)
     {
-        var response = await _httpClient.PostAsJsonAsync($"post/author/{authorId}?page={page}&pageSize={pageSize}", filter);
-        return await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
+        try
+        {
+            var response = await _httpClient.PostAsJsonAsync($"post/author/{authorId}?page={page}&pageSize={pageSize}", filter);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"API Error: {response.StatusCode} - {errorContent}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new ErrorDataResult<PaginatedResultDto<PostListDto>>("Empty response from API");
+            }
+
+            return await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
+        }
+        catch (JsonException ex)
+        {
+            return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"JSON parsing error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"Service error: {ex.Message}");
+        }
     }
 
     public async Task<Result> UpdatePostAsync(PostUpdateDto dto)
     {
-        var response = await _httpClient.PutAsJsonAsync($"post", dto);
-        return await response.Content.ReadFromJsonAsync<Result>();
+        try
+        {
+            var response = await _httpClient.PutAsJsonAsync($"post", dto);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return new ErrorResult($"API Error: {response.StatusCode} - {errorContent}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new ErrorResult("Empty response from API");
+            }
+
+            return await response.Content.ReadFromJsonAsync<Result>();
+        }
+        catch (JsonException ex)
+        {
+            return new ErrorResult($"JSON parsing error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorResult($"Service error: {ex.Message}");
+        }
     }
 
     public async Task<Result> DeletePostAsync(Guid id)
     {
-        var response = await _httpClient.DeleteAsync($"post/{id}");
-        return await response.Content.ReadFromJsonAsync<Result>();
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"post/{id}");
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return new ErrorResult($"API Error: {response.StatusCode} - {errorContent}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new ErrorResult("Empty response from API");
+            }
+
+            return await response.Content.ReadFromJsonAsync<Result>();
+        }
+        catch (JsonException ex)
+        {
+            return new ErrorResult($"JSON parsing error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorResult($"Service error: {ex.Message}");
+        }
     }
 
     public async Task<Result> UpdatePostStatusAsync(Guid postId, PostStatus status, DateTime? publishDate = null)
     {
-        var payload = new
+        try
         {
-            PostId = postId,
-            Status = status,
-            PublishDate = publishDate
-        };
-        var response = await _httpClient.PutAsJsonAsync($"post/status", payload);
-        return await response.Content.ReadFromJsonAsync<Result>();
+            var payload = new
+            {
+                PostId = postId,
+                Status = status,
+                PublishDate = publishDate
+            };
+            var response = await _httpClient.PutAsJsonAsync($"post/status", payload);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return new ErrorResult($"API Error: {response.StatusCode} - {errorContent}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new ErrorResult("Empty response from API");
+            }
+
+            return await response.Content.ReadFromJsonAsync<Result>();
+        }
+        catch (JsonException ex)
+        {
+            return new ErrorResult($"JSON parsing error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorResult($"Service error: {ex.Message}");
+        }
     }
 
     public async Task<Result> UpdatePostVisibilityAsync(Guid postId, PostVisibility visibility)
     {
-        var payload = new { PostId = postId, Visibility = visibility };
-        var response = await _httpClient.PutAsJsonAsync($"post/visibility", payload);
-        return await response.Content.ReadFromJsonAsync<Result>();
+        try
+        {
+            var payload = new { PostId = postId, Visibility = visibility };
+            var response = await _httpClient.PutAsJsonAsync($"post/visibility", payload);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return new ErrorResult($"API Error: {response.StatusCode} - {errorContent}");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return new ErrorResult("Empty response from API");
+            }
+
+            return await response.Content.ReadFromJsonAsync<Result>();
+        }
+        catch (JsonException ex)
+        {
+            return new ErrorResult($"JSON parsing error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorResult($"Service error: {ex.Message}");
+        }
     }
 
     public async Task<Result> TogglePostFeaturedStatusAsync(Guid postId)
