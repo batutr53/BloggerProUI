@@ -1,0 +1,21 @@
+<!-- Header Navigation -->
+<header class="header-nav">
+    <div class="nav-container">
+        <a href="@Url.Action("Index", "Home")" class="logo">Q. <em>Studio</em></a>
+        
+        <nav>
+            <ul class="main-nav">
+                <li><a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Home" && ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")">Ana Sayfa</a></li>
+                <li><a href="@Url.Action("Index", "Blog")" class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Blog" ? "active" : "")">Blog</a></li>
+                <li><a href="@Url.Action("About", "Home")">Hakkımızda</a></li>
+                <li><a href="@Url.Action("Contact", "Home")">İletişim</a></li>
+            </ul>
+        </nav>
+        
+        <div class="nav-icons">
+            <i class="fas fa-search"></i>
+            <i class="fas fa-bookmark"></i>
+            <a href="@Url.Action("Index", "UserPanel")" style="color: inherit;"><i class="fas fa-user"></i></a>
+        </div>
+    </div>
+</header>

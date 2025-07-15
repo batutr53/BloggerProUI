@@ -3,97 +3,228 @@
 @using BloggerProUI.Models.Tag
 
 @{
-    ViewData["Title"] = "Home";
-    
-    var featuredPost = ViewData["FeaturedPost"] as PostDetailDto;
-    var categories = ViewData["Categories"] as List<CategoryDto>;
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<!-- Hero Section with Featured Post -->
-@if (featuredPost != null)
-{
-    <section class="hero-section">
-        <div class="container">
-            <div class="featured-post">
-                <div class="featured-post-content">
-                    @if (featuredPost.Categories?.Any() == true)
-                    {
-                        <div class="post-categories">
-                            @foreach (var category in featuredPost.Categories.Take(2))
-                            {
-                                @*<a href="#" class="category-tag">@category.Name</a>*@
-                            }
-                        </div>
-                    }
-                    <h1 class="featured-post-title">
-                        <a href="/post/@featuredPost.Slug">
-                            @featuredPost.Title
-                        </a>
-                    </h1>
-                    <p class="featured-post-excerpt">@featuredPost.Excerpt</p>
-                    <div class="post-meta">
-                        <div class="post-author">
-                            <img src="@featuredPost.FeaturedImage" alt="@featuredPost.AuthorName" class="author-avatar">
-                            <span>By @featuredPost.AuthorName</span>
-                        </div>
-                        <span class="post-date">@featuredPost.PublishDate</span>
-                        <span class="post-read-time">@(Math.Ceiling((double)featuredPost.Content.Length / 250)) min read</span>
-                    </div>
-                </div>
-                <div class="featured-post-image">
-                    <img src="@featuredPost.FeaturedImage" alt="@featuredPost.Title" class="img-fluid">
-                </div>
-            </div>
+<!-- Main Content -->
+<main class="content-container">
+    <!-- Featured Article Section -->
+    <section class="featured-section">
+        <article class="featured-article">
+            <a href="@Url.Action("Detail", "Blog")" style="text-decoration: none; color: inherit;">
+                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Featured Article" class="featured-image" loading="lazy">
+                <div class="featured-meta">KAPAK HÝKAYESÝ · 4 Temmuz 2025</div>
+                <h1 class="featured-title">The Definitive Helmut Newton Photobook</h1>
+                <div class="featured-author">Yazan: ALICE SMITH</div>
+                <p class="featured-excerpt">
+                    Helmut Newton'un ikonik fotoðraflarýnýn bir araya geldiði bu kapsamlý koleksiyon, 
+                    asta fotoðrafçýnýn kariyerinin en önemli eserlerini sunuyor. Moda, portre ve 
+                    sanat fotoðrafçýlýðýnda devrim yaratan Newton'un benzersiz tarzý...
+                </p>
+            </a>
+        </article>
+        
+        <aside class="sidebar">
+            <a href="#" class="sidebar-article">
+                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Sidebar Article" class="sidebar-image" loading="lazy">
+                <div class="sidebar-meta">SANAT · 14 Ocak 2025</div>
+                <h3 class="sidebar-title">Modern Sanatýn Dijital Evrimi</h3>
+                <div class="sidebar-author">Yazan: MEHMET YILMAZ</div>
+                <p class="sidebar-excerpt">
+                    Dijital teknolojilerin sanat dünyasýna etkisi ve çaðdaþ sanatçýlarýn 
+                    bu yeni araçlarý nasýl kullandýðý...
+                </p>
+            </a>
+            
+            <a href="#" class="sidebar-article">
+                <img src="https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Sidebar Article" class="sidebar-image" loading="lazy">
+                <div class="sidebar-meta">TASARIM · 13 Ocak 2025</div>
+                <h3 class="sidebar-title">Minimalizmin Yükseliþi</h3>
+                <div class="sidebar-author">Yazan: AYÞE KAYA</div>
+                <p class="sidebar-excerpt">
+                    Modern tasarým anlayýþýnda minimalizmin artan etkisi ve 
+                    bu yaklaþýmýn günlük yaþama yansýmalarý...
+                </p>
+            </a>
+            
+            <a href="#" class="sidebar-article">
+                <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Sidebar Article" class="sidebar-image" loading="lazy">
+                <div class="sidebar-meta">MIMARI · 12 Ocak 2025</div>
+                <h3 class="sidebar-title">Sürdürülebilir Mimari</h3>
+                <div class="sidebar-author">Yazan: ALI DEMIR</div>
+                <p class="sidebar-excerpt">
+                    Çevre dostu yapý malzemeleri ve enerji verimliliði 
+                    odaklý mimari projeler...
+                </p>
+            </a>
+        </aside>
+    </section>
+
+    <!-- Today's Trending Section -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">Bugünün Öne Çýkanlarý</h2>
+            <a href="@Url.Action("Index", "Blog")" class="view-all">Tümünü Gör</a>
+        </div>
+        
+        <div class="trending-grid">
+            <a href="@Url.Action("Detail", "Blog")" class="trending-item">
+                <img src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Trending Article" class="trending-image" loading="lazy">
+                <div class="trending-meta">FOTOÐRAF · 15 Ocak 2025</div>
+                <h3 class="trending-title">Sokak Fotoðrafçýlýðýnýn Altýn Kurallarý</h3>
+                <div class="trending-author">Yazan: EMRE ÖZKAN</div>
+            </a>
+            
+            <a href="#" class="trending-item">
+                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Trending Article" class="trending-image" loading="lazy">
+                <div class="trending-meta">MODA · 14 Ocak 2025</div>
+                <h3 class="trending-title">2025 Moda Trendleri</h3>
+                <div class="trending-author">Yazan: ZEYNEP AKTAÞ</div>
+            </a>
+            
+            <a href="#" class="trending-item">
+                <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Trending Article" class="trending-image" loading="lazy">
+                <div class="trending-meta">TEKNOLOJI · 13 Ocak 2025</div>
+                <h3 class="trending-title">Yapay Zeka ve Yaratýcýlýk</h3>
+                <div class="trending-author">Yazan: CAN YILDIRIM</div>
+            </a>
         </div>
     </section>
-}
 
-<!-- Categories Section -->
-@if (categories?.Any() == true)
-{
-    <section class="categories-section py-5">
-        <div class="container">
-            <div class="section-header text-center mb-5">
-                <h2 class="section-title">Browse Categories</h2>
-                <p class="section-subtitle">Explore our wide range of categories</p>
+    <!-- Latest Articles Section -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">Son Yazýlar</h2>
+            <a href="#" class="view-all">Tümünü Gör</a>
+        </div>
+        
+        <div class="latest-layout">
+            <div class="articles-left">
+                <a href="#" class="article-item">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Article" class="article-image" loading="lazy">
+                    <div class="article-content">
+                        <div class="article-meta">PORTRE · 15 Ocak 2025</div>
+                        <h3 class="article-title">Portre Fotoðrafçýlýðýnda Iþýk Kullanýmý</h3>
+                        <div class="article-author">Yazan: FATMA ÞEN</div>
+                        <p class="article-excerpt">
+                            Doðal ve yapay ýþýk kaynaklarýný kullanarak etkileyici portreler 
+                            çekmenin yollarý ve teknikleri hakkýnda detaylý rehber...
+                        </p>
+                    </div>
+                </a>
+                
+                <a href="#" class="article-item">
+                    <img src="https://images.unsplash.com/photo-1456885284447-7dd4bb8720bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Article" class="article-image" loading="lazy">
+                    <div class="article-content">
+                        <div class="article-meta">SANAT · 14 Ocak 2025</div>
+                        <h3 class="article-title">Çaðdaþ Türk Sanatçýlarý</h3>
+                        <div class="article-author">Yazan: OÐUZ KAAN</div>
+                        <p class="article-excerpt">
+                            Uluslararasý sanat sahnesinde öne çýkan Türk sanatçýlar ve 
+                            eserleriyle yarattýklarý etki üzerine bir inceleme...
+                        </p>
+                    </div>
+                </a>
+                
+                <a href="#" class="article-item">
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Article" class="article-image" loading="lazy">
+                    <div class="article-content">
+                        <div class="article-meta">TASARIM · 13 Ocak 2025</div>
+                        <h3 class="article-title">Grafik Tasarýmda Renk Teorisi</h3>
+                        <div class="article-author">Yazan: SEDA ACAR</div>
+                        <p class="article-excerpt">
+                            Görsel iletiþimde renklerin psikolojik etkisi ve 
+                            tasarým projelerinde doðru renk paletlerinin seçimi...
+                        </p>
+                    </div>
+                </a>
             </div>
             
-            <div class="row">
-                @foreach (var category in categories.Take(6))
-                {
-                    <div class="col-md-4 col-lg-2 mb-4">
-                        <a href="/category/@category.Slug" class="category-card">
-                            <div class="category-card-inner">
-                                <div class="category-icon">
-                                    <i class="fas fa-folder"></i>
-                                </div>
-                                <h3 class="category-name">@category.Name</h3>
-                            </div>
-                        </a>
-                    </div>
-                }
-            </div>
+            <aside class="sidebar">
+                <a href="#" class="sidebar-article">
+                    <img src="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Editor's Pick" class="sidebar-image" loading="lazy">
+                    <div class="sidebar-meta">EDÝTÖRÜN SEÇÝMÝ · 15 Ocak 2025</div>
+                    <h3 class="sidebar-title">Yýlýn Fotoðraf Sergisi</h3>
+                    <div class="sidebar-author">Yazan: EDITÖR</div>
+                    <p class="sidebar-excerpt">
+                        Bu yýlýn en etkileyici fotoðraf sergilerinden birini 
+                        kaçýrmayýn...
+                    </p>
+                </a>
+                
+                <a href="#" class="sidebar-article">
+                    <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Popular Article" class="sidebar-image" loading="lazy">
+                    <div class="sidebar-meta">POPÜLER · 14 Ocak 2025</div>
+                    <h3 class="sidebar-title">En Çok Okunan Makale</h3>
+                    <div class="sidebar-author">Yazan: TEAM</div>
+                    <p class="sidebar-excerpt">
+                        Okuyucularýmýzýn en çok ilgi gösterdiði 
+                        içeriklerden biri...
+                    </p>
+                </a>
+            </aside>
         </div>
     </section>
-}
+
+    <!-- Latest Podcasts Section -->
+    <section>
+        <div class="section-header">
+            <h2 class="section-title">Son Podcast'ler</h2>
+            <a href="#" class="view-all">Tümünü Gör</a>
+        </div>
+        
+        <div class="articles-left">
+            <a href="#" class="podcast-item">
+                <div class="podcast-image" style="position: relative;">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Fashion Podcast" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="play-button">
+                        <i class="fas fa-play" style="margin-left: 3px;"></i>
+                    </div>
+                </div>
+                <div class="podcast-content">
+                    <div class="podcast-meta">PODCAST · 15 Ocak 2025 · 45 dk</div>
+                    <h3 class="podcast-title">Modada Maskülen ve Feminen Sýnýrlarý Nasýl Siliyor?</h3>
+                    <div class="article-author">Konuk: MODA UZMANLAR</div>
+                    <p class="podcast-description">
+                        Çaðdaþ moda dünyasýnda cinsiyet sýnýrlarýnýn bulanýklaþmasý 
+                        ve bu deðiþimin toplumsal etkileri üzerine derin bir sohbet...
+                    </p>
+                </div>
+            </a>
+            
+            <a href="#" class="podcast-item">
+                <div class="podcast-image" style="position: relative;">
+                    <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Art Podcast" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div class="play-button">
+                        <i class="fas fa-play" style="margin-left: 3px;"></i>
+                    </div>
+                </div>
+                <div class="podcast-content">
+                    <div class="podcast-meta">PODCAST · 12 Ocak 2025 · 38 dk</div>
+                    <h3 class="podcast-title">Sanatýn Dijital Dönüþümü</h3>
+                    <div class="article-author">Konuk: SANAT TARÝHÇÝLERÝ</div>
+                    <p class="podcast-description">
+                        NFT'lerden sanal gerçeklik sergilerine, sanat dünyasýnýn 
+                        teknoloji ile buluþmasý üzerine kapsamlý bir deðerlendirme...
+                    </p>
+                </div>
+            </a>
+        </div>
+    </section>
+</main>
 
 <!-- Newsletter Section -->
-<section class="newsletter-section py-5 bg-primary text-white">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
-                <h2 class="mb-3">Subscribe to Our Newsletter</h2>
-                <p class="mb-4">Get the latest posts delivered right to your inbox. No spam, ever.</p>
-                
-                <form class="newsletter-form">
-                    <div class="input-group">
-                        <input type="email" class="form-control" placeholder="Enter your email address">
-                        <button class="btn btn-light" type="submit">Subscribe</button>
-                    </div>
-                </form>
-                
-                <div class="form-text mt-2">We respect your privacy. Unsubscribe at any time.</div>
-            </div>
+<section class="newsletter-section">
+    <h2 class="newsletter-title">Daha Fazlasý Ýçin Abone Olun</h2>
+    <p class="newsletter-description">
+        Sanat, tasarým ve fotoðrafçýlýk dünyasýndan en güncel haberler, 
+        özel içerikler ve eksklüzif röportajlar için e-bültenimize katýlýn.
+    </p>
+    
+    <div class="newsletter-buttons">
+        <div class="newsletter-input">
+            <input type="email" placeholder="E-posta adresiniz" name="newsletter-email">
+            <button type="button">Abone Ol</button>
         </div>
     </div>
 </section>
