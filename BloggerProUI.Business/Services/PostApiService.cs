@@ -383,4 +383,25 @@ public class PostApiService : IPostApiService
         var response = await _httpClient.GetAsync($"post/user-stat");
         return await response.Content.ReadFromJsonAsync<DataResult<UserPostStatsDto>>();
     }
+
+    public async Task<IResult> IncrementViewCountAsync(Guid postId)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"post/{postId}/increment-view", null);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<Result>();
+                return result ?? new SuccessResult("Görüntülenme sayısı artırıldı.");
+            }
+            
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return new ErrorResult($"API hatası: {response.StatusCode} - {errorContent}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorResult($"Servis hatası: {ex.Message}");
+        }
+    }
 }

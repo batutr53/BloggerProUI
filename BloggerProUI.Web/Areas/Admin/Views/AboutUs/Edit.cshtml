@@ -1,0 +1,108 @@
+@model BloggerProUI.Models.AboutUs.AboutUsUpdateDto
+@{
+    ViewData["Title"] = "Hakkımızda Bilgisi Düzenle";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Hakkımızda Bilgisi Düzenle</h1>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <input asp-for="Id" type="hidden" />
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label asp-for="Title" class="control-label">Başlık *</label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label asp-for="Content" class="control-label">İçerik *</label>
+                        <textarea asp-for="Content" class="form-control" rows="8"></textarea>
+                        <span asp-validation-for="Content" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label asp-for="Mission" class="control-label">Misyon *</label>
+                        <textarea asp-for="Mission" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Mission" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label asp-for="Vision" class="control-label">Vizyon *</label>
+                        <textarea asp-for="Vision" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Vision" class="text-danger"></span>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="m-0 font-weight-bold text-primary">Ayarlar</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label asp-for="SortOrder" class="control-label">Sıralama</label>
+                                <input asp-for="SortOrder" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="SortOrder" class="text-danger"></span>
+                                <small class="form-text text-muted">0 = En üst sıra</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="custom-control custom-checkbox">
+                                    <input asp-for="IsActive" class="custom-control-input" />
+                                    <label asp-for="IsActive" class="custom-control-label">Aktif</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Güncelle
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> İptal
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#Content, #Mission, #Vision').summernote({
+                height: 150,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['insert', ['link']]
+                ]
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+}

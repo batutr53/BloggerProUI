@@ -14,7 +14,7 @@ public class AuthTokenHandler : DelegatingHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var token = _httpContextAccessor.HttpContext?.Request.Cookies["AuthToken"];
+        var token = _httpContextAccessor.HttpContext?.Request.Cookies["access_token"];
         if (!string.IsNullOrWhiteSpace(token))
         {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);

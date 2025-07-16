@@ -97,6 +97,19 @@ public class BlogController : Controller
             
             if (postResponse?.Success == true && postResponse.Data != null)
             {
+                // Increment view count (fire and forget - don't wait for response)
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _postApiService.IncrementViewCountAsync(guid);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to increment view count for post {PostId}", guid);
+                    }
+                });
+
                 // Pass additional data to view
                 ViewBag.Comments = commentsResponse?.Success == true ? commentsResponse.Data : new List<CommentListDto>();
                 ViewBag.RelatedPosts = relatedPostsResponse?.Success == true ? relatedPostsResponse.Data?.Items?.Take(3).ToList() : new List<PostListDto>();

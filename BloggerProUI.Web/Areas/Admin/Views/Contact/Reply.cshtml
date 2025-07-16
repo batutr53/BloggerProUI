@@ -1,0 +1,89 @@
+@model BloggerProUI.Models.Contact.ContactReplyDto
+@{
+    ViewData["Title"] = "Mesaja Yanıt Ver";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var contact = ViewBag.Contact as BloggerProUI.Models.Contact.ContactListDto;
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Mesaja Yanıt Ver</h1>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Yanıt Formu</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Reply" method="post">
+                    <div class="form-group">
+                        <label asp-for="AdminReply" class="control-label">Yanıtınız *</label>
+                        <textarea asp-for="AdminReply" class="form-control" rows="8" placeholder="Yanıtınızı buraya yazın..."></textarea>
+                        <span asp-validation-for="AdminReply" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Yanıtı Gönder
+                        </button>
+                        <a asp-action="Details" asp-route-id="@contact?.Id" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        @if (contact != null)
+        {
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Orijinal Mesaj</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Gönderen:</strong>
+                        <p>@contact.Name</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Email:</strong>
+                        <p><a href="mailto:@contact.Email">@contact.Email</a></p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Konu:</strong>
+                        <p>@contact.Subject</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Tarih:</strong>
+                        <p>@contact.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Mesaj:</strong>
+                        <div class="border p-3 mt-2 bg-light">
+                            @Html.Raw(contact.Message.Replace("\n", "<br />"))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

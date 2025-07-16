@@ -65,9 +65,23 @@ namespace BloggerProUI.Web.Controllers
         {
             if (!ModelState.IsValid)
                 return View(model);
-            // Register işlemi için AuthApiService'de bir metot varsa burada kullanılmalı
-            // Şimdilik örnek olarak başarısız döndürülüyor
-            ModelState.AddModelError("", "Kayıt API entegrasyonu eklenmeli.");
+
+            var registerDto = new BloggerProUI.Models.Auth.RegisterDto
+            {
+                Username = model.Username,
+                Email = model.Email,
+                Password = model.Password,
+            };
+
+            var result = await _authApiService.RegisterAsync(registerDto);
+            
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = "Kayıt başarılı! Şimdi giriş yapabilirsiniz.";
+                return RedirectToAction("Login");
+            }
+
+            ModelState.AddModelError("", string.Join(", ", result.Message ?? new[] { "Kayıt işlemi başarısız." }));
             return View(model);
         }
 

@@ -66,6 +66,23 @@ public static class HttpClientServiceCollectionExtensions
             client.BaseAddress = baseAddress;
         });
 
+        services.AddHttpClient<IContactApiService, ContactApiService>(client =>
+        {
+            client.BaseAddress = baseAddress;
+        });
+
+        services.AddHttpClient<IAboutUsApiService, AboutUsApiService>(client =>
+        {
+            client.BaseAddress = baseAddress;
+        })
+        .AddHttpMessageHandler<AuthTokenHandler>();
+
+        services.AddHttpClient<ITeamMemberApiService, TeamMemberApiService>(client =>
+        {
+            client.BaseAddress = baseAddress;
+        })
+        .AddHttpMessageHandler<AuthTokenHandler>();
+
         return services;
     }
 }

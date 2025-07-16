@@ -11,5 +11,6 @@ namespace BloggerProUI.Business.Interfaces
     public interface IAuthApiService
     {
         Task<IDataResult<string>> LoginAsync(LoginDto dto);
+        Task<IResult> RegisterAsync(RegisterDto dto);
     }
 }

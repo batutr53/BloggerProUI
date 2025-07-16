@@ -4,7 +4,6 @@ using BloggerProUI.Shared.Utilities.Results;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json.Serialization;
 
 namespace BloggerProUI.Business.Services
 {
@@ -39,7 +38,7 @@ namespace BloggerProUI.Business.Services
                 }
 
                 // Hatalı durum - response status code 400/401/500
-                var errorResult = JsonConvert.DeserializeObject<Result>(responseContent);
+                var errorResult = JsonConvert.DeserializeObject<ErrorResult>(responseContent);
                 if (errorResult == null || response.StatusCode == HttpStatusCode.InternalServerError)
                 {
                     return new ErrorDataResult<string>("Sunucu hatası: veri boş döndü.");
@@ -58,6 +57,45 @@ namespace BloggerProUI.Business.Services
             }
         }
 
-    }
+        public async Task<IResult> RegisterAsync(RegisterDto dto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("auth/register", dto);
+                var responseContent = await response.Content.ReadAsStringAsync();
 
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<Result>(responseContent);
+                    
+                    if (result != null && result.Success)
+                    {
+                        return new SuccessResult("Kayıt başarılı.");
+                    }
+
+                    return new ErrorResult(
+                        result?.Message != null ? string.Join(" | ", result.Message) : "Bilinmeyen API hatası"
+                    );
+                }
+
+                // Hatalı durum - response status code 400/401/500
+                var errorResult = JsonConvert.DeserializeObject<ErrorResult>(responseContent);
+                if (errorResult == null || response.StatusCode == HttpStatusCode.InternalServerError)
+                {
+                    return new ErrorResult("Sunucu hatası: veri boş döndü.");
+                }
+
+                return new ErrorResult(
+                    errorResult.Message != null ? string.Join(" | ", errorResult.Message) : "Kayıt başarısız.",
+                    errorResult.HttpStatusCode,
+                    errorResult.StatusCode
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(DateTime.Now.ToString("yyyy.MM.dd:HH:mm:ss") + " | " + ex.Message);
+                return new ErrorResult("İstisna oluştu: " + ex.Message);
+            }
+        }
+    }
 }
