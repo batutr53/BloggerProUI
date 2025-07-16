@@ -331,13 +331,13 @@ public class PostApiService : IPostApiService
 
     public async Task<Result> LikePostAsync(Guid postId)
     {
-        var response = await _httpClient.PostAsync($"post/like/{postId}", null);
+        var response = await _httpClient.PostAsync($"post/{postId}/like", null);
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 
     public async Task<Result> UnlikePostAsync(Guid postId)
     {
-        var response = await _httpClient.DeleteAsync($"post/unlike/{postId}");
+        var response = await _httpClient.DeleteAsync($"post/{postId}/like");
         return await response.Content.ReadFromJsonAsync<Result>();
     }
 

@@ -2,6 +2,7 @@ using BloggerProUI.Business.Handlers;
 using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Business.Services;
 using BloggerProUI.Web.Extensions;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddConfiguredHttpClients(builder.Configuration);
-
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(options =>
+        {
+            options.LoginPath = "/Auth/Login";
+            options.LogoutPath = "/Auth/Logout";
+            options.AccessDeniedPath = "/Auth/Login";
+        });
 builder.Services.AddTransient<AuthTokenHandler>();
 
 var app = builder.Build();

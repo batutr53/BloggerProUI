@@ -1,8 +1,8 @@
 @model BloggerProUI.Models.Post.PostDetailDto
 @{
     ViewData["Title"] = Model?.Title ?? "Blog Detayı";
+    var isAuthenticated = User.Identity.IsAuthenticated;
 }
-
 @if (Model == null)
 {
     <main class="content-container" style="text-align: center; padding: 60px 20px;">
@@ -471,10 +471,15 @@ else
     </aside>
 </main>
 
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
 <!-- SweetAlert2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+    var isUserAuthenticated = @(isAuthenticated.ToString().ToLower());
+    
 // Copy to clipboard function
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {
@@ -504,49 +509,118 @@ function copyToClipboard(text) {
     });
 }
 
-// Like/Unlike function
-async function toggleLike(postId) {
-    try {
-        const likeBtn = document.querySelector('.like-btn');
-        const isCurrentlyLiked = likeBtn.classList.contains('liked');
-        
-        // Optimistic UI update
-        if (isCurrentlyLiked) {
-            likeBtn.classList.remove('liked');
-            likeBtn.innerHTML = '❤️ Beğen';
-            likeBtn.style.background = '#fff';
-            likeBtn.style.color = '#333';
-        } else {
-            likeBtn.classList.add('liked');
-            likeBtn.innerHTML = '❤️ Beğenildi';
-            likeBtn.style.background = '#e74c3c';
-            likeBtn.style.color = '#fff';
-        }
-        
-        // Make API call to toggle like
-        const endpoint = isCurrentlyLiked ? `/Blog/UnlikePost/${postId}` : `/Blog/LikePost/${postId}`;
-        const response = await fetch(endpoint, { 
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+// Like/Unlike function with jQuery
+function toggleLike(postId) {
+    if (!isUserAuthenticated) {
+        Swal.fire({
+            title: 'Giriş Yapmanız Gerekiyor',
+            text: 'Beğeni yapmak için lütfen giriş yapın.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Giriş Yap',
+            cancelButtonText: 'Vazgeç'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/Auth/Login';
             }
         });
-        
-        if (!response.ok) {
-            // Revert the UI changes if the API call failed
-            location.reload();
-        }
-        
-        console.log(`Toggle like for post: ${postId}`);
-    } catch (error) {
-        console.error('Like işlemi hatası:', error);
-        // Revert UI changes on error
-        location.reload();
+        return;
     }
+    const $likeBtn = $('.like-btn');
+    const $likeCount = $('.stats-left span:contains("beğeni")');
+    const isCurrentlyLiked = $likeBtn.hasClass('liked');
+    
+    // Get current like count
+    let currentLikes = parseInt($likeCount.text().match(/\d+/)[0]);
+    
+    // Optimistic UI update
+    if (isCurrentlyLiked) {
+        $likeBtn.removeClass('liked')
+               .html('❤️ Beğen')
+               .css({
+                   'background': '#fff',
+                   'color': '#333'
+               });
+        currentLikes--;
+    } else {
+        $likeBtn.addClass('liked')
+               .html('❤️ Beğenildi')
+               .css({
+                   'background': '#e74c3c',
+                   'color': '#fff'
+               });
+        currentLikes++;
+    }
+    
+    // Update like count in UI
+    $likeCount.html(`❤️ ${currentLikes} beğeni`);
+    
+    // Make API call to toggle like
+    const endpoint = isCurrentlyLiked ? `/Blog/UnlikePost/${postId}` : `/Blog/LikePost/${postId}`;
+    
+    $.ajax({
+        url: endpoint,
+        method: 'POST',
+        contentType: 'application/json',
+        success: function(response) {
+            // İşlem başarılı, UI zaten güncellenmiş durumda
+            Swal.fire({
+                title: 'Başarılı!',
+                text: isCurrentlyLiked ? 'Beğeni kaldırıldı.' : 'Gönderi beğenildi!',
+                icon: 'success',
+                timer: 1000,
+                showConfirmButton: false
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('Like işlemi hatası:', error);
+            // Hata durumunda UI'ı eski haline getir
+            if (isCurrentlyLiked) {
+                $likeBtn.addClass('liked')
+                       .html('❤️ Beğenildi')
+                       .css({
+                           'background': '#e74c3c',
+                           'color': '#fff'
+                       });
+                currentLikes++;
+            } else {
+                $likeBtn.removeClass('liked')
+                       .html('❤️ Beğen')
+                       .css({
+                           'background': '#fff',
+                           'color': '#333'
+                       });
+                currentLikes--;
+            }
+            $likeCount.html(`❤️ ${currentLikes} beğeni`);
+            
+            Swal.fire({
+                title: 'Hata!',
+                text: 'Beğeni işlemi gerçekleştirilemedi.',
+                icon: 'error',
+                confirmButtonText: 'Tamam'
+            });
+        }
+    });
 }
 
 // Add Comment function
 async function addComment(event) {
+    if (!isUserAuthenticated) {
+        Swal.fire({
+            title: 'Giriş Yapmanız Gerekiyor',
+            text: 'Yorum yapmak için lütfen giriş yapın.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Giriş Yap',
+            cancelButtonText: 'Vazgeç'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/Auth/Login';
+            }
+        });
+        return;
+    }
     event.preventDefault();
     
     const postId = '@Model?.Id';
