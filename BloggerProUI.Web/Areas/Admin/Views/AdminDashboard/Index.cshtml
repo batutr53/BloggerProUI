@@ -8,13 +8,23 @@
 <div class="container-fluid">
     <h1 class="h3 mb-4 text-gray-800">Dashboard</h1>
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Uyarı!</strong> @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
     <!-- Stat Kartları -->
     <div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Toplam Kullanıcı</div>
-                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalUsers</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.TotalUsers ?? 0)</div>
                 </div>
             </div>
         </div>
@@ -22,7 +32,7 @@
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Toplam Post</div>
-                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalPosts</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.TotalPosts ?? 0)</div>
                 </div>
             </div>
         </div>
@@ -30,7 +40,7 @@
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Toplam Yorum</div>
-                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalComments</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.TotalComments ?? 0)</div>
                 </div>
             </div>
         </div>
@@ -38,7 +48,7 @@
             <div class="card border-left-danger shadow h-100 py-2">
                 <div class="card-body">
                     <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Toplam Beğeni</div>
-                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalLikes</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.TotalLikes ?? 0)</div>
                 </div>
             </div>
         </div>
@@ -50,7 +60,7 @@
             <h6 class="m-0 font-weight-bold text-primary">En Çok Beğenilen Postlar</h6>
         </div>
         <div class="card-body">
-            @if (Model.TopLikedPosts?.Any() == true)
+            @if (Model?.TopLikedPosts?.Any() == true)
             {
                 <div class="table-responsive">
                     <table class="table table-bordered" width="100%" cellspacing="0">
@@ -89,7 +99,7 @@
             <h6 class="m-0 font-weight-bold text-info">En Aktif Kullanıcılar</h6>
         </div>
         <div class="card-body">
-            @if (Model.MostActiveUsers?.Any() == true)
+            @if (Model?.MostActiveUsers?.Any() == true)
             {
                 <ul class="list-group">
                     @foreach (var user in Model.MostActiveUsers)

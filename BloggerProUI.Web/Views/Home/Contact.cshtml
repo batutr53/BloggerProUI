@@ -32,7 +32,7 @@
                     </div>
                 }
                 
-                <form class="profile-form" style="gap: 20px;" method="post" asp-action="Contact">
+                <form class="profile-form" style="gap: 20px;" method="post" action="/Home/Contact">
                     @Html.AntiForgeryToken()
                     
                     <div class="form-group">
@@ -70,22 +70,49 @@
                 <h2 class="section-title" style="margin-bottom: 30px;">İletişim Bilgileri</h2>
                 
                 <div class="article-text">
-                    <p><strong>Adres:</strong><br>
-                    Q. Studio<br>
-                    Levent Mahallesi, Büyükdere Caddesi No: 123<br>
-                    34330 Beşiktaş/İstanbul</p>
-                    
-                    <p><strong>E-posta:</strong><br>
-                    info@qstudio.com<br>
-                    editör@qstudio.com</p>
-                    
-                    <p><strong>Telefon:</strong><br>
-                    +90 212 555 01 23</p>
-                    
-                    <p><strong>Çalışma Saatleri:</strong><br>
-                    Pazartesi - Cuma: 09:00 - 18:00<br>
-                    Cumartesi: 10:00 - 16:00<br>
-                    Pazar: Kapalı</p>
+                    @if (ViewBag.ContactInfo != null && ((List<BloggerProUI.Models.Footer.FooterDto>)ViewBag.ContactInfo).Any())
+                    {
+                        @foreach (var contactInfo in (List<BloggerProUI.Models.Footer.FooterDto>)ViewBag.ContactInfo)
+                        {
+                            <p>
+                                @if (!string.IsNullOrEmpty(contactInfo.SectionTitle))
+                                {
+                                    <strong>@contactInfo.SectionTitle:</strong><br>
+                                }
+                                @if (!string.IsNullOrEmpty(contactInfo.IconClass))
+                                {
+                                    <i class="@contactInfo.IconClass" style="margin-right: 5px;"></i>
+                                }
+                                @if (!string.IsNullOrEmpty(contactInfo.LinkUrl))
+                                {
+                                    <a href="@contactInfo.LinkUrl" style="color: #666; text-decoration: none;">@contactInfo.Content</a>
+                                }
+                                else
+                                {
+                                    @Html.Raw(contactInfo.Content.Replace("\n", "<br>"))
+                                }
+                            </p>
+                        }
+                    }
+                    else
+                    {
+                        <p><strong>Adres:</strong><br>
+                        Q. Studio<br>
+                        Levent Mahallesi, Büyükdere Caddesi No: 123<br>
+                        34330 Beşiktaş/İstanbul</p>
+                        
+                        <p><strong>E-posta:</strong><br>
+                        info@qstudio.com<br>
+                        editör@qstudio.com</p>
+                        
+                        <p><strong>Telefon:</strong><br>
+                        +90 212 555 01 23</p>
+                        
+                        <p><strong>Çalışma Saatleri:</strong><br>
+                        Pazartesi - Cuma: 09:00 - 18:00<br>
+                        Cumartesi: 10:00 - 16:00<br>
+                        Pazar: Kapalı</p>
+                    }
                 </div>
             </section>
         </div>
@@ -133,38 +160,7 @@
     </div>
 </main>
 
-<script>
-function handleContactForm(event) {
-    event.preventDefault();
-    
-    // Get form data
-    const formData = new FormData(event.target);
-    const data = {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        subject: formData.get('subject'),
-        message: formData.get('message')
-    };
-    
-    // Simple validation
-    if (!data.name || !data.email || !data.subject || !data.message) {
-        alert('Lütfen tüm zorunlu alanları doldurun.');
-        return;
-    }
-    
-    // Simulate form submission
-    const submitBtn = event.target.querySelector('.save-btn');
-    const originalText = submitBtn.textContent;
-    
-    submitBtn.textContent = 'Gönderiliyor...';
-    submitBtn.disabled = true;
-    
-    // Simulate API call
-    setTimeout(() => {
-        alert('Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.');
-        event.target.reset();
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-    }, 1500);
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
-</script>
+

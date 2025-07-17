@@ -1,3 +1,4 @@
+@model BloggerProUI.Web.Models.AboutPageViewModel
 @{
     ViewData["Title"] = "Hakkımızda";
 }
@@ -6,18 +7,30 @@
 <main class="content-container">
     <!-- Page Header -->
     <section class="page-header" style="text-align: center; margin-bottom: 60px;">
-        <h1 class="page-title">Hakkımızda</h1>
-        <p class="page-subtitle">Sanat, tasarım ve fotoğrafçılık tutkumuz</p>
+        <h1 class="page-title">@(Model?.AboutUs?.Title ?? "Hakkımızda")</h1>
+        <p class="page-subtitle">@(Model?.AboutUs?.Mission ?? "Sanat, tasarım ve fotoğrafçılık tutkumuz")</p>
     </section>
 
     <!-- About Content -->
     <section>
         <div class="article-text">
-            <p>Q. Studio, sanat ve tasarım dünyasının en yenilikçi projelerini keşfetmeniz için kurulmuş bir platformdur. 2020 yılında kurulan stüdyomuz, fotoğrafçılık, grafik tasarım ve modern sanat alanlarında öncü içerikler üretmektedir.</p>
+            @if (Model?.AboutUs != null && !string.IsNullOrEmpty(Model.AboutUs.Content))
+            {
+                @Html.Raw(Model.AboutUs.Content.Replace("\n", "</p><p>").Insert(0, "<p>") + "</p>")
+            }
+            else
+            {
+                <p>Q. Studio, sanat ve tasarım dünyasının en yenilikçi projelerini keşfetmeniz için kurulmuş bir platformdur. 2020 yılında kurulan stüdyomuz, fotoğrafçılık, grafik tasarım ve modern sanat alanlarında öncü içerikler üretmektedir.</p>
+                
+                <p>Misyonumuz, yaratıcı endüstrilerin sınırlarını zorlayan projeleri sizlerle buluşturmak ve sanat dünyasının nabzını tutmanıza yardımcı olmaktır. Deneyimli editör kadromuz ve uzman yazarlarımızla, sektörün en güncel trendlerini ve derinlemesine analizleri sunuyoruz.</p>
+                
+                <p>Q. Studio olarak, her yaştan okuyucunun sanat ve tasarıma olan bakış açısını genişletmeyi hedefliyoruz. Podcast'lerimiz, özel röportajlarımız ve kapsamlı makalelerimizle sizleri ilham verici bir yolculuğa çıkarıyoruz.</p>
+            }
             
-            <p>Misyonumuz, yaratıcı endüstrilerin sınırlarını zorlayan projeleri sizlerle buluşturmak ve sanat dünyasının nabzını tutmanıza yardımcı olmaktır. Deneyimli editör kadromuz ve uzman yazarlarımızla, sektörün en güncel trendlerini ve derinlemesine analizleri sunuyoruz.</p>
-            
-            <p>Q. Studio olarak, her yaştan okuyucunun sanat ve tasarıma olan bakış açısını genişletmeyi hedefliyoruz. Podcast'lerimiz, özel röportajlarımız ve kapsamlı makalelerimizle sizleri ilham verici bir yolculuğa çıkarıyoruz.</p>
+            @if (Model?.AboutUs != null && !string.IsNullOrEmpty(Model.AboutUs.Vision))
+            {
+                <p><strong>Vizyonumuz:</strong> @Model.AboutUs.Vision</p>
+            }
         </div>
     </section>
 
@@ -28,26 +41,46 @@
         </div>
         
         <div class="trending-grid">
-            <div class="team-member">
-                <img src="https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Team Member" class="trending-image" loading="lazy">
-                <div class="trending-meta">EDITÖR</div>
-                <h3 class="trending-title">Alice Smith</h3>
-                <div class="trending-author">Baş Editör</div>
-            </div>
-            
-            <div class="team-member">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Team Member" class="trending-image" loading="lazy">
-                <div class="trending-meta">FOTOĞRAFÇI</div>
-                <h3 class="trending-title">Emre Özkan</h3>
-                <div class="trending-author">Fotoğraf Editörü</div>
-            </div>
-            
-            <div class="team-member">
-                <img src="https://images.unsplash.com/photo-1456885284447-7dd4bb8720bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Team Member" class="trending-image" loading="lazy">
-                <div class="trending-meta">TASARIMCI</div>
-                <h3 class="trending-title">Zeynep Aktaş</h3>
-                <div class="trending-author">Tasarım Editörü</div>
-            </div>
+            @if (Model?.TeamMembers != null && Model.TeamMembers.Any())
+            {
+                @foreach (var member in Model.TeamMembers)
+                {
+                    <div class="team-member">
+                        <img src="@(string.IsNullOrEmpty(member.ImageUrl) ? "https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" : member.ImageUrl)" 
+                             alt="@member.Name" class="trending-image" loading="lazy">
+                        <div class="trending-meta">@member.Department.ToUpper()</div>
+                        <h3 class="trending-title">@member.Name</h3>
+                        <div class="trending-author">@member.Position</div>
+                        @if (!string.IsNullOrEmpty(member.Bio))
+                        {
+                            <div class="team-bio" style="font-size: 0.9em; color: #666; margin-top: 10px;">@member.Bio</div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="team-member">
+                    <img src="https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Team Member" class="trending-image" loading="lazy">
+                    <div class="trending-meta">EDITÖR</div>
+                    <h3 class="trending-title">Alice Smith</h3>
+                    <div class="trending-author">Baş Editör</div>
+                </div>
+                
+                <div class="team-member">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Team Member" class="trending-image" loading="lazy">
+                    <div class="trending-meta">FOTOĞRAFÇI</div>
+                    <h3 class="trending-title">Emre Özkan</h3>
+                    <div class="trending-author">Fotoğraf Editörü</div>
+                </div>
+                
+                <div class="team-member">
+                    <img src="https://images.unsplash.com/photo-1456885284447-7dd4bb8720bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" alt="Team Member" class="trending-image" loading="lazy">
+                    <div class="trending-meta">TASARIMCI</div>
+                    <h3 class="trending-title">Zeynep Aktaş</h3>
+                    <div class="trending-author">Tasarım Editörü</div>
+                </div>
+            }
         </div>
     </section>
 </main>

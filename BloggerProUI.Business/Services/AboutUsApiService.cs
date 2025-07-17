@@ -18,7 +18,7 @@ public class AboutUsApiService : IAboutUsApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync("aboutus");
+            var response = await _httpClient.GetAsync("AboutUs");
             
             if (!response.IsSuccessStatusCode)
             {
@@ -44,7 +44,7 @@ public class AboutUsApiService : IAboutUsApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"aboutus/{id}");
+            var response = await _httpClient.GetAsync($"AboutUs/{id}");
             
             if (!response.IsSuccessStatusCode)
             {
@@ -70,7 +70,7 @@ public class AboutUsApiService : IAboutUsApiService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("aboutus", dto);
+            var response = await _httpClient.PostAsJsonAsync("AboutUs", dto);
             
             if (!response.IsSuccessStatusCode)
             {
@@ -96,7 +96,7 @@ public class AboutUsApiService : IAboutUsApiService
     {
         try
         {
-            var response = await _httpClient.PutAsJsonAsync($"aboutus/{dto.Id}", dto);
+            var response = await _httpClient.PutAsJsonAsync($"AboutUs/{dto.Id}", dto);
             
             if (!response.IsSuccessStatusCode)
             {
@@ -122,7 +122,7 @@ public class AboutUsApiService : IAboutUsApiService
     {
         try
         {
-            var response = await _httpClient.DeleteAsync($"aboutus/{id}");
+            var response = await _httpClient.DeleteAsync($"AboutUs/{id}");
             
             if (!response.IsSuccessStatusCode)
             {
@@ -148,7 +148,7 @@ public class AboutUsApiService : IAboutUsApiService
     {
         try
         {
-            var response = await _httpClient.PostAsync($"aboutus/{id}/toggle-status", null);
+            var response = await _httpClient.PostAsync($"AboutUs/{id}/toggle-status", null);
             
             if (!response.IsSuccessStatusCode)
             {

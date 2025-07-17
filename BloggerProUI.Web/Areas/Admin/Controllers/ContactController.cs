@@ -1,10 +1,12 @@
 using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Contact;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize(Roles = "Admin")]
 public class ContactController : Controller
 {
     private readonly IContactApiService _contactApiService;
@@ -16,18 +18,34 @@ public class ContactController : Controller
 
     public async Task<IActionResult> Index(int page = 1, int pageSize = 10, bool? isReplied = null)
     {
-        var result = await _contactApiService.GetAllContactsAsync(page, pageSize, isReplied);
-        
-        if (result.Success)
+        try
         {
-            ViewBag.CurrentPage = page;
-            ViewBag.PageSize = pageSize;
-            ViewBag.IsReplied = isReplied;
-            return View(result.Data);
+            var result = await _contactApiService.GetAllContactsAsync(page, pageSize, isReplied);
+            
+            if (result.Success)
+            {
+                ViewBag.CurrentPage = page;
+                ViewBag.PageSize = pageSize;
+                ViewBag.IsReplied = isReplied;
+                
+                // Debug: Check if data is null or empty
+                if (result.Data == null)
+                {
+                    TempData["ErrorMessage"] = "API'den null data alındı.";
+                    return View(new BloggerProUI.Models.Pagination.PaginatedResultDto<ContactListDto>());
+                }
+                
+                return View(result.Data);
+            }
+            
+            TempData["ErrorMessage"] = "API Hatası: " + (result.Message?.FirstOrDefault() ?? "İletişim mesajları yüklenirken bir hata oluştu.");
+            return View(new BloggerProUI.Models.Pagination.PaginatedResultDto<ContactListDto>());
         }
-        
-        TempData["ErrorMessage"] = result.Message?.FirstOrDefault() ?? "İletişim mesajları yüklenirken bir hata oluştu.";
-        return View();
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "Exception: " + ex.Message + " | " + ex.StackTrace;
+            return View(new BloggerProUI.Models.Pagination.PaginatedResultDto<ContactListDto>());
+        }
     }
 
     public async Task<IActionResult> Details(Guid id)

@@ -25,7 +25,7 @@ public class ContactApiService : IContactApiService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("contact", contactCreateDto);
+            var response = await _httpClient.PostAsJsonAsync("Contact", contactCreateDto);
 
             if (response.IsSuccessStatusCode)
             {
@@ -73,7 +73,7 @@ public class ContactApiService : IContactApiService
     {
         try
         {
-            var query = $"contact?page={page}&pageSize={pageSize}";
+            var query = $"Contact?page={page}&pageSize={pageSize}";
             if (isReplied.HasValue)
             {
                 query += $"&isReplied={isReplied.Value}";
@@ -113,7 +113,7 @@ public class ContactApiService : IContactApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"contact/{id}");
+            var response = await _httpClient.GetAsync($"Contact/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -147,7 +147,7 @@ public class ContactApiService : IContactApiService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync($"contact/{id}/reply", contactReplyDto);
+            var response = await _httpClient.PostAsJsonAsync($"Contact/{id}/reply", contactReplyDto);
 
             if (response.IsSuccessStatusCode)
             {
@@ -195,7 +195,7 @@ public class ContactApiService : IContactApiService
     {
         try
         {
-            var response = await _httpClient.DeleteAsync($"contact/{id}");
+            var response = await _httpClient.DeleteAsync($"Contact/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -229,7 +229,7 @@ public class ContactApiService : IContactApiService
     {
         try
         {
-            var response = await _httpClient.PatchAsync($"contact/{id}/mark-replied", null);
+            var response = await _httpClient.PatchAsync($"Contact/{id}/mark-replied", null);
 
             if (response.IsSuccessStatusCode)
             {

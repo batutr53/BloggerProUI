@@ -1,0 +1,59 @@
+@model List<BloggerProUI.Models.Footer.FooterDto>
+
+@if (Model.Any())
+{
+    var mainFooter = Model.FirstOrDefault(f => f.FooterType == "section") ?? Model.First();
+    
+    <div class="footer-section">
+        @* Section title with icon if available *@
+        @if (!string.IsNullOrEmpty(mainFooter.IconClass))
+        {
+            <h5><i class="@mainFooter.IconClass"></i> @mainFooter.SectionTitle</h5>
+        }
+        else
+        {
+            <h5>@mainFooter.SectionTitle</h5>
+        }
+        
+        @* Section content *@
+        @if (!string.IsNullOrEmpty(mainFooter.Content))
+        {
+            <p style="color: #ccc; font-size: 14px; margin-bottom: 15px;">@Html.Raw(mainFooter.Content)</p>
+        }
+        
+        @* Links *@
+        @{
+            var links = Model.Where(f => f.FooterType == "link").ToList();
+        }
+        @if (links.Any())
+        {
+            <ul class="footer-links">
+                @foreach (var link in links.OrderBy(l => l.SortOrder))
+                {
+                    <li>
+                        @if (!string.IsNullOrEmpty(link.LinkUrl))
+                        {
+                            <a href="@link.LinkUrl">@(link.LinkText ?? link.SectionTitle)</a>
+                        }
+                        else
+                        {
+                            <a href="#">@(link.LinkText ?? link.SectionTitle)</a>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+        
+        @* Newsletter section *@
+        @{
+            var newsletter = Model.FirstOrDefault(f => f.FooterType == "newsletter");
+        }
+        @if (newsletter != null)
+        {
+            <div class="newsletter-input">
+                <input type="email" placeholder="E-posta adresiniz">
+                <button type="button">Abone Ol</button>
+            </div>
+        }
+    </div>
+}

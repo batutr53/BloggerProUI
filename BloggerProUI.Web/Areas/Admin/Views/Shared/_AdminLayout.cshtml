@@ -11,6 +11,7 @@
     <title>@title</title>
 
     @await Html.PartialAsync("_Styles")
+    @RenderSection("Styles", required: false)
     @RenderSection("Head", required: false)
 </head>
 <body id="page-top">

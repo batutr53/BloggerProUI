@@ -1,10 +1,12 @@
 ﻿using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Category;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize(Roles = "Admin")]
 public class CategoryController : Controller
 {
     private readonly ICategoryApiService _categoryApiService;

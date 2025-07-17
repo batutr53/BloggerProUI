@@ -16,17 +16,20 @@ public class TeamMemberCreateDto
     [StringLength(100, ErrorMessage = "Departman en fazla 100 karakter olabilir.")]
     public string Department { get; set; } = string.Empty;
 
+    [StringLength(1000, ErrorMessage = "Biyografi en fazla 1000 karakter olabilir.")]
     public string? Bio { get; set; }
 
+    [StringLength(500, ErrorMessage = "Resim URL'si en fazla 500 karakter olabilir.")]
     public string? ImageUrl { get; set; }
 
     [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz.")]
+    [StringLength(100, ErrorMessage = "Email en fazla 100 karakter olabilir.")]
     public string? Email { get; set; }
 
-    [Url(ErrorMessage = "Geçerli bir LinkedIn URL'si giriniz.")]
+    [StringLength(500, ErrorMessage = "LinkedIn URL'si en fazla 500 karakter olabilir.")]
     public string? LinkedInUrl { get; set; }
 
-    [Url(ErrorMessage = "Geçerli bir Twitter URL'si giriniz.")]
+    [StringLength(500, ErrorMessage = "Twitter URL'si en fazla 500 karakter olabilir.")]
     public string? TwitterUrl { get; set; }
 
     public bool IsActive { get; set; } = true;

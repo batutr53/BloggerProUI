@@ -1,10 +1,12 @@
 ﻿using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Tag;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class TagController : Controller
     {
         private readonly ITagApiService _tagApiService;

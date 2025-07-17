@@ -1,10 +1,12 @@
 using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.TeamMember;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize(Roles = "Admin")]
 public class TeamMemberController : Controller
 {
     private readonly ITeamMemberApiService _teamMemberApiService;

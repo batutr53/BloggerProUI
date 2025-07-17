@@ -1,9 +1,11 @@
 ﻿using BloggerProUI.Business.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
+[Authorize(Roles = "Admin")]
 public class AdminDashboardController : Controller
 {
     private readonly IAdminDashboardApiService _dashboardService;
@@ -15,13 +17,48 @@ public class AdminDashboardController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var result = await _dashboardService.GetStatsAsync();
-        if (!result.Success)
+        try
         {
-            TempData["ErrorMessage"] = result.Message?.FirstOrDefault();
-            return View(null);
+            var result = await _dashboardService.GetStatsAsync();
+            if (result.Success && result.Data != null)
+            {
+                return View(result.Data);
+            }
+            
+            // API çağrısı başarısız olursa boş model oluştur
+            TempData["ErrorMessage"] = result.Message?.FirstOrDefault() ?? "Dashboard verileri alınamadı.";
+            
+            var emptyModel = new BloggerProUI.Models.Dashboard.AdminDashboardStatsDto
+            {
+                TotalUsers = 0,
+                TotalPosts = 0,
+                TotalComments = 0,
+                TotalLikes = 0,
+                TotalRatings = 0,
+                TopLikedPosts = new List<BloggerProUI.Models.Post.PostDto>(),
+                TopRatedPosts = new List<BloggerProUI.Models.Post.PostDto>(),
+                MostActiveUsers = new List<BloggerProUI.Models.User.ActiveUserDto>()
+            };
+            
+            return View(emptyModel);
         }
-
-        return View(result.Data);
+        catch (Exception ex)
+        {
+            // Hata durumunda boş model döndür
+            var emptyModel = new BloggerProUI.Models.Dashboard.AdminDashboardStatsDto
+            {
+                TotalUsers = 0,
+                TotalPosts = 0,
+                TotalComments = 0,
+                TotalLikes = 0,
+                TotalRatings = 0,
+                TopLikedPosts = new List<BloggerProUI.Models.Post.PostDto>(),
+                TopRatedPosts = new List<BloggerProUI.Models.Post.PostDto>(),
+                MostActiveUsers = new List<BloggerProUI.Models.User.ActiveUserDto>()
+            };
+            
+            TempData["ErrorMessage"] = "Dashboard yüklenirken bir hata oluştu: " + ex.Message;
+            return View(emptyModel);
+        }
     }
 }

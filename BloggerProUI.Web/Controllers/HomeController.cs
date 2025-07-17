@@ -7,6 +7,8 @@ using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Pagination;
 using BloggerProUI.Models.Post;
 using BloggerProUI.Models.Contact;
+using BloggerProUI.Models.AboutUs;
+using BloggerProUI.Models.TeamMember;
 
 namespace BloggerProUI.Web.Controllers;
 
@@ -18,14 +20,19 @@ public class HomeController : Controller
     private readonly ITagApiService _tagApiService;
     private readonly ICommentApiService _commentApiService;
     private readonly IContactApiService _contactApiService;
-
+    private readonly IAboutUsApiService _aboutUsApiService;
+    private readonly ITeamMemberApiService _teamMemberApiService;
+    private readonly IFooterApiService _footerApiService;
     public HomeController(
         ILogger<HomeController> logger,
         IPostApiService postApiService,
         ICategoryApiService categoryApiService,
         ITagApiService tagApiService,
         ICommentApiService commentApiService,
-        IContactApiService contactApiService)
+        IContactApiService contactApiService,
+        IAboutUsApiService aboutUsApiService,
+        ITeamMemberApiService teamMemberApiService,
+        IFooterApiService footerApiService)
     {
         _logger = logger;
         _postApiService = postApiService;
@@ -33,6 +40,9 @@ public class HomeController : Controller
         _tagApiService = tagApiService;
         _commentApiService = commentApiService;
         _contactApiService = contactApiService;
+        _aboutUsApiService = aboutUsApiService;
+        _teamMemberApiService = teamMemberApiService;
+        _footerApiService = footerApiService;
     }
 
     public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
@@ -79,28 +89,72 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult About()
+    public async Task<IActionResult> About()
     {
-        return View();
+        try
+        {
+            // Get AboutUs and TeamMember data in parallel
+            var aboutUsTask = _aboutUsApiService.GetAllAboutUsAsync();
+            var teamMembersTask = _teamMemberApiService.GetAllTeamMembersAsync();
+
+            await Task.WhenAll(aboutUsTask, teamMembersTask);
+
+            var aboutUsResponse = aboutUsTask.Result;
+            var teamMembersResponse = teamMembersTask.Result;
+
+            // Create a view model
+            var viewModel = new AboutPageViewModel
+            {
+                AboutUs = aboutUsResponse?.Success == true && aboutUsResponse.Data != null && aboutUsResponse.Data.Any() 
+                    ? aboutUsResponse.Data.Where(a => a.IsActive).OrderBy(a => a.SortOrder).FirstOrDefault()
+                    : null,
+                TeamMembers = teamMembersResponse?.Success == true ? 
+                    teamMembersResponse.Data?.Where(t => t.IsActive).OrderBy(t => t.SortOrder).ToList() ?? new List<TeamMemberDto>()
+                    : new List<TeamMemberDto>()
+            };
+
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching about page data");
+            // Return view with null model to show fallback content
+            return View(new AboutPageViewModel());
+        }
     }
 
-    public IActionResult Contact()
+    public async Task<IActionResult> Contact()
     {
-        return View();
+        await LoadContactInfoAsync();
+        return View(new ContactCreateDto());
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Contact(ContactCreateDto contactCreateDto)
     {
+        _logger.LogInformation("POST Contact metodu çağrıldı!");
+        _logger.LogInformation("Model: Name={Name}, Email={Email}, Subject={Subject}", contactCreateDto?.Name, contactCreateDto?.Email, contactCreateDto?.Subject);
+        
         if (!ModelState.IsValid)
         {
+            _logger.LogWarning("ModelState geçersiz!");
+            foreach (var error in ModelState)
+            {
+                _logger.LogWarning("Field: {Field}, Errors: {Errors}", error.Key, string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage)));
+            }
+            // ViewBag.ContactInfo'yu yükle çünkü view'a geri dönecek
+            await LoadContactInfoAsync();
             return View(contactCreateDto);
         }
 
         try
         {
+            _logger.LogInformation("Contact mesajı gönderiliyor: {Name}, {Email}, {Subject}", contactCreateDto.Name, contactCreateDto.Email, contactCreateDto.Subject);
+            
             var result = await _contactApiService.CreateContactAsync(contactCreateDto);
+
+            _logger.LogInformation("Contact API yanıtı: Success={Success}, Messages={Messages}", result.Success, string.Join(", ", result.Message ?? new string[0]));
 
             if (result.Success)
             {
@@ -110,6 +164,7 @@ public class HomeController : Controller
             else
             {
                 TempData["ErrorMessage"] = result.Message?.FirstOrDefault() ?? "Mesaj gönderilirken bir hata oluştu.";
+                await LoadContactInfoAsync();
                 return View(contactCreateDto);
             }
         }
@@ -117,7 +172,24 @@ public class HomeController : Controller
         {
             _logger.LogError(ex, "Error occurred while sending contact message");
             TempData["ErrorMessage"] = "Mesaj gönderilirken beklenmeyen bir hata oluştu.";
+            await LoadContactInfoAsync();
             return View(contactCreateDto);
+        }
+    }
+
+    private async Task LoadContactInfoAsync()
+    {
+        try
+        {
+            var footerResponse = await _footerApiService.GetAllFootersAsync();
+            ViewBag.ContactInfo = footerResponse?.Success == true ? 
+                footerResponse.Data?.Where(f => f.IsActive && f.FooterType == "ContactInfo").OrderBy(f => f.SortOrder).ToList() 
+                : new List<BloggerProUI.Models.Footer.FooterDto>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading contact info");
+            ViewBag.ContactInfo = new List<BloggerProUI.Models.Footer.FooterDto>();
         }
     }
 

@@ -18,7 +18,7 @@ public class TeamMemberApiService : ITeamMemberApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync("teammembers");
+            var response = await _httpClient.GetAsync("TeamMember");
             
             if (!response.IsSuccessStatusCode)
             {
@@ -44,7 +44,7 @@ public class TeamMemberApiService : ITeamMemberApiService
     {
         try
         {
-            var response = await _httpClient.GetAsync($"teammembers/{id}");
+            var response = await _httpClient.GetAsync($"TeamMember/{id}");
             
             if (!response.IsSuccessStatusCode)
             {
@@ -70,7 +70,7 @@ public class TeamMemberApiService : ITeamMemberApiService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("teammembers", dto);
+            var response = await _httpClient.PostAsJsonAsync("TeamMember", dto);
             
             if (!response.IsSuccessStatusCode)
             {
@@ -96,7 +96,7 @@ public class TeamMemberApiService : ITeamMemberApiService
     {
         try
         {
-            var response = await _httpClient.PutAsJsonAsync($"teammembers/{dto.Id}", dto);
+            var response = await _httpClient.PutAsJsonAsync($"TeamMember/{dto.Id}", dto);
             
             if (!response.IsSuccessStatusCode)
             {
@@ -122,7 +122,7 @@ public class TeamMemberApiService : ITeamMemberApiService
     {
         try
         {
-            var response = await _httpClient.DeleteAsync($"teammembers/{id}");
+            var response = await _httpClient.DeleteAsync($"TeamMember/{id}");
             
             if (!response.IsSuccessStatusCode)
             {
@@ -148,7 +148,7 @@ public class TeamMemberApiService : ITeamMemberApiService
     {
         try
         {
-            var response = await _httpClient.PostAsync($"teammembers/{id}/toggle-status", null);
+            var response = await _httpClient.PostAsync($"TeamMember/{id}/toggle-status", null);
             
             if (!response.IsSuccessStatusCode)
             {

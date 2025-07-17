@@ -1,13 +1,117 @@
 <!-- Footer -->
 <footer class="footer">
-    <div class="footer-container">
+    <div class="footer-container" id="footer-container">
+        <!-- Footer sections will be loaded dynamically -->
+    </div>
+    
+    <!-- Copyright -->
+    <div style="border-top: 1px solid #555; margin-top: 30px; padding-top: 20px; text-align: center;" id="footer-copyright">
+        <p style="color: #999; font-size: 13px; margin: 0;">
+            © @DateTime.Now.Year Q. Studio. Tüm hakları saklıdır. | Tasarım ve geliştirme: Q. Studio Team
+        </p>
+    </div>
+</footer>
+
+<script>
+// Load footer content dynamically
+document.addEventListener('DOMContentLoaded', function() {
+    loadFooterContent();
+});
+
+async function loadFooterContent() {
+    try {
+        const response = await fetch('/Footer/GetActiveFooters');
+        const footers = await response.json();
+        
+        if (footers && footers.length > 0) {
+            renderFooterSections(footers);
+            renderCopyright(footers);
+        } else {
+            renderDefaultFooter();
+        }
+    } catch (error) {
+        console.log('Footer loading error:', error);
+        renderDefaultFooter();
+    }
+}
+
+function renderFooterSections(footers) {
+    const container = document.getElementById('footer-container');
+    const sections = {};
+    
+    footers.forEach(footer => {
+        const key = footer.parentSection || footer.sectionTitle || 'default';
+        if (!sections[key]) {
+            sections[key] = [];
+        }
+        sections[key].push(footer);
+    });
+    
+    let html = '';
+    
+    Object.keys(sections).forEach(sectionKey => {
+        const sectionFooters = sections[sectionKey];
+        const mainFooter = sectionFooters.find(f => f.footerType === 'section') || sectionFooters[0];
+        
+        if (mainFooter && mainFooter.footerType !== 'copyright') {
+            html += '<div class="footer-section">';
+            
+            if (mainFooter.iconClass) {
+                html += `<h5><i class="${mainFooter.iconClass}"></i> ${mainFooter.sectionTitle}</h5>`;
+            } else {
+                html += `<h5>${mainFooter.sectionTitle}</h5>`;
+            }
+            
+            if (mainFooter.content) {
+                html += `<p style="color: #ccc; font-size: 14px; margin-bottom: 15px;">${mainFooter.content}</p>`;
+            }
+            
+            const links = sectionFooters.filter(f => f.footerType === 'link');
+            if (links.length > 0) {
+                html += '<ul class="footer-links">';
+                links.forEach(link => {
+                    if (link.linkUrl && link.linkText) {
+                        html += `<li><a href="${link.linkUrl}">${link.linkText}</a></li>`;
+                    } else if (link.linkText) {
+                        html += `<li><a href="#">${link.linkText}</a></li>`;
+                    }
+                });
+                html += '</ul>';
+            }
+            
+            const newsletter = sectionFooters.find(f => f.footerType === 'newsletter');
+            if (newsletter) {
+                html += '<div class="newsletter-input">';
+                html += '<input type="email" placeholder="E-posta adresiniz">';
+                html += '<button type="button">Abone Ol</button>';
+                html += '</div>';
+            }
+            
+            html += '</div>';
+        }
+    });
+    
+    container.innerHTML = html;
+}
+
+function renderCopyright(footers) {
+    const copyrightFooter = footers.find(f => f.footerType === 'copyright');
+    if (copyrightFooter) {
+        const copyrightDiv = document.getElementById('footer-copyright');
+        copyrightDiv.innerHTML = `<p style="color: #999; font-size: 13px; margin: 0;">${copyrightFooter.content}</p>`;
+    }
+}
+
+function renderDefaultFooter() {
+    const container = document.getElementById('footer-container');
+    container.innerHTML = `
         <div class="footer-section">
             <h5>Q. Studio</h5>
             <ul class="footer-links">
-                <li><a href="@Url.Action("About", "Home")">Hakkımızda</a></li>
-                <li><a href="@Url.Action("Contact", "Home")">İletişim</a></li>
-                <li><a href="@Url.Action("Privacy", "Home")">Gizlilik Politikası</a></li>
-                <li><a href="@Url.Action("Terms", "Home")">Kullanım Şartları</a></li>
+                <li><a href="/Home/About">Hakkımızda</a></li>
+                <li><a href="/Home/Contact">İletişim</a></li>
+                <li><a href="/Home/Privacy">Gizlilik Politikası</a></li>
+                <li><a href="/Home/Terms">Kullanım Şartları</a></li>
             </ul>
         </div>
         
@@ -36,17 +140,11 @@
             <p style="color: #ccc; font-size: 14px; margin-bottom: 15px;">
                 Yeni içeriklerden haberdar olmak için e-bültenimize abone olun.
             </p>
-            <div class="newsletter-input">
+            <div class="newsletter-footer">
                 <input type="email" placeholder="E-posta adresiniz">
                 <button type="button">Abone Ol</button>
             </div>
         </div>
-    </div>
-    
-    <!-- Copyright -->
-    <div style="border-top: 1px solid #555; margin-top: 30px; padding-top: 20px; text-align: center;">
-        <p style="color: #999; font-size: 13px; margin: 0;">
-            © @DateTime.Now.Year Q. Studio. Tüm hakları saklıdır. | Tasarım ve geliştirme: Q. Studio Team
-        </p>
-    </div>
-</footer>
+    `;
+}
+</script>

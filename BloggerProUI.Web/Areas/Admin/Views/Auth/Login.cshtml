@@ -25,12 +25,14 @@
 
                     <form asp-area="Admin" asp-controller="Auth" asp-action="Login" method="post">
                         <div class="mb-3">
-                            <label class="form-label"></label>
-                            <input type="Email" name="Email" class="form-control" />
+                            <label asp-for="Email" class="form-label">E-posta</label>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="E-posta adresinizi girin" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
-                            <label asp-for="Password" class="form-label"></label>
-                            <input type="Password" name="Password" class="form-control" />
+                            <label asp-for="Password" class="form-label">Şifre</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="Şifrenizi girin" />
+                            <span asp-validation-for="Password" class="form-label"></span>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Giriş</button>
                     </form>
