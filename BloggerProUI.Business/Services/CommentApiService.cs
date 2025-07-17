@@ -1,6 +1,7 @@
-﻿using BloggerProUI.Business.Interfaces;
+using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Comment;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace BloggerProUI.Business.Services
 {
@@ -108,6 +109,82 @@ namespace BloggerProUI.Business.Services
                     Message = new[] { $"Bir hata oluştu: {ex.Message}" },
                     Data = new List<RecentCommentDto>()
                 };
+            }
+        }
+
+        public async Task<Result> LikeCommentAsync(Guid commentId)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync($"/api/CommentLike/{commentId}", null);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    return JsonSerializer.Deserialize<Result>(content, options) ?? new Result { Success = false, Message = new[] { "Invalid response format" } };
+                }
+                return new Result { Success = false, Message = new[] { await response.Content.ReadAsStringAsync() } };
+            }
+            catch (Exception ex)
+            {
+                return new Result { Success = false, Message = new[] { ex.Message } };
+            }
+        }
+
+        public async Task<Result> UnlikeCommentAsync(Guid commentId)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"/api/CommentLike/{commentId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    return JsonSerializer.Deserialize<Result>(content, options) ?? new Result { Success = false, Message = new[] { "Invalid response format" } };
+                }
+                return new Result { Success = false, Message = new[] { await response.Content.ReadAsStringAsync() } };
+            }
+            catch (Exception ex)
+            {
+                return new Result { Success = false, Message = new[] { ex.Message } };
+            }
+        }
+
+        public async Task<DataResult<int>> GetCommentLikeCountAsync(Guid commentId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/CommentLike/{commentId}/count");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    return JsonSerializer.Deserialize<DataResult<int>>(content, options) ?? new DataResult<int> { Success = false, Message = new[] { "Invalid response format" } };
+                }
+                return new DataResult<int> { Success = false, Message = new[] { "Failed to get like count" } };
+            }
+            catch (Exception ex)
+            {
+                return new DataResult<int> { Success = false, Message = new[] { ex.Message } };
+            }
+        }
+
+        public async Task<DataResult<bool>> HasUserLikedCommentAsync(Guid commentId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/CommentLike/{commentId}/has-liked");
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    return JsonSerializer.Deserialize<DataResult<bool>>(content, options) ?? new DataResult<bool> { Success = false, Message = new[] { "Invalid response format" } };
+                }
+                return new DataResult<bool> { Success = false, Message = new[] { "Failed to check like status" } };
+            }
+            catch (Exception ex)
+            {
+                return new DataResult<bool> { Success = false, Message = new[] { ex.Message } };
             }
         }
     }

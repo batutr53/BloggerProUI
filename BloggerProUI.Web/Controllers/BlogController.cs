@@ -110,8 +110,32 @@ public class BlogController : Controller
                     }
                 });
 
+                // Get comments and update like status for each
+                var comments = commentsResponse?.Success == true ? commentsResponse.Data : new List<CommentListDto>();
+                
+                // Update like status for each comment and its replies
+                if (comments != null)
+                {
+                    foreach (var comment in comments)
+                    {
+                        // Check if current user has liked this comment
+                        var hasLiked = await _commentApiService.HasUserLikedCommentAsync(comment.Id);
+                        comment.HasLiked = hasLiked.Success && hasLiked.Data;
+                        
+                        // Update like status for replies
+                        if (comment.Replies != null)
+                        {
+                            foreach (var reply in comment.Replies)
+                            {
+                                var replyHasLiked = await _commentApiService.HasUserLikedCommentAsync(reply.Id);
+                                reply.HasLiked = replyHasLiked.Success && replyHasLiked.Data;
+                            }
+                        }
+                    }
+                }
+                
                 // Pass additional data to view
-                ViewBag.Comments = commentsResponse?.Success == true ? commentsResponse.Data : new List<CommentListDto>();
+                ViewBag.Comments = comments;
                 ViewBag.RelatedPosts = relatedPostsResponse?.Success == true ? relatedPostsResponse.Data?.Items?.Take(3).ToList() : new List<PostListDto>();
                 ViewBag.AllTags = tagsResponse?.Success == true ? tagsResponse.Data : new List<BloggerProUI.Models.Tag.TagDto>();
                 
@@ -184,6 +208,106 @@ public class BlogController : Controller
         {
             _logger.LogError(ex, "Error occurred while unliking post");
             return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
+    [HttpPost("LikeComment/{id}")]
+    public async Task<IActionResult> LikeComment(string id)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out var commentId))
+            {
+                return BadRequest(new { success = false, message = "Geçersiz yorum ID'si" });
+            }
+            
+            var result = await _commentApiService.LikeCommentAsync(commentId);
+            
+            if (result.Success)
+            {
+                var likeCount = await _commentApiService.GetCommentLikeCountAsync(commentId);
+                return Ok(new { 
+                    success = true, 
+                    message = "Yorum beğenildi",
+                    likeCount = likeCount.Success ? likeCount.Data : 0,
+                    hasLiked = true
+                });
+            }
+            else
+            {
+                return BadRequest(new { 
+                    success = false, 
+                    message = string.Join(", ", result.Message ?? new[] { "Beğeni işlemi başarısız" }) 
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while liking comment");
+            return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
+    [HttpDelete("UnlikeComment/{id}")]
+    public async Task<IActionResult> UnlikeComment(string id)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out var commentId))
+            {
+                return BadRequest(new { success = false, message = "Geçersiz yorum ID'si" });
+            }
+            
+            var result = await _commentApiService.UnlikeCommentAsync(commentId);
+            
+            if (result.Success)
+            {
+                var likeCount = await _commentApiService.GetCommentLikeCountAsync(commentId);
+                return Ok(new { 
+                    success = true, 
+                    message = "Beğeni kaldırıldı",
+                    likeCount = likeCount.Success ? likeCount.Data : 0,
+                    hasLiked = false
+                });
+            }
+            else
+            {
+                return BadRequest(new { 
+                    success = false, 
+                    message = string.Join(", ", result.Message ?? new[] { "Beğeni kaldırma işlemi başarısız" }) 
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while unliking comment");
+            return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
+    [HttpGet("CommentLikes/{id}")]
+    public async Task<IActionResult> GetCommentLikes(string id)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out var commentId))
+            {
+                return BadRequest(new { success = false, message = "Geçersiz yorum ID'si" });
+            }
+            
+            var likeCount = await _commentApiService.GetCommentLikeCountAsync(commentId);
+            var hasLiked = await _commentApiService.HasUserLikedCommentAsync(commentId);
+            
+            return Ok(new { 
+                success = true, 
+                likeCount = likeCount.Success ? likeCount.Data : 0,
+                hasLiked = hasLiked.Success && hasLiked.Data
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while getting comment likes");
+            return BadRequest(new { success = false, message = "Beğeni bilgileri alınamadı" });
         }
     }
 

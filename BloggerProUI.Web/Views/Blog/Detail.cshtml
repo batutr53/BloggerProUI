@@ -318,8 +318,8 @@ else
                                     @comment.Content
                                 </div>
                                 <div class="comment-actions" style="display: flex; gap: 10px; margin-top: 10px;">
-                                    <button class="comment-like-btn" onclick="likeComment('@comment.Id')" style="background: none; border: none; color: #666; cursor: pointer;">
-                                        ❤️ @comment.LikeCount
+                                    <button class="comment-like-btn" onclick="likeComment('@comment.Id')" data-comment-id="@comment.Id" data-liked="@(comment.HasLiked ? "true" : "false")" style="background: none; border: none; color: @(comment.HasLiked ? "#ff4757" : "#666"); cursor: pointer;">
+                                        @(comment.HasLiked ? "❤️" : "🤍") @comment.LikeCount
                                     </button>
                                     <button class="comment-reply-btn" onclick="replyToComment('@comment.Id')" style="background: none; border: none; color: #666; cursor: pointer;">
                                         💬 Yanıtla
@@ -358,8 +358,8 @@ else
                                                     @reply.Content
                                                 </div>
                                                 <div class="reply-actions" style="margin-top: 8px;">
-                                                    <button class="reply-like-btn" onclick="likeComment('@reply.Id')" style="background: none; border: none; color: #666; cursor: pointer; font-size: 12px;">
-                                                        ❤️ @reply.LikeCount
+                                                    <button class="reply-like-btn" onclick="likeComment('@reply.Id')" data-comment-id="@reply.Id" data-liked="@(reply.HasLiked ? "true" : "false")" style="background: none; border: none; color: @(reply.HasLiked ? "#ff4757" : "#666"); cursor: pointer; font-size: 12px;">
+                                                        @(reply.HasLiked ? "❤️" : "🤍") @reply.LikeCount
                                                     </button>
                                                 </div>
                                             </div>
@@ -473,6 +473,9 @@ else
 
 <!-- jQuery CDN -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<!-- SweetAlert2 for notifications -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <!-- SweetAlert2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -768,6 +771,105 @@ async function likeComment(commentId) {
 }
 
 // Scroll to comments function
+// Initialize comment like buttons when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Load like status for all comments
+    const likeButtons = document.querySelectorAll('.comment-like-btn, .reply-like-btn');
+    likeButtons.forEach(button => {
+        const commentId = button.getAttribute('data-comment-id');
+        if (commentId) {
+            updateCommentLikeStatus(commentId);
+        }
+    });
+});
+
+// Update comment like status from server
+async function updateCommentLikeStatus(commentId) {
+    try {
+        const response = await fetch(`/Blog/CommentLikes/${commentId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const likeButton = document.querySelector(`.comment-like-btn[data-comment-id="${commentId}"], .reply-like-btn[data-comment-id="${commentId}"]`);
+            if (likeButton) {
+                likeButton.innerHTML = data.hasLiked ? `❤️ ${data.likeCount}` : `🤍 ${data.likeCount}`;
+                likeButton.setAttribute('data-liked', data.hasLiked);
+                likeButton.style.color = data.hasLiked ? '#ff4757' : '#666';
+            }
+        }
+    } catch (error) {
+        console.error('Error updating like status:', error);
+    }
+}
+
+// Handle like/unlike comment
+async function likeComment(commentId) {
+    try {
+        const isAuthenticated = @(User.Identity?.IsAuthenticated.ToString().ToLower() ?? "false");
+        if (!isAuthenticated) {
+            Swal.fire({
+                title: 'Giriş Yapmanız Gerekiyor',
+                text: 'Yorumları beğenmek için lütfen giriş yapın.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Giriş Yap',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                }
+            });
+            return;
+        }
+
+        const likeButton = document.querySelector(`.comment-like-btn[data-comment-id="${commentId}"], .reply-like-btn[data-comment-id="${commentId}"]`);
+        const isLiked = likeButton.getAttribute('data-liked') === 'true';
+        
+        let response;
+        if (isLiked) {
+            response = await fetch(`/Blog/UnlikeComment/${commentId}`, { method: 'DELETE' });
+        } else {
+            response = await fetch(`/Blog/LikeComment/${commentId}`, { method: 'POST' });
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Update the like button
+            likeButton.innerHTML = isLiked ? `🤍 ${result.likeCount}` : `❤️ ${result.likeCount}`;
+            likeButton.setAttribute('data-liked', !isLiked);
+            likeButton.style.color = !isLiked ? '#ff4757' : '#666';
+            
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Başarılı!',
+                text: isLiked ? 'Beğeni kaldırıldı' : 'Yorum beğenildi',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            // Show error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Hata!',
+                text: result.message || 'Bir hata oluştu',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    } catch (error) {
+        console.error('Error liking comment:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Hata!',
+            text: 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+}
+
 function scrollToComments() {
     // This would scroll to a comments section if it exists
     const commentsSection = document.getElementById('comments-section');

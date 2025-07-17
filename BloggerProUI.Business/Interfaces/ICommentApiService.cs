@@ -1,4 +1,4 @@
-﻿using BloggerProUI.Models.Comment;
+using BloggerProUI.Models.Comment;
 
 namespace BloggerProUI.Business.Interfaces
 {
@@ -9,5 +9,11 @@ namespace BloggerProUI.Business.Interfaces
         Task<Result> DeleteCommentAsync(Guid commentId);
         Task<DataResult<List<CommentListDto>>> GetMostLikedCommentsAsync(int count = 10);
         Task<DataResult<List<RecentCommentDto>>> GetRecentCommentsAsync(int count = 5);
+        
+        // Like related methods
+        Task<Result> LikeCommentAsync(Guid commentId);
+        Task<Result> UnlikeCommentAsync(Guid commentId);
+        Task<DataResult<int>> GetCommentLikeCountAsync(Guid commentId);
+        Task<DataResult<bool>> HasUserLikedCommentAsync(Guid commentId);
     }
 }
