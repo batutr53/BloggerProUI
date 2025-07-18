@@ -21,6 +21,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             options.AccessDeniedPath = "/Auth/Login";
         });
 builder.Services.AddTransient<BloggerProUI.Business.Handlers.AuthTokenHandler>();
+builder.Services.AddScoped<BloggerProUI.Web.Services.SeoConfigurationService>();
 
 // Asset Versioning Services - Temporarily disabled
 // builder.Services.Configure<AssetVersioningOptions>(

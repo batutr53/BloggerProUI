@@ -1,20 +1,30 @@
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://localhost:7020/sitemap.xml
-Sitemap: https://localhost:7020/sitemap-posts.xml
+# Sitemap (will be updated dynamically in production)
+Sitemap: /sitemap.xml
+Sitemap: /sitemap-posts.xml
 
 # Disallow admin areas
 Disallow: /Admin/
 Disallow: /UserPanel/
 Disallow: /api/
+Disallow: /Auth/
+Disallow: /Account/
 
 # Allow important directories
 Allow: /Blog/
 Allow: /css/
 Allow: /js/
 Allow: /images/
+Allow: /uploads/
 
-# Crawl-delay
+# Performance optimizations
+Crawl-delay: 1
+
+# Common SEO directives
+User-agent: Googlebot
+Crawl-delay: 0
+
+User-agent: Bingbot
 Crawl-delay: 1

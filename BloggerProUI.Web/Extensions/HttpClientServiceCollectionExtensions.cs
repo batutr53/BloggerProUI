@@ -90,6 +90,12 @@ public static class HttpClientServiceCollectionExtensions
         })
         .AddHttpMessageHandler<AuthTokenHandler>();
 
+        services.AddHttpClient<IBookmarkApiService, BookmarkApiService>(client =>
+        {
+            client.BaseAddress = baseAddress;
+        })
+        .AddHttpMessageHandler<AuthTokenHandler>();
+
         return services;
     }
 }

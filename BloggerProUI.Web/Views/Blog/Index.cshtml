@@ -106,7 +106,7 @@
             {
                 @foreach (var post in Model.Items.Take(3))
                 {
-                    <a href="@Url.Action("Detail", "Blog", new { id = post.Id })" class="trending-item">
+                    <a href="@Url.Action("Detail", "Blog", new { slug = post.Slug })" class="trending-item">
                         <img src="@(!string.IsNullOrEmpty(post.FeaturedImage) ? post.FeaturedImage : "https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80")" 
                              alt="@post.Title" class="trending-image" loading="lazy">
                         <div class="trending-meta">
@@ -162,7 +162,7 @@
                 {
                     @foreach (var post in Model.Items)
                     {
-                        <a href="@Url.Action("Detail", "Blog", new { id = post.Id })" class="article-item">
+                        <a href="@Url.Action("Detail", "Blog", new { slug = post.Slug })" class="article-item">
                             <img src="@(!string.IsNullOrEmpty(post.FeaturedImage) ? post.FeaturedImage : "https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80")" 
                                  alt="@post.Title" class="article-image" loading="lazy">
                             <div class="article-content">

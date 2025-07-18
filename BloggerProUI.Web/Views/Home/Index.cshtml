@@ -19,7 +19,7 @@
             if (featuredPost != null)
             {
                 <article class="featured-article">
-                    <a href="@Url.Action("Detail", "Blog", new { id = featuredPost.Id })" style="text-decoration: none; color: inherit;">
+                    <a href="@Url.Action("Detail", "Blog", new { slug = featuredPost.Slug })" style="text-decoration: none; color: inherit;">
                         <img src="@(string.IsNullOrEmpty(featuredPost.FeaturedImage) ? "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" : featuredPost.FeaturedImage)" alt="@featuredPost.Title" class="featured-image" loading="lazy">
                         <div class="featured-meta">@featuredPost.Categories?.FirstOrDefault()?.ToUpper() • @featuredPost.CreatedAt.ToString("dd MMMM yyyy")</div>
                         <h1 class="featured-title">@featuredPost.Title</h1>
@@ -41,7 +41,7 @@
             {
                 @foreach (var sidebarPost in Model.Items.Skip(1).Take(3))
                 {
-                    <a href="@Url.Action("Detail", "Blog", new { id = sidebarPost.Id })" class="sidebar-article">
+                    <a href="@Url.Action("Detail", "Blog", new { slug = sidebarPost.Slug })" class="sidebar-article">
                         <img src="@(string.IsNullOrEmpty(sidebarPost.FeaturedImage) ? "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" : sidebarPost.FeaturedImage)" alt="@sidebarPost.Title" class="sidebar-image" loading="lazy">
                         <div class="sidebar-meta">@sidebarPost.Categories?.FirstOrDefault()?.ToUpper() • @sidebarPost.CreatedAt.ToString("dd MMMM yyyy")</div>
                         <h3 class="sidebar-title">@sidebarPost.Title</h3>
@@ -74,7 +74,7 @@
                 {
                     @foreach (var trendingPost in featuredPosts)
                     {
-                        <a href="@Url.Action("Detail", "Blog", new { id = trendingPost.Id })" class="trending-item">
+                        <a href="@Url.Action("Detail", "Blog", new { slug = trendingPost.Slug })" class="trending-item">
                             <img src="@(string.IsNullOrEmpty(trendingPost.FeaturedImage) ? "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80" : trendingPost.FeaturedImage)" alt="@trendingPost.Title" class="trending-image" loading="lazy">
                             <div class="trending-meta">@trendingPost.Categories?.FirstOrDefault()?.ToUpper() • @trendingPost.CreatedAt.ToString("dd MMMM yyyy")</div>
                             <h3 class="trending-title">@trendingPost.Title</h3>
@@ -103,7 +103,7 @@
                 {
                     @foreach (var latestPost in Model.Items.Skip(7).Take(3))
                     {
-                        <a href="@Url.Action("Detail", "Blog", new { id = latestPost.Id })" class="article-item">
+                        <a href="@Url.Action("Detail", "Blog", new { slug = latestPost.Slug })" class="article-item">
                             <img src="@(string.IsNullOrEmpty(latestPost.FeaturedImage) ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" : latestPost.FeaturedImage)" alt="@latestPost.Title" class="article-image" loading="lazy">
                             <div class="article-content">
                                 <div class="article-meta">@latestPost.Categories?.FirstOrDefault()?.ToUpper() • @latestPost.CreatedAt.ToString("dd MMMM yyyy")</div>

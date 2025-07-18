@@ -16,14 +16,16 @@ public class BlogController : Controller
     private readonly ICommentApiService _commentApiService;
     private readonly ICategoryApiService _categoryApiService;
     private readonly ITagApiService _tagApiService;
+    private readonly IBookmarkApiService _bookmarkApiService;
 
-    public BlogController(ILogger<BlogController> logger, IPostApiService postApiService, ICommentApiService commentApiService, ICategoryApiService categoryApiService, ITagApiService tagApiService)
+    public BlogController(ILogger<BlogController> logger, IPostApiService postApiService, ICommentApiService commentApiService, ICategoryApiService categoryApiService, ITagApiService tagApiService, IBookmarkApiService bookmarkApiService)
     {
         _logger = logger;
         _postApiService = postApiService;
         _commentApiService = commentApiService;
         _categoryApiService = categoryApiService;
         _tagApiService = tagApiService;
+        _bookmarkApiService = bookmarkApiService;
     }
 
     [HttpGet("")]
@@ -73,27 +75,47 @@ public class BlogController : Controller
     [HttpGet("Post/{id}")]  // Alternative route
     [HttpGet("{id:guid}")]  // SEO-friendly route
     [HttpGet("{slug}")]     // SEO-friendly slug route
-    public async Task<IActionResult> Detail(string id)
+    [HttpGet("{year:int:min(2020)}/{month:int:min(1):max(12)}/{slug}")]  // SEO-friendly date-based route
+    [HttpGet("{category}/{slug}")]  // SEO-friendly category-based route
+    public async Task<IActionResult> Detail(string id, string? category = null, int? year = null, int? month = null, string? slug = null)
     {
         try
         {
             Guid guid;
-            
-            // Try to parse as GUID first
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
-            
+       
             if (Guid.TryParse(id, out guid))
             {
                 // ID is a valid GUID
             }
+            else if (!string.IsNullOrEmpty(slug))
+            {
+                // Try to find post by slug
+                var postBySlugResponse = await _postApiService.GetPostBySlugAsync(slug);
+                if (postBySlugResponse.Success && postBySlugResponse.Data != null)
+                {
+                    guid = postBySlugResponse.Data.Id;
+                    
+                    // Continue with the slug-based URL, don't redirect
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
             else
             {
                 // ID might be a slug - try to find post by slug
-                // For now, return NotFound, but this could be extended to support slug-based routing
-                return NotFound();
+                var postBySlugResponse = await _postApiService.GetPostBySlugAsync(id);
+                if (postBySlugResponse.Success && postBySlugResponse.Data != null)
+                {
+                    guid = postBySlugResponse.Data.Id;
+                    
+                    // Continue with the slug-based URL, don't redirect
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
             
             // Fetch post details, comments, related posts, and tags in parallel
@@ -379,6 +401,83 @@ public class BlogController : Controller
         {
             _logger.LogError(ex, "Error occurred while deleting comment");
             return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
+    [HttpPost("AddBookmark")]
+    public async Task<IActionResult> AddBookmark([FromBody] BloggerProUI.Models.Bookmark.BookmarkCreateDto bookmarkDto)
+    {
+        try
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _bookmarkApiService.AddBookmarkAsync(bookmarkDto);
+
+            if (result.Success)
+            {
+                return Ok(new { success = true, message = "Yazı favorilere eklendi" });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = result.Message });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while adding bookmark");
+            return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
+    [HttpDelete("RemoveBookmark/{postId}")]
+    public async Task<IActionResult> RemoveBookmark(Guid postId)
+    {
+        try
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            var result = await _bookmarkApiService.RemoveBookmarkAsync(postId);
+
+            if (result.Success)
+            {
+                return Ok(new { success = true, message = "Yazı favorilerden kaldırıldı" });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = result.Message });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while removing bookmark");
+            return BadRequest(new { success = false, message = "Bir hata oluştu" });
+        }
+    }
+
+    [HttpGet("IsBookmarked/{postId}")]
+    public async Task<IActionResult> IsBookmarked(Guid postId)
+    {
+        try
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Ok(new { data = false });
+            }
+
+            var result = await _bookmarkApiService.IsBookmarkedAsync(postId);
+
+            return Ok(new { data = result.Data });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while checking bookmark status");
+            return Ok(new { data = false });
         }
     }
 

@@ -289,20 +289,43 @@ function addArticleStructuredData() {
     const title = articleTitle.textContent.trim();
     const imageUrl = articleImage ? articleImage.src : (window.location.origin + '/images/og-default.jpg');
     const currentUrl = window.location.href;
-    const publishDate = new Date().toISOString(); // This should be dynamic from the model
+    
+    // Extract publish date from article meta
+    const publishDateElement = document.querySelector('.article-meta');
+    const publishDate = extractDateFromMeta(publishDateElement) || new Date().toISOString();
     
     // Extract author from article-author element
     const authorElement = document.querySelector('.article-author');
     const author = authorElement ? authorElement.textContent.replace('Yazan: ', '').trim() : 'insanlikHallerimiz';
     
+    // Extract content for word count and reading time
+    const articleContent = document.querySelector('.article-text, .article-content');
+    const wordCount = articleContent ? countWords(articleContent.textContent) : 0;
+    const readingTime = Math.ceil(wordCount / 200); // 200 words per minute
+    
+    // Extract stats
+    const viewCountElement = document.querySelector('.article-stats span[title*="Görüntülenme"]');
+    const likeCountElement = document.querySelector('.article-stats span[title*="Beğeni"]');
+    const commentCountElement = document.querySelector('.article-stats span[title*="Yorum"]');
+    
+    const viewCount = viewCountElement ? parseInt(viewCountElement.textContent.match(/\d+/)?.[0] || '0') : 0;
+    const likeCount = likeCountElement ? parseInt(likeCountElement.textContent.match(/\d+/)?.[0] || '0') : 0;
+    const commentCount = commentCountElement ? parseInt(commentCountElement.textContent.match(/\d+/)?.[0] || '0') : 0;
+    
+    // Extract rating if available
+    const ratingElement = document.querySelector('.article-stats span[title*="Ortalama"]');
+    const rating = ratingElement ? parseFloat(ratingElement.textContent.match(/[\d.]+/)?.[0] || '0') : null;
+    
+    // Enhanced BlogPosting schema
     const structuredData = {
         "@context": "https://schema.org",
-        "@type": "Article",
+        "@type": "BlogPosting",
         "headline": title,
         "image": [imageUrl],
         "author": {
             "@type": "Person",
-            "name": author
+            "name": author,
+            "url": window.location.origin + "/yazar/" + author.toLowerCase().replace(/\s+/g, '-')
         },
         "publisher": {
             "@type": "Organization",
@@ -318,14 +341,114 @@ function addArticleStructuredData() {
             "@type": "WebPage",
             "@id": currentUrl
         },
-        "url": currentUrl
+        "url": currentUrl,
+        "wordCount": wordCount,
+        "timeRequired": `PT${readingTime}M`,
+        "interactionStatistic": [
+            {
+                "@type": "InteractionCounter",
+                "interactionType": "https://schema.org/ReadAction",
+                "userInteractionCount": viewCount
+            },
+            {
+                "@type": "InteractionCounter", 
+                "interactionType": "https://schema.org/LikeAction",
+                "userInteractionCount": likeCount
+            },
+            {
+                "@type": "InteractionCounter",
+                "interactionType": "https://schema.org/CommentAction", 
+                "userInteractionCount": commentCount
+            }
+        ]
     };
+    
+    // Add rating if available
+    if (rating && rating > 0) {
+        structuredData.aggregateRating = {
+            "@type": "AggregateRating",
+            "ratingValue": rating,
+            "ratingCount": 1,
+            "bestRating": 5,
+            "worstRating": 1
+        };
+    }
+    
+    // Add FAQ schema if there are comments
+    if (commentCount > 0) {
+        addFAQSchema();
+    }
     
     // Add structured data to head
     const script = document.createElement('script');
     script.type = 'application/ld+json';
     script.textContent = JSON.stringify(structuredData);
     document.head.appendChild(script);
+}
+
+// Helper function to extract date from meta element
+function extractDateFromMeta(metaElement) {
+    if (!metaElement) return null;
+    
+    const dateText = metaElement.textContent;
+    const dateMatch = dateText.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/);
+    
+    if (dateMatch) {
+        const [, day, month, year] = dateMatch;
+        const monthNames = {
+            'Ocak': '01', 'Şubat': '02', 'Mart': '03', 'Nisan': '04',
+            'Mayıs': '05', 'Haziran': '06', 'Temmuz': '07', 'Ağustos': '08',
+            'Eylül': '09', 'Ekim': '10', 'Kasım': '11', 'Aralık': '12'
+        };
+        
+        const monthNum = monthNames[month] || '01';
+        return `${year}-${monthNum}-${day.padStart(2, '0')}T00:00:00Z`;
+    }
+    
+    return null;
+}
+
+// Helper function to count words
+function countWords(text) {
+    if (!text) return 0;
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+}
+
+// Add FAQ schema based on comments
+function addFAQSchema() {
+    const comments = document.querySelectorAll('.comment');
+    if (comments.length === 0) return;
+    
+    const faqItems = [];
+    
+    comments.forEach((comment, index) => {
+        const questionElement = comment.querySelector('.comment-content');
+        const answerElement = comment.querySelector('.reply .reply-content');
+        
+        if (questionElement && answerElement) {
+            faqItems.push({
+                "@type": "Question",
+                "name": questionElement.textContent.trim().substring(0, 100) + "...",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": answerElement.textContent.trim()
+                }
+            });
+        }
+    });
+    
+    if (faqItems.length > 0) {
+        const faqSchema = {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faqItems
+        };
+        
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.textContent = JSON.stringify(faqSchema);
+        document.head.appendChild(script);
+    }
 }
 
 // Add service worker for better caching (optional)

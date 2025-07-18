@@ -13,6 +13,7 @@ namespace BloggerProUI.Business.Interfaces
         Task<DataResult<List<PostListDto>>> GetFeaturedPostsAsync(int count = 5);
         Task<DataResult<string>> CreatePostAsync(PostCreateDto dto);
         Task<DataResult<PostDetailDto>> GetPostByIdAsync(Guid id);
+        Task<DataResult<PostDetailDto>> GetPostBySlugAsync(string slug);
         Task<DataResult<PaginatedResultDto<PostListDto>>> GetPostsByAuthorIdAsync(Guid authorId, PostFilterDto filter, int page = 1, int pageSize = 10);
         Task<DataResult<PaginatedResultDto<PostListDto>>> GetAllPostsAsync(PostFilterDto filter, int page = 1, int pageSize = 10);
         Task<Result> UpdatePostAsync(PostUpdateDto dto);

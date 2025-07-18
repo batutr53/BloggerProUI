@@ -404,4 +404,25 @@ public class PostApiService : IPostApiService
             return new ErrorResult($"Servis hatası: {ex.Message}");
         }
     }
+
+    public async Task<DataResult<PostDetailDto>> GetPostBySlugAsync(string slug)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"Post/slug/{slug}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<DataResult<PostDetailDto>>();
+                return result ?? new ErrorDataResult<PostDetailDto>("Boş response döndü.");
+            }
+            
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return new ErrorDataResult<PostDetailDto>($"API hatası: {response.StatusCode} - {errorContent}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorDataResult<PostDetailDto>($"Servis hatası: {ex.Message}");
+        }
+    }
 }

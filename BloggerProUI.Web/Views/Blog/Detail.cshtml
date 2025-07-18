@@ -9,14 +9,14 @@
         ViewData["Description"] = !string.IsNullOrEmpty(Model.Excerpt) ? Model.Excerpt : Model.Title + " - insanlikHallerimiz blog yazı sı";
         ViewData["Keywords"] = Model.Tags != null && Model.Tags.Any() ? string.Join(", ", Model.Tags) + ", blog, makale" : "blog, makale, insanlik hallerimiz";
         ViewData["Author"] = Model.AuthorName ?? "insanlikHallerimiz";
-        ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/Blog/Detail/{Model.Id}";
+        ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/Blog/{Model.Slug}";
         
         // Open Graph
         ViewData["OgTitle"] = Model.Title;
         ViewData["OgDescription"] = !string.IsNullOrEmpty(Model.Excerpt) ? Model.Excerpt : Model.Title;
         ViewData["OgImage"] = !string.IsNullOrEmpty(Model.FeaturedImage) ? Model.FeaturedImage : $"{Context.Request.Scheme}://{Context.Request.Host}/images/og-default.jpg";
         ViewData["OgType"] = "article";
-        ViewData["OgUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/Blog/Detail/{Model.Id}";
+        ViewData["OgUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/Blog/{Model.Slug}";
         
         // Twitter
         ViewData["TwitterTitle"] = Model.Title;
@@ -89,7 +89,7 @@ else
             
             @if (Model != null)
             {
-                <div class="article-stats" style="margin-top: 15px; color: #999; font-size: 14px; display: flex; gap: 20px;">
+                <div class="article-stats" style="margin-top: 15px; color: #999; font-size: 14px; display: flex; gap: 20px; flex-wrap: wrap;">
                     <span title="Görüntülenme sayısı">👁 @Model.ViewCount</span>
                     <span title="Beğeni sayısı">❤️ @Model.LikeCount</span>
                     <span title="Yorum sayısı">💬 @Model.CommentCount</span>
@@ -97,6 +97,8 @@ else
                     {
                         <span title="Ortalama puan">⭐ @Model.AverageRating.Value.ToString("F1")</span>
                     }
+                    <span id="reading-time-display" title="Tahmini okuma süresi">📖 <span id="reading-time-value">0</span> dk</span>
+                    <span id="word-count-display" title="Kelime sayısı">📝 <span id="word-count-value">0</span> kelime</span>
                 </div>
             }
         </header>
@@ -263,6 +265,12 @@ else
                             onclick="toggleLike('@Model.Id')" 
                             style="background: @(Model.IsLikedByCurrentUser == true ? "#e74c3c" : "#fff"); color: @(Model.IsLikedByCurrentUser == true ? "#fff" : "#333"); border: 2px solid #e74c3c; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
                         ❤️ @(Model.IsLikedByCurrentUser == true ? "Beğenildi" : "Beğen")
+                    </button>
+                    
+                    <button id="bookmark-btn" 
+                            onclick="toggleBookmark('@Model.Id')" 
+                            style="background: #fff; color: #333; border: 2px solid #f39c12; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                        <span id="bookmark-icon">🔖</span> <span id="bookmark-text">Favorilere Ekle</span>
                     </button>
                     
                     @if (Model.AllowComments)
@@ -446,7 +454,7 @@ else
                 {
                     @foreach (var post in relatedPosts)
                     {
-                        <a href="@Url.Action("Detail", "Blog", new { id = post.Id })" class="related-article">
+                        <a href="@Url.Action("Detail", "Blog", new { slug = post.Slug })" class="related-article">
                             <img src="@(string.IsNullOrEmpty(post.FeaturedImage) ? "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" : post.FeaturedImage)" alt="@post.Title" class="related-image" loading="lazy">
                             <div class="related-meta">@post.Categories?.FirstOrDefault()?.ToUpper() · @post.CreatedAt.ToString("dd MMMM yyyy")</div>
                             <h4 class="related-title">@post.Title</h4>
@@ -526,12 +534,140 @@ else
 <!-- SweetAlert2 for notifications -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- SweetAlert2 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Reading Time and Content Analytics -->
+<script src="~/js/reading-time.js" asp-append-version="true"></script>
 
 <script>
     var isUserAuthenticated = @(isAuthenticated.ToString().ToLower());
     
+// Check bookmark status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (isUserAuthenticated) {
+        checkBookmarkStatus('@Model?.Id');
+    }
+});
+
+// Bookmark functionality
+async function toggleBookmark(postId) {
+    if (!isUserAuthenticated) {
+        Swal.fire({
+            title: 'Giriş Yapmanız Gerekiyor',
+            text: 'Favorilere eklemek için lütfen giriş yapın.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Giriş Yap',
+            cancelButtonText: 'İptal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/Auth/Login';
+            }
+        });
+        return;
+    }
+
+    const bookmarkBtn = document.getElementById('bookmark-btn');
+    const bookmarkIcon = document.getElementById('bookmark-icon');
+    const bookmarkText = document.getElementById('bookmark-text');
+    
+    const isBookmarked = bookmarkBtn.classList.contains('bookmarked');
+    
+    try {
+        let response;
+        if (isBookmarked) {
+            response = await fetch(`/Blog/RemoveBookmark/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        } else {
+            response = await fetch('/Blog/AddBookmark', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    postId: postId,
+                    notes: null
+                })
+            });
+        }
+        
+        if (response.ok) {
+            if (isBookmarked) {
+                bookmarkBtn.classList.remove('bookmarked');
+                bookmarkBtn.style.background = '#fff';
+                bookmarkBtn.style.color = '#333';
+                bookmarkIcon.textContent = '🔖';
+                bookmarkText.textContent = 'Favorilere Ekle';
+                
+                Swal.fire({
+                    title: 'Başarılı!',
+                    text: 'Yazı favorilerden kaldırıldı.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                bookmarkBtn.classList.add('bookmarked');
+                bookmarkBtn.style.background = '#f39c12';
+                bookmarkBtn.style.color = '#fff';
+                bookmarkIcon.textContent = '📌';
+                bookmarkText.textContent = 'Favorilerde';
+                
+                Swal.fire({
+                    title: 'Başarılı!',
+                    text: 'Yazı favorilere eklendi.',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        } else {
+            Swal.fire({
+                title: 'Hata!',
+                text: 'İşlem gerçekleştirilemedi.',
+                icon: 'error',
+                confirmButtonText: 'Tamam'
+            });
+        }
+    } catch (error) {
+        console.error('Bookmark işlemi hatası:', error);
+        Swal.fire({
+            title: 'Hata!',
+            text: 'Bir hata oluştu. Lütfen tekrar deneyin.',
+            icon: 'error',
+            confirmButtonText: 'Tamam'
+        });
+    }
+}
+
+// Check bookmark status
+async function checkBookmarkStatus(postId) {
+    if (!postId) return;
+    
+    try {
+        const response = await fetch(`/Blog/IsBookmarked/${postId}`);
+        
+        if (response.ok) {
+            const result = await response.json();
+            const bookmarkBtn = document.getElementById('bookmark-btn');
+            const bookmarkIcon = document.getElementById('bookmark-icon');
+            const bookmarkText = document.getElementById('bookmark-text');
+            
+            if (result.data === true) {
+                bookmarkBtn.classList.add('bookmarked');
+                bookmarkBtn.style.background = '#f39c12';
+                bookmarkBtn.style.color = '#fff';
+                bookmarkIcon.textContent = '📌';
+                bookmarkText.textContent = 'Favorilerde';
+            }
+        }
+    } catch (error) {
+        console.error('Bookmark durumu kontrolü hatası:', error);
+    }
+}
+
 // Copy to clipboard function
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(function() {

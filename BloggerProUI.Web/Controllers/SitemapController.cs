@@ -67,7 +67,7 @@ namespace BloggerProUI.Web.Controllers
                     foreach (var post in postsResponse.Data.Items)
                     {
                         sb.AppendLine("<url>");
-                        sb.AppendLine($"<loc>{baseUrl}/Blog/Detail/{post.Id}</loc>");
+                        sb.AppendLine($"<loc>{baseUrl}/Blog/{post.Slug}</loc>");
                         sb.AppendLine($"<lastmod>{(post.LastModified ?? post.CreatedAt):yyyy-MM-dd}</lastmod>");
                         sb.AppendLine("<changefreq>weekly</changefreq>");
                         sb.AppendLine("<priority>0.8</priority>");
@@ -133,7 +133,7 @@ namespace BloggerProUI.Web.Controllers
                     foreach (var post in postsResponse.Data.Items)
                     {
                         sb.AppendLine("<url>");
-                        sb.AppendLine($"<loc>{baseUrl}/Blog/Detail/{post.Id}</loc>");
+                        sb.AppendLine($"<loc>{baseUrl}/Blog/{post.Slug}</loc>");
                         sb.AppendLine($"<lastmod>{(post.LastModified ?? post.CreatedAt):yyyy-MM-dd}</lastmod>");
                         sb.AppendLine("<changefreq>weekly</changefreq>");
                         sb.AppendLine("<priority>0.8</priority>");
