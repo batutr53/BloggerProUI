@@ -96,6 +96,12 @@ public static class HttpClientServiceCollectionExtensions
         })
         .AddHttpMessageHandler<AuthTokenHandler>();
 
+        services.AddHttpClient<UserDashboardApiService>(client =>
+        {
+            client.BaseAddress = baseAddress;
+        })
+        .AddHttpMessageHandler<AuthTokenHandler>();
+
         return services;
     }
 }

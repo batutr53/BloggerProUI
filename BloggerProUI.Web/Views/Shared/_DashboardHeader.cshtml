@@ -4,10 +4,58 @@
         <a href="@Url.Action("Index", "Home")" class="logo">Q. <em>Studio</em></a>
         
         <div class="user-menu">
-            <a href="@Url.Action("Index", "Home")" style="color: #666; text-decoration: none; font-size: 14px; margin-right: 20px;">← Ana Sayfa</a>
-            <img src="https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="User Avatar" class="user-avatar" loading="lazy">
-            <span class="user-name">Kullanıcı Adı</span>
-            <button class="logout-btn">Çıkış Yap</button>
+            <a href="@Url.Action("Index", "Home")" class="home-link">
+                <i class="fas fa-home"></i> Ana Sayfa
+            </a>
+            
+            <div class="user-profile-dropdown">
+                <div class="user-profile-trigger" onclick="toggleUserDropdown()">
+                    <img src="https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="User Avatar" class="user-avatar" loading="lazy">
+                    <div class="user-info">
+                        <span class="user-name">@(User.Identity?.Name ?? "Kullanıcı")</span>
+                        <span class="user-role">Üye</span>
+                    </div>
+                    <i class="fas fa-chevron-down dropdown-arrow"></i>
+                </div>
+                
+                <div class="user-dropdown-menu" id="userDropdownMenu">
+                    <div class="dropdown-header">
+                        <div class="user-avatar-large">
+                            <img src="https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="User Avatar" loading="lazy">
+                        </div>
+                        <div class="user-details">
+                            <h4>@(User.Identity?.Name ?? "Kullanıcı")</h4>
+                            <p>@(User.Identity?.Name ?? "user@example.com")</p>
+                        </div>
+                    </div>
+                    
+                    <div class="dropdown-divider"></div>
+                    
+                    <div class="dropdown-items">
+                        <a href="@Url.Action("Profile", "UserPanel")" class="dropdown-item">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Profil Ayarları</span>
+                        </a>
+                        <a href="@Url.Action("Bookmarks", "UserPanel")" class="dropdown-item">
+                            <i class="fas fa-bookmark"></i>
+                            <span>Favorilerim</span>
+                        </a>
+                        <a href="@Url.Action("Index", "UserPanel")" class="dropdown-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </div>
+                    
+                    <div class="dropdown-divider"></div>
+                    
+                    <div class="dropdown-footer">
+                        <button class="modern-logout-btn" onclick="confirmLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Güvenli Çıkış</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </header>

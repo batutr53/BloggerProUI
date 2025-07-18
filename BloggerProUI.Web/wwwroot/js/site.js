@@ -1,4 +1,4 @@
-﻿// Q. Studio JavaScript
+// Q. Studio JavaScript
 document.addEventListener('DOMContentLoaded', function() {
     
     // Tab System
@@ -43,16 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 saveBtn.textContent = originalText;
                 saveBtn.style.background = '#333';
             }, 1500);
-        });
-    }
-
-    // Logout functionality
-    const logoutBtn = document.querySelector('.logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
-                window.location.href = '/Auth/Logout';
-            }
         });
     }
 
@@ -142,14 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add random notification every 30 seconds (demo)
     setInterval(addNotification, 30000);
-
-    // Search functionality (simulated)
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'k') {
-            e.preventDefault();
-            console.log('Arama açıldı');
-        }
-    });
 
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
@@ -397,12 +379,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            const href = this.getAttribute('href');
+            if (href && href.length > 1) {
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             }
         });
     });
@@ -437,21 +422,19 @@ document.addEventListener('DOMContentLoaded', function() {
         animationObserver.observe(el);
     });
 
-});
-
-// Enhanced Navigation and Smooth Scrolling
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // Smooth scrolling for internal links
+    // Enhanced Navigation and Smooth Scrolling
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            const href = this.getAttribute('href');
+            if (href && href.length > 1) {
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             }
         });
     });
@@ -462,91 +445,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const emailInput = newsletterForm.querySelector('input[type="email"]');
         const submitBtn = newsletterForm.querySelector('button');
         
-        submitBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const email = emailInput.value.trim();
-            if (!email) {
-                showNotification('Lütfen e-posta adresinizi girin.', 'error');
-                return;
-            }
-            
-            if (!isValidEmail(email)) {
-                showNotification('Lütfen geçerli bir e-posta adresi girin.', 'error');
-                return;
-            }
-            
-            // Simulate subscription
-            submitBtn.textContent = 'Kaydediliyor...';
-            submitBtn.disabled = true;
-            
-            setTimeout(() => {
-                showNotification('Başarıyla abone oldunuz!', 'success');
-                emailInput.value = '';
-                submitBtn.textContent = 'Abone Ol';
-                submitBtn.disabled = false;
-            }, 1500);
-        });
-    }
-
-    // Image lazy loading enhancement
-    const images = document.querySelectorAll('img');
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.classList.add('fade-in');
-                observer.unobserve(img);
-            }
-        });
-    });
-
-    images.forEach(img => imageObserver.observe(img));
-
-    // Utility Functions
-    function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.textContent = message;
-        
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#007bff'};
-            color: white;
-            border-radius: 5px;
-            z-index: 10000;
-            animation: slideInRight 0.3s ease;
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    // Add CSS animations for notifications
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const email = emailInput.value.trim();
+                if (!email) {
+                    showNotification('Lütfen e-posta adresinizi girin.', 'error');
+                    return;
+                }
+                
+                if (!isValidEmail(email)) {
+                    showNotification('Lütfen geçerli bir e-posta adresi girin.', 'error');
+                    return;
+                }
+                
+                // Simulate subscription
+                submitBtn.textContent = 'Kaydediliyor...';
+                submitBtn.disabled = true;
+                
+                setTimeout(() => {
+                    showNotification('Başarıyla abone oldunuz!', 'success');
+                    emailInput.value = '';
+                    submitBtn.textContent = 'Abone Ol';
+                    submitBtn.disabled = false;
+                }, 1500);
+            });
         }
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-    `;
-    document.head.appendChild(style);
+    }
 
     // Contact form handling
     const contactForm = document.querySelector('.profile-form');
@@ -601,6 +527,36 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Utility functions
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#007bff'};
+        color: white;
+        border-radius: 5px;
+        z-index: 10000;
+        animation: slideInRight 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
 function formatDate(date) {
     return new Intl.DateTimeFormat('tr-TR', {
         year: 'numeric',
@@ -625,3 +581,240 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+// Mobile Menu Toggle Function
+function toggleMobileMenu() {
+    const mainNav = document.getElementById('mainNav');
+    if (mainNav) {
+        mainNav.classList.toggle('show');
+    }
+}
+
+// Search functionality
+let searchTimeout;
+
+function showSearchBox() {
+    const dropdown = document.getElementById('searchDropdown');
+    const input = document.getElementById('searchInput');
+    
+    if (dropdown && input) {
+        dropdown.classList.add('show');
+        input.focus();
+        input.value = '';
+        const results = document.getElementById('searchResults');
+        if (results) {
+            results.innerHTML = '';
+        }
+    }
+}
+
+function hideSearchBox() {
+    const dropdown = document.getElementById('searchDropdown');
+    const input = document.getElementById('searchInput');
+    
+    if (dropdown && input) {
+        dropdown.classList.remove('show');
+        input.value = '';
+    }
+}
+
+function performSearch() {
+    const input = document.getElementById('searchInput');
+    if (!input) return;
+    
+    const keyword = input.value.trim();
+    
+    if (!keyword) {
+        const results = document.getElementById('searchResults');
+        if (results) {
+            results.innerHTML = '';
+        }
+        return;
+    }
+    
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        searchPosts(keyword);
+    }, 300);
+}
+
+async function searchPosts(keyword) {
+    const results = document.getElementById('searchResults');
+    
+    if (!results) return;
+    
+    results.innerHTML = '<div class="search-loading"><i class="fas fa-spinner"></i> Aranıyor...</div>';
+    
+    try {
+        // UI Controller'ındaki Search action'ına istek at
+        const response = await fetch(`/Home/Search?keyword=${encodeURIComponent(keyword)}&pageSize=8`);
+        
+        if (!response.ok) {
+            throw new Error('Arama başarısız');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success && result.data && result.data.length > 0) {
+            displaySearchResults(result.data);
+        } else {
+            results.innerHTML = '<div class="search-no-results">Sonuç bulunamadı</div>';
+        }
+    } catch (error) {
+        console.error('Search error:', error);
+        results.innerHTML = '<div class="search-no-results">Arama hatası oluştu</div>';
+    }
+}
+
+function displaySearchResults(posts) {
+    const results = document.getElementById('searchResults');
+    if (!results) return;
+    
+    let html = '';
+    
+    posts.forEach(post => {
+        const excerpt = post.excerpt || '';
+        const createdAt = new Date(post.createdAt).toLocaleDateString('tr-TR');
+        
+        html += `
+            <a href="/Blog/Detail/${post.id}" class="search-result-item" onclick="hideSearchBox()">
+                <div class="search-result-title">${escapeHtml(post.title)}</div>
+                <div class="search-result-excerpt">${escapeHtml(excerpt)}</div>
+                <div class="search-result-meta">
+                    ${escapeHtml(post.author?.userName || 'Yazar')} • ${createdAt}
+                </div>
+            </a>
+        `;
+    });
+    
+    results.innerHTML = html;
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Search Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Search input event listener
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', performSearch);
+        searchInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                hideSearchBox();
+            }
+        });
+    }
+});
+
+// Close search when clicking outside
+document.addEventListener('click', function(event) {
+    const searchToggle = document.querySelector('.search-toggle');
+    if (searchToggle && !searchToggle.contains(event.target)) {
+        hideSearchBox();
+    }
+});
+
+// Dynamic header update removed - cache sorunu çözüldü/
+/ Image Error Handling
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle image loading errors
+    const images = document.querySelectorAll('img');
+    
+    images.forEach(img => {
+        // Set loading placeholder
+        img.addEventListener('loadstart', function() {
+            this.style.opacity = '0.5';
+        });
+        
+        // Handle successful load
+        img.addEventListener('load', function() {
+            this.style.opacity = '1';
+            this.classList.add('loaded');
+        });
+        
+        // Handle loading errors
+        img.addEventListener('error', function() {
+            console.log('Image failed to load:', this.src);
+            
+            // Set fallback image based on context
+            if (this.closest('.podcast-image')) {
+                this.src = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80';
+            } else if (this.closest('.article-item')) {
+                this.src = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80';
+            } else if (this.closest('.trending-item')) {
+                this.src = 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80';
+            } else {
+                this.src = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80';
+            }
+            
+            this.style.opacity = '1';
+            this.classList.add('error-fallback');
+        });
+        
+        // Check if image is already loaded (cached)
+        if (img.complete && img.naturalHeight !== 0) {
+            img.style.opacity = '1';
+            img.classList.add('loaded');
+        }
+    });
+    
+    // Lazy loading for images
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+    
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.style.opacity = '0.5';
+                    
+                    // Preload image
+                    const tempImg = new Image();
+                    tempImg.onload = function() {
+                        img.style.opacity = '1';
+                        img.classList.add('loaded');
+                    };
+                    tempImg.onerror = function() {
+                        img.style.opacity = '1';
+                        img.classList.add('error-fallback');
+                    };
+                    tempImg.src = img.src;
+                    
+                    observer.unobserve(img);
+                }
+            });
+        });
+        
+        lazyImages.forEach(img => imageObserver.observe(img));
+    }
+});
+
+// Fix for disappearing images in recent comments
+function fixRecentCommentsImages() {
+    const commentImages = document.querySelectorAll('.podcast-image img');
+    
+    commentImages.forEach(img => {
+        // Force reload if image is not visible
+        if (img.offsetWidth === 0 || img.offsetHeight === 0) {
+            const originalSrc = img.src;
+            img.src = '';
+            setTimeout(() => {
+                img.src = originalSrc;
+            }, 100);
+        }
+        
+        // Add error handling
+        img.onerror = function() {
+            this.src = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80';
+        };
+    });
+}
+
+// Run fix on page load and after dynamic content updates
+document.addEventListener('DOMContentLoaded', fixRecentCommentsImages);
+setTimeout(fixRecentCommentsImages, 1000); // Run again after 1 second

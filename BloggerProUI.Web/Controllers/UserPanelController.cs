@@ -3,30 +3,50 @@ using Microsoft.AspNetCore.Mvc;
 using BloggerProUI.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using BloggerProUI.Business.Interfaces;
+using BloggerProUI.Business.Services;
 
 namespace BloggerProUI.Web.Controllers;
 
 [Authorize]
-public class UserPanelController : Controller
+public class UserPanelController : BaseController
 {
     private readonly ILogger<UserPanelController> _logger;
     private readonly IBookmarkApiService _bookmarkApiService;
+    private readonly UserDashboardApiService _userDashboardApiService;
 
-    public UserPanelController(ILogger<UserPanelController> logger, IBookmarkApiService bookmarkApiService)
+    public UserPanelController(ILogger<UserPanelController> logger, IBookmarkApiService bookmarkApiService, UserDashboardApiService userDashboardApiService)
     {
         _logger = logger;
         _bookmarkApiService = bookmarkApiService;
+        _userDashboardApiService = userDashboardApiService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        try
+        {
+            var statsResult = await _userDashboardApiService.GetUserDashboardStatsAsync();
+            var activitiesResult = await _userDashboardApiService.GetUserActivitiesAsync(10);
+            var recentPostsResult = await _userDashboardApiService.GetRecentPostsAsync(5);
+            var readingStatsResult = await _userDashboardApiService.GetReadingStatsAsync();
+
+            var viewModel = new UserDashboardViewModel
+            {
+                Stats = statsResult.Success ? statsResult.Data : new BloggerProUI.Models.UserDashboard.UserDashboardStatsDto(),
+                Activities = activitiesResult.Success ? activitiesResult.Data : new List<BloggerProUI.Models.UserDashboard.UserActivityDto>(),
+                RecentPosts = recentPostsResult.Success ? recentPostsResult.Data : new List<BloggerProUI.Models.UserDashboard.RecentPostDto>(),
+                ReadingStats = readingStatsResult.Success ? readingStatsResult.Data : new Dictionary<string, int>()
+            };
+
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while fetching dashboard data");
+            return View(new UserDashboardViewModel());
+        }
     }
 
-    public IActionResult Dashboard()
-    {
-        return View();
-    }
 
     public IActionResult Reading()
     {

@@ -2,6 +2,7 @@ using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Bookmark;
 using BloggerProUI.Shared.Utilities.Results;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
@@ -82,19 +83,19 @@ namespace BloggerProUI.Business.Services
             {
                 var response = await _httpClient.GetAsync($"/api/bookmark/is-bookmarked/{postId}");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var jsonResponse = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<IDataResult<bool>>(jsonResponse, _jsonOptions);
-                    
-                    return result?.Data == true 
-                        ? new SuccessDataResult<bool>(true, "Favorilerde")
-                        : new SuccessDataResult<bool>(false, "Favorilerde değil");
-                }
-                else
+                if (!response.IsSuccessStatusCode)
                 {
                     return new ErrorDataResult<bool>(false, "Favori durumu kontrol edilemedi");
                 }
+
+                var content = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(content))
+                {
+                    return new ErrorDataResult<bool>(false, "Boş yanıt alındı.");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<DataResult<bool>>();
+                return result ?? new ErrorDataResult<bool>(false, "Veriler işlenirken bir hata oluştu.");
             }
             catch (HttpRequestException)
             {
@@ -112,19 +113,19 @@ namespace BloggerProUI.Business.Services
             {
                 var response = await _httpClient.GetAsync("/api/bookmark/my-bookmarks");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var jsonResponse = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<IDataResult<List<BookmarkListDto>>>(jsonResponse, _jsonOptions);
-                    
-                    return result?.Data != null 
-                        ? new SuccessDataResult<List<BookmarkListDto>>(result.Data, "Favoriler getirildi")
-                        : new SuccessDataResult<List<BookmarkListDto>>(new List<BookmarkListDto>(), "Favori bulunamadı");
-                }
-                else
+                if (!response.IsSuccessStatusCode)
                 {
                     return new ErrorDataResult<List<BookmarkListDto>>(new List<BookmarkListDto>(), "Favoriler getirilemedi");
                 }
+
+                var content = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(content))
+                {
+                    return new ErrorDataResult<List<BookmarkListDto>>(new List<BookmarkListDto>(), "Boş yanıt alındı.");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<DataResult<List<BookmarkListDto>>>();
+                return result ?? new ErrorDataResult<List<BookmarkListDto>>(new List<BookmarkListDto>(), "Veriler işlenirken bir hata oluştu.");
             }
             catch (HttpRequestException)
             {
@@ -142,19 +143,19 @@ namespace BloggerProUI.Business.Services
             {
                 var response = await _httpClient.GetAsync("/api/bookmark/count");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var jsonResponse = await response.Content.ReadAsStringAsync();
-                    var result = JsonSerializer.Deserialize<IDataResult<int>>(jsonResponse, _jsonOptions);
-                    
-                    return result?.Data != null 
-                        ? new SuccessDataResult<int>(result.Data, "Favori sayısı getirildi")
-                        : new SuccessDataResult<int>(0, "Favori sayısı bulunamadı");
-                }
-                else
+                if (!response.IsSuccessStatusCode)
                 {
                     return new ErrorDataResult<int>(0, "Favori sayısı getirilemedi");
                 }
+
+                var content = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrEmpty(content))
+                {
+                    return new ErrorDataResult<int>(0, "Boş yanıt alındı.");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<DataResult<int>>();
+                return result ?? new ErrorDataResult<int>(0, "Veriler işlenirken bir hata oluştu.");
             }
             catch (HttpRequestException)
             {

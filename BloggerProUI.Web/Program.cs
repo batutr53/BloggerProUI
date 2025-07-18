@@ -23,12 +23,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddTransient<BloggerProUI.Business.Handlers.AuthTokenHandler>();
 builder.Services.AddScoped<BloggerProUI.Web.Services.SeoConfigurationService>();
 
-// Asset Versioning Services - Temporarily disabled
-// builder.Services.Configure<AssetVersioningOptions>(
-//     builder.Configuration.GetSection(AssetVersioningOptions.SectionName));
-// builder.Services.AddScoped<IAssetVersioningService, AssetVersioningService>();
-// builder.Services.AddScoped<VersionedAssetTagHelper>();
-// builder.Services.AddHostedService<FileWatcherService>();
+// Asset Versioning Services - Cache Busting
+builder.Services.Configure<AssetVersioningOptions>(
+    builder.Configuration.GetSection(AssetVersioningOptions.SectionName));
+builder.Services.AddScoped<IAssetVersioningService, AssetVersioningService>();
+builder.Services.AddScoped<VersionedAssetTagHelper>();
+builder.Services.AddHostedService<FileWatcherService>();
 
 var app = builder.Build();
 
@@ -41,12 +41,44 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// ULTRA AGRESIF CACHE DEVRE DIŞI - Her request için
+app.Use(async (context, next) =>
+{
+    // Response headers - cache'i tamamen devre dışı bırak
+    context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate, private";
+    context.Response.Headers.Pragma = "no-cache";
+    context.Response.Headers.Expires = "Thu, 01 Jan 1970 00:00:00 GMT";
+    context.Response.Headers.ETag = $"\"{Guid.NewGuid()}\"";
+    context.Response.Headers.LastModified = DateTime.UtcNow.ToString("R");
+    context.Response.Headers["X-Cache-Control"] = "no-cache";
+    
+    // Request headers - cache'li request'leri engelle
+    context.Request.Headers.Remove("If-Modified-Since");
+    context.Request.Headers.Remove("If-None-Match");
+    
+    await next();
+});
+
+// Static files - CACHE TAMAMEN KAPALI
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        var headers = context.Context.Response.Headers;
+        headers.CacheControl = "no-cache, no-store, must-revalidate";
+        headers.Pragma = "no-cache";
+        headers.Expires = "0";
+        headers.ETag = $"\"{DateTime.Now.Ticks}\"";
+        headers.LastModified = DateTime.UtcNow.ToString("R");
+    }
+});
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
+// MapStaticAssets kaldırıldı - cache sorununa neden oluyor
 
 app.UseEndpoints(endpoints =>
 {

@@ -481,4 +481,32 @@ public class BlogController : Controller
         }
     }
 
+    [HttpGet("Search")]
+    public async Task<IActionResult> SearchPosts(string keyword, int page = 1, int pageSize = 8)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return BadRequest(new { success = false, message = "Arama terimi gerekli" });
+            }
+
+            var result = await _postApiService.SearchPostsAsync(keyword, page, pageSize);
+            
+            if (result.Success)
+            {
+                return Ok(new { success = true, data = result.Data });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = string.Join(", ", result.Message ?? new[] { "Arama başarısız" }) });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while searching posts");
+            return BadRequest(new { success = false, message = "Arama sırasında bir hata oluştu" });
+        }
+    }
+
 }

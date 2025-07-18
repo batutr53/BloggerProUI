@@ -12,7 +12,7 @@ using BloggerProUI.Models.TeamMember;
 
 namespace BloggerProUI.Web.Controllers;
 
-public class HomeController : Controller
+public class HomeController : BaseController
 {
     private readonly ILogger<HomeController> _logger;
     private readonly IPostApiService _postApiService;
@@ -186,6 +186,39 @@ public class HomeController : Controller
         {
             _logger.LogError(ex, "Error loading contact info");
             ViewBag.ContactInfo = new List<BloggerProUI.Models.Footer.FooterDto>();
+        }
+    }
+
+    public async Task<IActionResult> Search(string keyword, int page = 1, int pageSize = 10)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return Json(new { success = false, message = "Arama kelimesi boş olamaz." });
+            }
+
+            var result = await _postApiService.SearchPostsAsync(keyword, page, pageSize);
+            
+            if (result.Success && result.Data != null)
+            {
+                return Json(new { 
+                    success = true, 
+                    data = result.Data.Items,
+                    //totalCount = result.Data.TotalCount,
+                    //currentPage = result.Data.CurrentPage,
+                    totalPages = result.Data.TotalPages
+                });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Arama sonucu bulunamadı." });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while searching posts");
+            return Json(new { success = false, message = "Arama sırasında bir hata oluştu." });
         }
     }
 

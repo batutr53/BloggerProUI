@@ -31,10 +31,7 @@
                 </article>
             }
         }
-        else
-        {
-          
-        }
+     
         
         <aside class="sidebar">
             @if (Model?.Items?.Count() > 1)
@@ -52,10 +49,7 @@
                     </a>
                 }
             }
-            else
-            {
-              
-            }
+        
         </aside>
     </section>
 
@@ -83,19 +77,12 @@
                     }
                 }
             }
-            else
-            {
-              
-            }
+         
         </div>
     </section>
 
     <!-- Latest Articles Section -->
     <section>
-        <div class="section-header">
-            <h2 class="section-title">Son Yazılar</h2>
-            <a href="@Url.Action("Index", "Blog")" class="view-all">Tümünü Gör</a>
-        </div>
         
         <div class="latest-layout">
             <div class="articles-left">
@@ -116,35 +103,9 @@
                         </a>
                     }
                 }
-                else
-                {
-                   
-                }
+           
             </div>
-            
-            <aside class="sidebar">
-                <a href="#" class="sidebar-article">
-                    <img src="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Editor's Pick" class="sidebar-image" loading="lazy">
-                    <div class="sidebar-meta">EDİTÖRÜN SEÇİMİ • 15 Ocak 2025</div>
-                    <h3 class="sidebar-title">Yılın Fotoğraf Sergisi</h3>
-                    <div class="sidebar-author">Yazan: EDİTÖR</div>
-                    <p class="sidebar-excerpt">
-                        Bu yılın en etkileyici fotoğraf sergilerinden birini 
-                        kaçırmayın...
-                    </p>
-                </a>
-                
-                <a href="#" class="sidebar-article">
-                    <img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Popular Article" class="sidebar-image" loading="lazy">
-                    <div class="sidebar-meta">POPÜLER • 14 Ocak 2025</div>
-                    <h3 class="sidebar-title">En Çok Okunan Makale</h3>
-                    <div class="sidebar-author">Yazan: TEAM</div>
-                    <p class="sidebar-excerpt">
-                        Okuyucularımızın en çok ilgi gösterdiği 
-                        içeriklerden biri...
-                    </p>
-                </a>
-            </aside>
+          
         </div>
     </section>
 
@@ -163,81 +124,39 @@
                 {
                     @foreach (var comment in recentComments)
                     {
-                        <div class="podcast-item" style="display: flex; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
-                            <div class="podcast-image" style="position: relative; width: 100px; height: 100px; overflow: hidden; flex-shrink: 0; border-radius: 8px;">
+                        <div class="podcast-item">
+                            <div class="podcast-image">
                                 <a href="@Url.Action("Detail", "Blog", new { slug = comment.Post.Slug })">
-                                    <img src="@(string.IsNullOrEmpty(comment.Post.ImageUrl) ? "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" : comment.Post.ImageUrl)" alt="@comment.Post.Title" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="@(string.IsNullOrEmpty(comment.Post.ImageUrl) ? "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" : comment.Post.ImageUrl)" 
+                                         alt="@comment.Post.Title" 
+                                         loading="lazy"
+                                         onerror="this.src='https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'; this.onerror=null;">
                                 </a>
                             </div>
-                            <div class="podcast-content" style="flex: 1; margin-left: 15px;">
-                                <h3 class="podcast-title" style="font-size: 16px; margin: 0 0 8px 0;">
-                                    <a href="@Url.Action("Detail", "Blog", new { slug = comment.Post.Slug })" style="color: #333; text-decoration: none;">
+                            <div class="podcast-content">
+                                <h3 class="podcast-title">
+                                    <a href="@Url.Action("Detail", "Blog", new { slug = comment.Post.Slug })">
                                         @comment.Post.Title
                                     </a>
                                 </h3>
-                                <div class="podcast-meta" style="color: #666; font-size: 14px; margin-bottom: 8px;">
+                                <div class="podcast-meta">
                                     @comment.UserName • @comment.CreatedAt.ToString("dd MMMM yyyy")
                                 </div>
-                                <p class="podcast-description" style="color: #666; font-size: 14px; line-height: 1.4; margin: 0;">
+                                <p class="podcast-description">
                                     @(comment.Content.Length > 120 ? comment.Content.Substring(0, 120) + "..." : comment.Content)
                                 </p>
                             </div>
                         </div>
                     }
                 }
-                else
-                {
-                    <div class="podcast-item" style="text-align: center; padding: 40px 20px; color: #666;">
-                        <div class="podcast-image" style="position: relative; margin: 0 auto 20px; width: 80px; height: 80px;">
-                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="No Comments" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                        </div>
-                        <div class="podcast-content">
-                            <div class="podcast-meta">BİLGİ • @DateTime.Now.ToString("dd MMMM yyyy")</div>
-                            <h3 class="podcast-title">Henüz Yorum Bulunmuyor</h3>
-                            <div class="article-author">BloggerPro</div>
-                            <p class="podcast-description">
-                                Blog yazılarına yapılan yorumlar burada görüntülenecektir.
-                                İlk yorumu siz yapın!
-                            </p>
-                        </div>
-                    </div>
-                }
+             
             }
-            else
-            {
-                <div class="podcast-item" style="text-align: center; padding: 40px 20px; color: #666;">
-                    <div class="podcast-image" style="position: relative; margin: 0 auto 20px; width: 80px; height: 80px;">
-                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80" alt="Loading" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                    </div>
-                    <div class="podcast-content">
-                        <div class="podcast-meta">YÜKLENIYOR • @DateTime.Now.ToString("dd MMMM yyyy")</div>
-                        <h3 class="podcast-title">Yorumlar Yükleniyor</h3>
-                        <div class="article-author">BloggerPro</div>
-                        <p class="podcast-description">
-                            Son yorumlar yükleniyor...
-                        </p>
-                    </div>
-                </div>
-            }
+
         </div>
     </section>
 </main>
 
-<!-- Newsletter Section -->
-<section class="newsletter-section">
-    <h2 class="newsletter-title">Daha Fazlası İçin Abone Olun</h2>
-    <p class="newsletter-description">
-        Sanat, tasarım ve fotoğrafçılık dünyasından en güncel haberler, 
-        özel içerikler ve eksklüzif röportajlar için e-bültenimize katılın.
-    </p>
-    
-    <div class="newsletter-buttons">
-        <div class="newsletter-input">
-            <input type="email" placeholder="E-posta adresiniz" name="newsletter-email">
-            <button type="button">Abone Ol</button>
-        </div>
-    </div>
-</section>
+
 
 @if (Model?.TotalPages > 1)
 {

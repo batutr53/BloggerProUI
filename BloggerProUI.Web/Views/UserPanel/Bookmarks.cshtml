@@ -4,205 +4,52 @@
     ViewData["Description"] = "Kaydettiğim blog yazıları ve favorilerim";
 }
 
-<style>
-    .bookmarks-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    
-    .bookmarks-header {
-        text-align: center;
-        margin-bottom: 40px;
-    }
-    
-    .bookmarks-header h1 {
-        color: #333;
-        margin-bottom: 10px;
-    }
-    
-    .bookmarks-header p {
-        color: #666;
-        font-size: 16px;
-    }
-    
-    .bookmarks-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
-        margin-top: 30px;
-    }
-    
-    .bookmark-card {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        text-decoration: none;
-        color: inherit;
-    }
-    
-    .bookmark-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-        text-decoration: none;
-        color: inherit;
-    }
-    
-    .bookmark-image {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-    
-    .bookmark-content {
-        padding: 20px;
-    }
-    
-    .bookmark-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        color: #333;
-        line-height: 1.4;
-    }
-    
-    .bookmark-meta {
-        color: #666;
-        font-size: 14px;
-        margin-bottom: 10px;
-    }
-    
-    .bookmark-excerpt {
-        color: #555;
-        font-size: 14px;
-        line-height: 1.6;
-        margin-bottom: 15px;
-    }
-    
-    .bookmark-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 15px;
-        border-top: 1px solid #eee;
-    }
-    
-    .bookmark-date {
-        color: #999;
-        font-size: 12px;
-    }
-    
-    .bookmark-actions {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .bookmark-remove {
-        background: #e74c3c;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-        transition: background 0.3s ease;
-    }
-    
-    .bookmark-remove:hover {
-        background: #c0392b;
-    }
-    
-    .no-bookmarks {
-        text-align: center;
-        padding: 60px 20px;
-        color: #666;
-    }
-    
-    .no-bookmarks h3 {
-        margin-bottom: 20px;
-        color: #333;
-    }
-    
-    .no-bookmarks p {
-        margin-bottom: 30px;
-        font-size: 16px;
-    }
-    
-    .browse-posts-btn {
-        background: #333;
-        color: white;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 4px;
-        text-decoration: none;
-        display: inline-block;
-        transition: background 0.3s ease;
-    }
-    
-    .browse-posts-btn:hover {
-        background: #555;
-        text-decoration: none;
-        color: white;
-    }
-    
-    .stats-info {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-    
-    .stats-info h3 {
-        color: #333;
-        margin-bottom: 5px;
-    }
-    
-    .stats-info p {
-        color: #666;
-        margin: 0;
-    }
-</style>
+<link rel="stylesheet" href="~/css/user-bookmarks.css" asp-append-version="true" />
 
-<div class="bookmarks-container">
-    <div class="bookmarks-header">
-        <h1>📚 Favorilerim</h1>
-        <p>Kaydettiğim blog yazıları ve daha sonra okumak istediğim içerikler</p>
+<div class="user-bookmarks-wrapper">
+    <div class="user-bookmarks-header">
+        <h1 class="user-bookmarks-title">Favorilerim</h1>
+        <p class="user-bookmarks-subtitle">Kaydettiğim blog yazıları ve daha sonra okumak istediğim içerikler</p>
     </div>
     
     @if (Model != null && Model.Any())
     {
-        <div class="stats-info">
-            <h3>@Model.Count</h3>
-            <p>Kayıtlı favori yazı</p>
+        <div class="user-bookmarks-counter">
+            <h3 class="user-bookmarks-count-number">@Model.Count</h3>
+            <p class="user-bookmarks-count-label">Kayıtlı favori yazı</p>
         </div>
         
-        <div class="bookmarks-grid">
+        <div class="user-bookmarks-list">
             @foreach (var bookmark in Model)
             {
-                <div class="bookmark-card">
+                <div class="user-bookmark-item">
                     <a href="@Url.Action("Detail", "Blog", new { slug = bookmark.Post.Slug })" style="text-decoration: none; color: inherit;">
                         <img src="@(!string.IsNullOrEmpty(bookmark.Post.FeaturedImage) ? bookmark.Post.FeaturedImage : "https://images.unsplash.com/photo-1494790108755-2616c9a7aaa0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80")" 
-                             alt="@bookmark.Post.Title" class="bookmark-image" loading="lazy">
-                        <div class="bookmark-content">
-                            <h3 class="bookmark-title">@bookmark.Post.Title</h3>
-                            <div class="bookmark-meta">
+                             alt="@bookmark.Post.Title" class="user-bookmark-thumbnail" loading="lazy">
+                    </a>
+                    <div class="user-bookmark-details">
+                        <div class="user-bookmark-main-info">
+                            <div class="user-bookmark-category">
                                 @if (bookmark.Post.Categories != null && bookmark.Post.Categories.Any())
                                 {
-                                    @string.Join(", ", bookmark.Post.Categories)
+                                    @string.Join(", ", bookmark.Post.Categories).ToUpper()
                                 }
                                 else
                                 {
-                                    <text>Genel</text>
+                                    <text>GENEL</text>
                                 }
                                 • @bookmark.Post.CreatedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
                             </div>
-                            <p class="bookmark-excerpt">
+                            <a href="@Url.Action("Detail", "Blog", new { slug = bookmark.Post.Slug })" style="text-decoration: none; color: inherit;">
+                                <h3 class="user-bookmark-post-title">@bookmark.Post.Title</h3>
+                            </a>
+                            <div class="user-bookmark-author">
+                                Yazan: @(bookmark.Post.Author?.ToString()?.ToUpper() ?? "BİLİNMEYEN")
+                            </div>
+                            <p class="user-bookmark-excerpt">
                                 @if (!string.IsNullOrEmpty(bookmark.Post.Excerpt))
                                 {
-                                    @(bookmark.Post.Excerpt.Length > 120 ? bookmark.Post.Excerpt.Substring(0, 120) + "..." : bookmark.Post.Excerpt)
+                                    @(bookmark.Post.Excerpt.Length > 150 ? bookmark.Post.Excerpt.Substring(0, 150) + "..." : bookmark.Post.Excerpt)
                                 }
                                 else
                                 {
@@ -211,20 +58,20 @@
                             </p>
                             @if (!string.IsNullOrEmpty(bookmark.Notes))
                             {
-                                <div class="bookmark-notes" style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 10px;">
+                                <div class="user-bookmark-personal-notes">
                                     <strong>Notum:</strong> @bookmark.Notes
                                 </div>
                             }
                         </div>
-                    </a>
-                    <div class="bookmark-footer">
-                        <div class="bookmark-date">
-                            Kaydedilme: @bookmark.BookmarkedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
-                        </div>
-                        <div class="bookmark-actions">
-                            <button class="bookmark-remove" onclick="removeBookmark('@bookmark.PostId', '@bookmark.Post.Title')">
-                                🗑️ Kaldır
-                            </button>
+                        <div class="user-bookmark-actions">
+                            <div class="user-bookmark-saved-date">
+                                Kaydedilme: @bookmark.BookmarkedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
+                            </div>
+                            <div class="user-bookmark-controls">
+                                <button class="user-bookmark-remove-btn" onclick="removeBookmark('@bookmark.PostId', '@bookmark.Post.Title')">
+                                    Kaldır
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -233,11 +80,11 @@
     }
     else
     {
-        <div class="no-bookmarks">
-            <h3>🔖 Henüz favori eklenmemiş</h3>
-            <p>Sevdiğiniz blog yazılarını favorilerinize ekleyerek daha sonra kolayca erişebilirsiniz.</p>
-            <a href="@Url.Action("Index", "Blog")" class="browse-posts-btn">
-                📖 Blog Yazılarını Keşfet
+        <div class="user-bookmarks-empty-state">
+            <h3 class="user-bookmarks-empty-title">Henüz favori eklenmemiş</h3>
+            <p class="user-bookmarks-empty-description">Sevdiğiniz blog yazılarını favorilerinize ekleyerek daha sonra kolayca erişebilirsiniz.</p>
+            <a href="@Url.Action("Index", "Blog")" class="user-bookmarks-explore-btn">
+                Blog Yazılarını Keşfet
             </a>
         </div>
     }

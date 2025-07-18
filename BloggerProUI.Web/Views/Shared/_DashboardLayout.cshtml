@@ -15,7 +15,8 @@
     @RenderBody()
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/site.js?v=@DateTime.Now.Ticks"></script>
+    <script src="~/js/user-panel.js?v=@DateTime.Now.Ticks"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

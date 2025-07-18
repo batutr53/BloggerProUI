@@ -4,7 +4,7 @@
         <a href="@Url.Action("Index", "Home")" class="logo">insanlikHallerimiz</a>
         
         <nav>
-            <ul class="main-nav">
+            <ul class="main-nav" id="mainNav">
                 <li><a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Home" && ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")">Ana Sayfa</a></li>
                 <li><a href="@Url.Action("Index", "Blog")" class="@(ViewContext.RouteData.Values["Controller"].ToString() == "Blog" ? "active" : "")">Blog</a></li>
                 <li><a href="@Url.Action("About", "Home")">Hakkımızda</a></li>
@@ -13,11 +13,35 @@
         </nav>
         
         <div class="nav-icons">
-            <i class="fas fa-search"></i>
-            <a href="@Url.Action("Bookmarks", "UserPanel")" style="color: inherit;" title="Favorilerim">
-                <i class="fas fa-bookmark"></i>
-            </a>
-            <a href="@Url.Action("Index", "UserPanel")" style="color: inherit;"><i class="fas fa-user"></i></a>
+            <div class="search-toggle">
+                <i class="fas fa-search" onclick="showSearchBox()"></i>
+                <div class="search-dropdown" id="searchDropdown">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Blog ara..." />
+                        <i class="fas fa-times search-close" onclick="hideSearchBox()"></i>
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+            </div>
+            
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a href="@Url.Action("Bookmarks", "UserPanel")" style="color: inherit;" title="Favorilerim">
+                    <i class="fas fa-bookmark"></i>
+                </a>
+                <a href="@Url.Action("Index", "UserPanel")" style="color: inherit;" title="@User.Identity.Name">
+                    <i class="fas fa-user"></i>
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("Login", "Auth")" style="color: inherit;" title="Giriş Yap">
+                    <i class="fas fa-sign-in-alt"></i>
+                </a>
+                <a href="@Url.Action("Register", "Auth")" style="color: inherit;" title="Kayıt Ol">
+                    <i class="fas fa-user-plus"></i>
+                </a>
+            }
         </div>
     </div>
 </header>

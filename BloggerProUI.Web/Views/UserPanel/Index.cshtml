@@ -1,3 +1,5 @@
+@model BloggerProUI.Web.Models.UserDashboardViewModel
+
 @{
     ViewData["Title"] = "Dashboard";
     Layout = "_DashboardLayout";
@@ -28,19 +30,19 @@
             <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-number" data-target="47">0</div>
+                    <div class="stat-number" data-target="@Model.Stats.TotalReadPosts">0</div>
                     <div class="stat-label">Okunan Makale</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" data-target="12">0</div>
+                    <div class="stat-number" data-target="@Model.Stats.TotalBookmarks">0</div>
                     <div class="stat-label">Yer İmi</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" data-target="8">0</div>
-                    <div class="stat-label">Okuma Listesi</div>
+                    <div class="stat-number" data-target="@Model.Stats.ConsecutiveActiveDays">0</div>
+                    <div class="stat-label">Aktif Gün Serisi</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" data-target="156">0</div>
+                    <div class="stat-number" data-target="@Model.Stats.TotalReadingTime">0</div>
                     <div class="stat-label">Okuma Süresi (dk)</div>
                 </div>
             </div>
@@ -49,42 +51,39 @@
             <div class="activity-section">
                 <h2 class="section-title">Son Aktiviteler</h2>
                 <div class="activity-list">
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-book-open"></i>
+                    @if (Model.Activities.Any())
+                    {
+                        @foreach (var activity in Model.Activities)
+                        {
+                            <div class="activity-item">
+                                <div class="activity-icon" style="background-color: @activity.Color">
+                                    <i class="@activity.Icon"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        @activity.Title: @activity.Description
+                                        @if (!string.IsNullOrEmpty(activity.PostSlug))
+                                        {
+                                            <a href="/Post/Details/@activity.PostSlug" class="activity-link">@activity.PostTitle</a>
+                                        }
+                                    </div>
+                                    <div class="activity-time">@activity.ActivityDate.ToString("dd MMM yyyy, HH:mm")</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">Henüz aktivite bulunmuyor. Blogdaki yazıları okuyarak aktivite oluşturmaya başlayın!</div>
+                                <div class="activity-time">Şimdi</div>
+                            </div>
                         </div>
-                        <div class="activity-content">
-                            <div class="activity-text">"Helmut Newton Photobook" makalesini okudun</div>
-                            <div class="activity-time">2 saat önce</div>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-bookmark"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">"Modern Sanatın Dijital Evrimi" makalesini yer imlerine ekledin</div>
-                            <div class="activity-time">5 saat önce</div>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">"Minimalizmin Yükselişi" makalesini beğendin</div>
-                            <div class="activity-time">1 gün önce</div>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-share"></i>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-text">"Sürdürülebilir Mimari" makalesini paylaştın</div>
-                            <div class="activity-time">2 gün önce</div>
-                        </div>
-                    </div>
+                    }
                 </div>
             </div>
         </div>
@@ -92,71 +91,75 @@
         <!-- Reading List Tab -->
         <div id="reading" class="tab-content">
             <div class="page-header">
-                <h1 class="page-title">Okuma Listesi</h1>
-                <p class="page-subtitle">Daha sonra okumak için kaydettiğin makaleler</p>
+                <h1 class="page-title">Son Okunan Yazılar</h1>
+                <p class="page-subtitle">Yakın zamanda okuduğun makaleler</p>
             </div>
 
             <div class="content-grid">
                 <div class="reading-list">
-                    <div class="book-item-small">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Book Cover" class="book-cover-small" loading="lazy">
-                        <div class="book-info">
-                            <h4 class="book-title-small">Portre Fotoğrafçılığında Işık Kullanımı</h4>
-                            <div class="book-author-small">Fatma Şen</div>
-                            <div class="reading-progress">
-                                <div class="progress-bar" data-width="75"></div>
+                    @if (Model.RecentPosts.Any())
+                    {
+                        @foreach (var post in Model.RecentPosts)
+                        {
+                            <div class="book-item-small">
+                                @if (!string.IsNullOrEmpty(post.FeaturedImage))
+                                {
+                                    <img src="@post.FeaturedImage" alt="@post.Title" class="book-cover-small" loading="lazy">
+                                }
+                                else
+                                {
+                                    <div class="book-cover-small no-image">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+                                }
+                                <div class="book-info">
+                                    <h4 class="book-title-small">
+                                        <a href="/Post/Details/@post.Slug" style="color: inherit; text-decoration: none;">
+                                            @post.Title
+                                        </a>
+                                    </h4>
+                                    <div class="book-author-small">@post.AuthorName</div>
+                                    <div class="reading-progress">
+                                        <div class="progress-bar" data-width="@(post.TotalReadingTime > 0 ? Math.Min(100, (post.TotalReadingTime * 100) / 10) : 0)"></div>
+                                    </div>
+                                    <div class="post-stats">
+                                        <span><i class="fas fa-eye"></i> @post.VisitCount</span>
+                                        <span><i class="fas fa-clock"></i> @post.TotalReadingTime dk</span>
+                                        @if (post.IsBookmarked)
+                                        {
+                                            <span><i class="fas fa-bookmark" style="color: #f39c12;"></i></span>
+                                        }
+                                    </div>
+                                </div>
                             </div>
+                        }
+                    }
+                    else
+                    {
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <i class="fas fa-book-open" style="font-size: 4rem; color: #ddd; margin-bottom: 20px;"></i>
+                            <h3>Henüz okunan yazı yok</h3>
+                            <p>Blogdaki yazıları okuyarak okuma geçmişinizi oluşturmaya başlayın!</p>
                         </div>
-                    </div>
-                    
-                    <div class="book-item-small">
-                        <img src="https://images.unsplash.com/photo-1456885284447-7dd4bb8720bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Book Cover" class="book-cover-small" loading="lazy">
-                        <div class="book-info">
-                            <h4 class="book-title-small">Çağdaş Türk Sanatçıları</h4>
-                            <div class="book-author-small">Oğuz Kaan</div>
-                            <div class="reading-progress">
-                                <div class="progress-bar" data-width="45"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="book-item-small">
-                        <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Book Cover" class="book-cover-small" loading="lazy">
-                        <div class="book-info">
-                            <h4 class="book-title-small">Grafik Tasarımda Renk Teorisi</h4>
-                            <div class="book-author-small">Seda Acar</div>
-                            <div class="reading-progress">
-                                <div class="progress-bar" data-width="90"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="book-item-small">
-                        <img src="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Book Cover" class="book-cover-small" loading="lazy">
-                        <div class="book-info">
-                            <h4 class="book-title-small">Yılın Fotoğraf Sergisi</h4>
-                            <div class="book-author-small">Editör</div>
-                            <div class="reading-progress">
-                                <div class="progress-bar" data-width="20"></div>
-                            </div>
-                        </div>
-                    </div>
+                    }
                 </div>
                 
                 <div class="bookmarks-section">
-                    <h3 class="section-title">Favori Yazarlar</h3>
-                    <a href="#" class="bookmark-item">
-                        <div class="bookmark-title">Alice Smith</div>
-                        <div class="bookmark-url">Fotoğraf Uzmanı</div>
-                    </a>
-                    <a href="#" class="bookmark-item">
-                        <div class="bookmark-title">Mehmet Yılmaz</div>
-                        <div class="bookmark-url">Sanat Tarihçisi</div>
-                    </a>
-                    <a href="#" class="bookmark-item">
-                        <div class="bookmark-title">Ayşe Kaya</div>
-                        <div class="bookmark-url">Tasarım Uzmanı</div>
-                    </a>
+                    <h3 class="section-title">İstatistikler</h3>
+                    <div class="stats-summary">
+                        <div class="stat-item">
+                            <strong>Bu Hafta:</strong> @Model.Stats.PostsReadThisWeek yazı
+                        </div>
+                        <div class="stat-item">
+                            <strong>Bu Ay:</strong> @Model.Stats.PostsReadThisMonth yazı
+                        </div>
+                        <div class="stat-item">
+                            <strong>Ortalama Okuma Süresi:</strong> @Model.Stats.AverageReadingTime dk
+                        </div>
+                        <div class="stat-item">
+                            <strong>Favori Kategori:</strong> @Model.Stats.FavoriteCategory
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -229,3 +232,75 @@
         </div>
     </main>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Reading Stats Chart (günlük okuma istatistikleri için)
+    document.addEventListener('DOMContentLoaded', function() {
+        const readingData = @Html.Raw(Json.Serialize(Model.ReadingStats));
+        
+        // Eğer reading tab'da bir chart container varsa chart'ı çiz
+        const chartContainer = document.querySelector('#reading .chart-container');
+        if (chartContainer) {
+            const canvas = document.createElement('canvas');
+            canvas.id = 'readingChart';
+            chartContainer.appendChild(canvas);
+            
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(readingData),
+                    datasets: [{
+                        label: 'Okunan Yazı Sayısı',
+                        data: Object.values(readingData),
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+    });
+    
+    // Animasyon efektleri için (stat-number counter)
+    document.addEventListener('DOMContentLoaded', function() {
+        const statNumbers = document.querySelectorAll('.stat-number');
+        
+        statNumbers.forEach(function(statNumber) {
+            const target = parseInt(statNumber.getAttribute('data-target'));
+            const increment = target / 100;
+            let current = 0;
+            
+            const updateNumber = function() {
+                if (current < target) {
+                    current += increment;
+                    statNumber.textContent = Math.floor(current);
+                    setTimeout(updateNumber, 20);
+                } else {
+                    statNumber.textContent = target;
+                }
+            };
+            
+            updateNumber();
+        });
+    });
+</script>

@@ -41,5 +41,7 @@ namespace BloggerProUI.Business.Interfaces
         Task<DataResult<UserPostStatsDto>> GetUserPostStatsAsync();
         
         Task<IResult> IncrementViewCountAsync(Guid postId);
+        
+        Task<DataResult<PaginatedResultDto<PostListDto>>> SearchPostsAsync(string keyword, int page = 1, int pageSize = 10);
     }
 }

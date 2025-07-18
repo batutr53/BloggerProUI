@@ -425,4 +425,25 @@ public class PostApiService : IPostApiService
             return new ErrorDataResult<PostDetailDto>($"Servis hatası: {ex.Message}");
         }
     }
+
+    public async Task<DataResult<PaginatedResultDto<PostListDto>>> SearchPostsAsync(string keyword, int page = 1, int pageSize = 10)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"Posts/search?keyword={Uri.EscapeDataString(keyword)}&page={page}&pageSize={pageSize}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<DataResult<PaginatedResultDto<PostListDto>>>();
+                return result ?? new ErrorDataResult<PaginatedResultDto<PostListDto>>("Boş response döndü.");
+            }
+            
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"API hatası: {response.StatusCode} - {errorContent}");
+        }
+        catch (Exception ex)
+        {
+            return new ErrorDataResult<PaginatedResultDto<PostListDto>>($"Servis hatası: {ex.Message}");
+        }
+    }
 }

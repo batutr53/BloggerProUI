@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"] - insanlikHallerimiz</title>
     
+    <!-- CACHE DEVRE DIŞI META TAGS -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Last-Modified" content="@DateTime.UtcNow.ToString("R")">
+    <meta http-equiv="ETag" content="@Guid.NewGuid()">
+    
     <!-- SEO Meta Tags -->
     <meta name="description" content="@(ViewData["Description"] ?? "insanlikHallerimiz - Sanat, tasarım ve fotoğrafçılık dünyasından güncel içerikler, ilham verici yazılar ve yaratıcı fikirler.")">
     <meta name="keywords" content="@(ViewData["Keywords"] ?? "blog, sanat, tasarım, fotoğrafçılık, yaratıcılık, insanlik hallerimiz")">
@@ -63,8 +70,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" media="swap">
-    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/post-content.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/style.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/css/post-content.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/css/header-search.css?v=@DateTime.Now.Ticks" />
     
     <!-- Structured Data -->
     @if(ViewData["StructuredData"] != null)
@@ -76,7 +84,9 @@
     <!-- Skip to main content for accessibility -->
     <a href="#main-content" class="sr-only sr-only-focusable">Ana içeriğe geç</a>
     
-    @await Html.PartialAsync("_Header")
+    <div id="header-container">
+        @await Html.PartialAsync("_Header")
+    </div>
 
     <main id="main-content">
         @RenderBody()
@@ -84,10 +94,41 @@
 
     @await Html.PartialAsync("_Footer")
 
+    <script>
+        // ULTRA CACHE KILLER - Browser cache'i tamamen öldür
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+        
+        // Browser cache'i temizle
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                for (let name of names) caches.delete(name);
+            });
+        }
+        
+        // Page cache'i engelle
+        window.addEventListener('beforeunload', function() {
+            if (window.performance && window.performance.navigation.type === 2) {
+                location.reload(true);
+            }
+        });
+        
+        // Back button cache'i engelle
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                location.reload(true);
+            }
+        });
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="~/js/seo-enhancements.js" asp-append-version="true"></script>
-    <!-- <script src="~/js/cache-busting.js" asp-append-version="true"></script> -->
+    <script src="~/js/site.js?v=@DateTime.Now.Ticks&nocache=@Guid.NewGuid()"></script>
+    <script src="~/js/seo-enhancements.js?v=@DateTime.Now.Ticks&nocache=@Guid.NewGuid()"></script>
+    <script src="~/js/cache-busting.js?v=@DateTime.Now.Ticks&nocache=@Guid.NewGuid()"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

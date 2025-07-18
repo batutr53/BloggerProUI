@@ -9,7 +9,7 @@ using BloggerProUI.Business.Interfaces;
 
 namespace BloggerProUI.Web.Controllers
 {
-    public class AuthController : Controller
+    public class AuthController : BaseController
     {
         private readonly IAuthApiService _authApiService;
         public AuthController(IAuthApiService authApiService)
