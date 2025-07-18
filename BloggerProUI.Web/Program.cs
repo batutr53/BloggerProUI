@@ -1,7 +1,9 @@
-using BloggerProUI.Business.Handlers;
 using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Business.Services;
 using BloggerProUI.Web.Extensions;
+using BloggerProUI.Web.Models.Configuration;
+using BloggerProUI.Web.Services;
+using BloggerProUI.Web.TagHelpers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +20,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             options.LogoutPath = "/Auth/Logout";
             options.AccessDeniedPath = "/Auth/Login";
         });
-builder.Services.AddTransient<AuthTokenHandler>();
+builder.Services.AddTransient<BloggerProUI.Business.Handlers.AuthTokenHandler>();
+
+// Asset Versioning Services - Temporarily disabled
+// builder.Services.Configure<AssetVersioningOptions>(
+//     builder.Configuration.GetSection(AssetVersioningOptions.SectionName));
+// builder.Services.AddScoped<IAssetVersioningService, AssetVersioningService>();
+// builder.Services.AddScoped<VersionedAssetTagHelper>();
+// builder.Services.AddHostedService<FileWatcherService>();
 
 var app = builder.Build();
 

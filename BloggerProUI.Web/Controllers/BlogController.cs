@@ -71,16 +71,30 @@ public class BlogController : Controller
 
     [HttpGet("Detail/{id}")]
     [HttpGet("Post/{id}")]  // Alternative route
+    [HttpGet("{id:guid}")]  // SEO-friendly route
+    [HttpGet("{slug}")]     // SEO-friendly slug route
     public async Task<IActionResult> Detail(string id)
     {
         try
         {
-            if (string.IsNullOrEmpty(id) || !Guid.TryParse(id, out var postId))
+            Guid guid;
+            
+            // Try to parse as GUID first
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
             
-            var guid = Guid.Parse(id);
+            if (Guid.TryParse(id, out guid))
+            {
+                // ID is a valid GUID
+            }
+            else
+            {
+                // ID might be a slug - try to find post by slug
+                // For now, return NotFound, but this could be extended to support slug-based routing
+                return NotFound();
+            }
             
             // Fetch post details, comments, related posts, and tags in parallel
             var postTask = _postApiService.GetPostByIdAsync(guid);

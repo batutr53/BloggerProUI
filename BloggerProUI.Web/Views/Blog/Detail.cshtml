@@ -2,6 +2,40 @@
 @{
     ViewData["Title"] = Model?.Title ?? "Blog Detayı";
     var isAuthenticated = User.Identity.IsAuthenticated;
+    
+    // SEO Meta Tags
+    if (Model != null)
+    {
+        ViewData["Description"] = !string.IsNullOrEmpty(Model.Excerpt) ? Model.Excerpt : Model.Title + " - insanlikHallerimiz blog yazı sı";
+        ViewData["Keywords"] = Model.Tags != null && Model.Tags.Any() ? string.Join(", ", Model.Tags) + ", blog, makale" : "blog, makale, insanlik hallerimiz";
+        ViewData["Author"] = Model.AuthorName ?? "insanlikHallerimiz";
+        ViewData["CanonicalUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/Blog/Detail/{Model.Id}";
+        
+        // Open Graph
+        ViewData["OgTitle"] = Model.Title;
+        ViewData["OgDescription"] = !string.IsNullOrEmpty(Model.Excerpt) ? Model.Excerpt : Model.Title;
+        ViewData["OgImage"] = !string.IsNullOrEmpty(Model.FeaturedImage) ? Model.FeaturedImage : $"{Context.Request.Scheme}://{Context.Request.Host}/images/og-default.jpg";
+        ViewData["OgType"] = "article";
+        ViewData["OgUrl"] = $"{Context.Request.Scheme}://{Context.Request.Host}/Blog/Detail/{Model.Id}";
+        
+        // Twitter
+        ViewData["TwitterTitle"] = Model.Title;
+        ViewData["TwitterDescription"] = !string.IsNullOrEmpty(Model.Excerpt) ? Model.Excerpt : Model.Title;
+        ViewData["TwitterImage"] = !string.IsNullOrEmpty(Model.FeaturedImage) ? Model.FeaturedImage : $"{Context.Request.Scheme}://{Context.Request.Host}/images/og-default.jpg";
+        
+        // Article meta
+        ViewData["ArticlePublishedTime"] = (Model.PublishDate ?? Model.CreatedAt).ToString("yyyy-MM-ddTHH:mm:ssZ");
+        if (Model.LastModified.HasValue)
+        {
+            ViewData["ArticleModifiedTime"] = Model.LastModified.Value.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        }
+        ViewData["ArticleAuthor"] = Model.AuthorName ?? "insanlikHallerimiz";
+        ViewData["ArticleSection"] = Model.Categories?.FirstOrDefault() ?? "Genel";
+        ViewData["ArticleTags"] = Model.Tags?.ToList() ?? new List<string>();
+        
+        // Structured Data will be added via JavaScript to avoid compilation issues
+        ViewData["HasStructuredData"] = "true";
+    }
 }
 @if (Model == null)
 {
@@ -17,6 +51,21 @@
 }
 else
 {
+
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb" class="breadcrumb-nav">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item home-item"><a href="/">Ana Sayfa</a></li>
+            <li class="breadcrumb-item"><a href="/Blog">Blog</a></li>
+            @if (Model?.Categories != null && Model.Categories.Any())
+            {
+                <li class="breadcrumb-item category-item"><a href="/Blog?category=@Uri.EscapeDataString(Model.Categories.First())">@Model.Categories.First()</a></li>
+            }
+            <li class="breadcrumb-item post-item active" aria-current="page" title="@(Model?.Title ?? "Blog Yazı sı")">@(Model?.Title ?? "Blog Yazı sı")</li>
+        </ol>
+    </div>
+</nav>
 
 <!-- Main Article Container -->
 <main class="article-container">

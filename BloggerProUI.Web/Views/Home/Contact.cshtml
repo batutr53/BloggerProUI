@@ -32,7 +32,7 @@
                     </div>
                 }
                 
-                <form class="profile-form" style="gap: 20px;" method="post" action="/Home/Contact">
+                <form id="contactForm" class="profile-form" style="gap: 20px;">
                     @Html.AntiForgeryToken()
                     
                     <div class="form-group">
@@ -102,8 +102,8 @@
                         34330 Beşiktaş/İstanbul</p>
                         
                         <p><strong>E-posta:</strong><br>
-                        info@qstudio.com<br>
-                        editör@qstudio.com</p>
+                        info@insanlikhallerimiz.com<br>
+                        editör@insanlikhallerimiz.com</p>
                         
                         <p><strong>Telefon:</strong><br>
                         +90 212 555 01 23</p>
@@ -125,22 +125,22 @@
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #666; transition: color 0.3s ease;">
                         <i class="fab fa-instagram" style="font-size: 18px;"></i>
-                        <span>@@qstudio_official</span>
+                        <span>@@insanlikhallerimiz_official</span>
                     </a>
                     
                     <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #666; transition: color 0.3s ease;">
                         <i class="fab fa-twitter" style="font-size: 18px;"></i>
-                        <span>@@qstudio</span>
+                        <span>@@insanlikhallerimiz</span>
                     </a>
                     
                     <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #666; transition: color 0.3s ease;">
                         <i class="fab fa-linkedin" style="font-size: 18px;"></i>
-                        <span>Q. Studio</span>
+                        <span>insanlikHallerimiz</span>
                     </a>
                     
                     <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #666; transition: color 0.3s ease;">
                         <i class="fab fa-youtube" style="font-size: 18px;"></i>
-                        <span>Q Studio Channel</span>
+                        <span>insanlikHallerimiz</span>
                     </a>
                 </div>
             </div>
@@ -162,5 +162,64 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            $('#contactForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                // Clear previous error messages
+                $('.text-danger').text('');
+                $('.alert').remove();
+                
+                // Disable submit button
+                const submitBtn = $('#contactForm button[type="submit"]');
+                const originalText = submitBtn.text();
+                submitBtn.prop('disabled', true).text('Gönderiliyor...');
+                
+                const formData = new FormData(this);
+                
+                $.ajax({
+                    url: '/Home/CreateContact',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if (response.success) {
+                            // Show success message
+                            $('#contactForm').before('<div class="alert alert-success" style="padding: 15px; margin-bottom: 20px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 4px;">' + response.message + '</div>');
+                            
+                            // Reset form
+                            $('#contactForm')[0].reset();
+                            
+                            // Auto-hide success message after 5 seconds
+                            setTimeout(function() {
+                                $('.alert-success').fadeOut();
+                            }, 5000);
+                        } else {
+                            // Show error message
+                            $('#contactForm').before('<div class="alert alert-danger" style="padding: 15px; margin-bottom: 20px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;">' + response.message + '</div>');
+                            
+                            // Show field-specific errors
+                            if (response.errors) {
+                                for (let field in response.errors) {
+                                    const fieldName = field.charAt(0).toLowerCase() + field.slice(1); // Convert to camelCase
+                                    $('span[data-valmsg-for="' + fieldName + '"]').text(response.errors[field][0]);
+                                }
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#contactForm').before('<div class="alert alert-danger" style="padding: 15px; margin-bottom: 20px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 4px;">Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.</div>');
+                    },
+                    complete: function() {
+                        // Re-enable submit button
+                        submitBtn.prop('disabled', false).text(originalText);
+                    }
+                });
+            });
+        });
+    </script>
 }
 

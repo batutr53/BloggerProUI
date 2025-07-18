@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://localhost:7020/sitemap.xml
+Sitemap: https://localhost:7020/sitemap-posts.xml
+
+# Disallow admin areas
+Disallow: /Admin/
+Disallow: /UserPanel/
+Disallow: /api/
+
+# Allow important directories
+Allow: /Blog/
+Allow: /css/
+Allow: /js/
+Allow: /images/
+
+# Crawl-delay
+Crawl-delay: 1

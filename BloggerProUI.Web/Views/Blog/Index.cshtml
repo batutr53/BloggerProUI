@@ -1,7 +1,70 @@
 @model BloggerProUI.Models.Pagination.PaginatedResultDto<BloggerProUI.Models.Post.PostListDto>
 @{
-    ViewData["Title"] = "Blog";
+    var currentCategory = ViewBag.CurrentCategory as string;
+    var currentTag = ViewBag.CurrentTag as string;
+    
+    if (!string.IsNullOrEmpty(currentCategory))
+    {
+        ViewData["Title"] = $"{currentCategory} - Blog";
+        ViewData["Description"] = $"{currentCategory} kategorisindeki blog yazı ları. Sanat, tasarım ve fotoğrafçılık hakkında güncel içerikler.";
+        ViewData["Keywords"] = $"{currentCategory}, blog, makale, insanlik hallerimiz";
+    }
+    else if (!string.IsNullOrEmpty(currentTag))
+    {
+        ViewData["Title"] = $"{currentTag} - Blog";
+        ViewData["Description"] = $"{currentTag} etiketindeki blog yazı ları. Sanat, tasarım ve fotoğrafçılık hakkında güncel içerikler.";
+        ViewData["Keywords"] = $"{currentTag}, blog, makale, insanlik hallerimiz";
+    }
+    else
+    {
+        ViewData["Title"] = "Blog";
+        ViewData["Description"] = "insanlikHallerimiz blog sayfası. Sanat, tasarım ve fotoğrafçılık dünyasından güncel içerikler, ilham verici yazı lar ve yaratıcı fikirler.";
+        ViewData["Keywords"] = "blog, sanat, tasarım, fotoğrafçılık, yaratıcılık, insanlik hallerimiz";
+    }
+    
+    // Canonical URL
+    var canonicalUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/Blog";
+    if (!string.IsNullOrEmpty(currentCategory))
+    {
+        canonicalUrl += $"?category={Uri.EscapeDataString(currentCategory)}";
+    }
+    else if (!string.IsNullOrEmpty(currentTag))
+    {
+        canonicalUrl += $"?tag={Uri.EscapeDataString(currentTag)}";
+    }
+    ViewData["CanonicalUrl"] = canonicalUrl;
+    
+    // Open Graph
+    ViewData["OgTitle"] = ViewData["Title"] + " - insanlikHallerimiz";
+    ViewData["OgDescription"] = ViewData["Description"];
+    ViewData["OgType"] = "website";
+    ViewData["OgUrl"] = canonicalUrl;
+    
+    // Structured Data will be added via JavaScript
+    ViewData["HasStructuredData"] = "true";
 }
+
+<!-- Breadcrumb Navigation -->
+<nav aria-label="breadcrumb" class="breadcrumb-nav">
+    <div class="container">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item home-item"><a href="/">Ana Sayfa</a></li>
+            <li class="breadcrumb-item"><a href="/Blog">Blog</a></li>
+            @if (!string.IsNullOrEmpty(ViewBag.CurrentCategory as string))
+            {
+                <li class="breadcrumb-item category-item active" aria-current="page">@ViewBag.CurrentCategory</li>
+            }
+            else if (!string.IsNullOrEmpty(ViewBag.CurrentTag as string))
+            {
+                <li class="breadcrumb-item category-item active" aria-current="page">@ViewBag.CurrentTag</li>
+            }
+            else
+            {
+                <li class="breadcrumb-item active" aria-current="page">Tüm Yazı lar</li>
+            }
+        </ol>
+    </div>
+</nav>
 
 <!-- Main Content -->
 <main class="content-container">

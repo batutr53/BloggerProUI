@@ -131,21 +131,22 @@ public class HomeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Contact(ContactCreateDto contactCreateDto)
+    public async Task<IActionResult> CreateContact(ContactCreateDto contactCreateDto)
     {
-        _logger.LogInformation("POST Contact metodu çağrıldı!");
+        _logger.LogInformation("POST CreateContact metodu çağrıldı!");
         _logger.LogInformation("Model: Name={Name}, Email={Email}, Subject={Subject}", contactCreateDto?.Name, contactCreateDto?.Email, contactCreateDto?.Subject);
         
         if (!ModelState.IsValid)
         {
             _logger.LogWarning("ModelState geçersiz!");
-            foreach (var error in ModelState)
-            {
-                _logger.LogWarning("Field: {Field}, Errors: {Errors}", error.Key, string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage)));
-            }
-            // ViewBag.ContactInfo'yu yükle çünkü view'a geri dönecek
-            await LoadContactInfoAsync();
-            return View(contactCreateDto);
+            var errors = ModelState
+                .Where(x => x.Value.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+            
+            return Json(new { success = false, message = "Form alanlarında hatalar var.", errors = errors });
         }
 
         try
@@ -158,22 +159,17 @@ public class HomeController : Controller
 
             if (result.Success)
             {
-                TempData["SuccessMessage"] = "Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.";
-                return RedirectToAction("Contact");
+                return Json(new { success = true, message = "Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız." });
             }
             else
             {
-                TempData["ErrorMessage"] = result.Message?.FirstOrDefault() ?? "Mesaj gönderilirken bir hata oluştu.";
-                await LoadContactInfoAsync();
-                return View(contactCreateDto);
+                return Json(new { success = false, message = result.Message?.FirstOrDefault() ?? "Mesaj gönderilirken bir hata oluştu." });
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while sending contact message");
-            TempData["ErrorMessage"] = "Mesaj gönderilirken beklenmeyen bir hata oluştu.";
-            await LoadContactInfoAsync();
-            return View(contactCreateDto);
+            return Json(new { success = false, message = "Mesaj gönderilirken beklenmeyen bir hata oluştu." });
         }
     }
 
