@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Image lazy loading
-    const images = document.querySelectorAll('img[data-src]');
+    const lazyLoadImages = document.querySelectorAll('img[data-src]');
     const imageObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    images.forEach(img => imageObserver.observe(img));
+    lazyLoadImages.forEach(img => imageObserver.observe(img));
 
     // Initialize animations
     const animatedElements = document.querySelectorAll('.fade-in');
@@ -422,22 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
         animationObserver.observe(el);
     });
 
-    // Enhanced Navigation and Smooth Scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const href = this.getAttribute('href');
-            if (href && href.length > 1) {
-                const target = document.querySelector(href);
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            }
-        });
-    });
+    // Enhanced Navigation and Smooth Scrolling - handled by earlier anchor link code
 
     // Newsletter subscription with validation
     const newsletterForm = document.querySelector('.newsletter-input');
@@ -524,6 +509,113 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Search input event listener
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', performSearch);
+        searchInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                hideSearchBox();
+            }
+        });
+    }
+
+    // Handle image loading errors
+    const images = document.querySelectorAll('img');
+    
+    images.forEach(img => {
+        // Set loading placeholder
+        img.addEventListener('loadstart', function() {
+            this.style.opacity = '0.5';
+        });
+        
+        // Handle successful load
+        img.addEventListener('load', function() {
+            this.style.opacity = '1';
+            this.classList.add('loaded');
+        });
+        
+        // Handle loading errors
+        img.addEventListener('error', function() {
+            console.log('Image failed to load:', this.src);
+            
+            // Set fallback image based on context
+            if (this.closest('.podcast-image')) {
+                this.src = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80';
+            } else if (this.closest('.article-item')) {
+                this.src = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80';
+            } else if (this.closest('.trending-item')) {
+                this.src = 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80';
+            } else {
+                this.src = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80';
+            }
+            
+            this.style.opacity = '1';
+            this.classList.add('error-fallback');
+        });
+        
+        // Check if image is already loaded (cached)
+        if (img.complete && img.naturalHeight !== 0) {
+            img.style.opacity = '1';
+            img.classList.add('loaded');
+        }
+    });
+    
+    // Lazy loading for images
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+    
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.style.opacity = '0.5';
+                    
+                    // Preload image
+                    const tempImg = new Image();
+                    tempImg.onload = function() {
+                        img.style.opacity = '1';
+                        img.classList.add('loaded');
+                    };
+                    tempImg.onerror = function() {
+                        img.style.opacity = '1';
+                        img.classList.add('error-fallback');
+                    };
+                    tempImg.src = img.src;
+                    
+                    observer.unobserve(img);
+                }
+            });
+        });
+        
+        lazyImages.forEach(img => imageObserver.observe(img));
+    }
+
+    // Fix for disappearing images in recent comments
+    function fixRecentCommentsImages() {
+        const commentImages = document.querySelectorAll('.podcast-image img');
+        
+        commentImages.forEach(img => {
+            // Force reload if image is not visible
+            if (img.offsetWidth === 0 || img.offsetHeight === 0) {
+                const originalSrc = img.src;
+                img.src = '';
+                setTimeout(() => {
+                    img.src = originalSrc;
+                }, 100);
+            }
+            
+            // Add error handling
+            img.onerror = function() {
+                this.src = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80';
+            };
+        });
+    }
+
+    // Run fix on page load and after dynamic content updates
+    fixRecentCommentsImages();
+    setTimeout(fixRecentCommentsImages, 1000); // Run again after 1 second
+
 });
 
 // Utility functions
@@ -567,7 +659,7 @@ function formatDate(date) {
 
 function truncateText(text, maxLength) {
     if (text.length <= maxLength) return text;
-    return text.substr(0, maxLength) + '...';
+    return text.substring(0, maxLength) + '...';
 }
 
 function debounce(func, wait) {
@@ -697,19 +789,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Search Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Search input event listener
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', performSearch);
-        searchInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                hideSearchBox();
-            }
-        });
-    }
-});
+// Search Event Listeners - moved to main DOMContentLoaded event
 
 // Close search when clicking outside
 document.addEventListener('click', function(event) {
@@ -719,102 +799,6 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Dynamic header update removed - cache sorunu çözüldü/
-/ Image Error Handling
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle image loading errors
-    const images = document.querySelectorAll('img');
-    
-    images.forEach(img => {
-        // Set loading placeholder
-        img.addEventListener('loadstart', function() {
-            this.style.opacity = '0.5';
-        });
-        
-        // Handle successful load
-        img.addEventListener('load', function() {
-            this.style.opacity = '1';
-            this.classList.add('loaded');
-        });
-        
-        // Handle loading errors
-        img.addEventListener('error', function() {
-            console.log('Image failed to load:', this.src);
-            
-            // Set fallback image based on context
-            if (this.closest('.podcast-image')) {
-                this.src = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80';
-            } else if (this.closest('.article-item')) {
-                this.src = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=387&q=80';
-            } else if (this.closest('.trending-item')) {
-                this.src = 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80';
-            } else {
-                this.src = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=435&q=80';
-            }
-            
-            this.style.opacity = '1';
-            this.classList.add('error-fallback');
-        });
-        
-        // Check if image is already loaded (cached)
-        if (img.complete && img.naturalHeight !== 0) {
-            img.style.opacity = '1';
-            img.classList.add('loaded');
-        }
-    });
-    
-    // Lazy loading for images
-    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
-    
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.style.opacity = '0.5';
-                    
-                    // Preload image
-                    const tempImg = new Image();
-                    tempImg.onload = function() {
-                        img.style.opacity = '1';
-                        img.classList.add('loaded');
-                    };
-                    tempImg.onerror = function() {
-                        img.style.opacity = '1';
-                        img.classList.add('error-fallback');
-                    };
-                    tempImg.src = img.src;
-                    
-                    observer.unobserve(img);
-                }
-            });
-        });
-        
-        lazyImages.forEach(img => imageObserver.observe(img));
-    }
-});
+// Dynamic header update removed - cache sorunu çözüldü
 
-// Fix for disappearing images in recent comments
-function fixRecentCommentsImages() {
-    const commentImages = document.querySelectorAll('.podcast-image img');
-    
-    commentImages.forEach(img => {
-        // Force reload if image is not visible
-        if (img.offsetWidth === 0 || img.offsetHeight === 0) {
-            const originalSrc = img.src;
-            img.src = '';
-            setTimeout(() => {
-                img.src = originalSrc;
-            }, 100);
-        }
-        
-        // Add error handling
-        img.onerror = function() {
-            this.src = 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80';
-        };
-    });
-}
-
-// Run fix on page load and after dynamic content updates
-document.addEventListener('DOMContentLoaded', fixRecentCommentsImages);
-setTimeout(fixRecentCommentsImages, 1000); // Run again after 1 second
+// Image Error Handling - code moved to main DOMContentLoaded event

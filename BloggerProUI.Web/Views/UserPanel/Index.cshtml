@@ -191,42 +191,150 @@
         <div id="profile" class="tab-content">
             <div class="page-header">
                 <h1 class="page-title">Profil Ayarları</h1>
-                <p class="page-subtitle">Hesap bilgilerini ve tercihlerini yönet</p>
+                <p class="page-subtitle">Hesap bilgilerini ve sosyal medya bağlantılarınızı yönetin</p>
             </div>
 
-            <form class="profile-form">
-                <div class="form-group">
-                    <label class="form-label">Ad</label>
-                    <input type="text" class="form-input" name="firstName" value="Kullanıcı">
+            <form class="profile-form" id="profileUpdateForm">
+                <!-- Profile Picture Section -->
+                <div class="form-section">
+                    <h3 class="section-title">Profil Resmi</h3>
+                    <div class="profile-picture-upload">
+                        <div class="current-picture">
+                            <img id="profilePreview" src="/images/placeholder.jpg" alt="Profile Picture" class="profile-img">
+                        </div>
+                        <div class="upload-controls">
+                            <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                            <button type="button" class="btn-upload" onclick="document.getElementById('profileImageInput').click()">
+                                <i class="fas fa-camera"></i> Resim Yükle
+                            </button>
+                            <p class="upload-hint">JPG, PNG veya WebP formatında, maksimum 5MB</p>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Soyad</label>
-                    <input type="text" class="form-input" name="lastName" value="Adı">
+
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h3 class="section-title">Temel Bilgiler</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Ad</label>
+                            <input type="text" class="form-input" name="firstName" id="firstName" placeholder="Adınız">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Soyad</label>
+                            <input type="text" class="form-input" name="lastName" id="lastName" placeholder="Soyadınız">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Konum</label>
+                            <input type="text" class="form-input" name="location" id="location" placeholder="Şehir, Ülke">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Doğum Tarihi</label>
+                            <input type="date" class="form-input" name="birthDate" id="birthDate">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label">E-posta</label>
+                            <input type="email" class="form-input" name="email" id="email" disabled placeholder="E-posta adresiniz">
+                            <small class="form-help">E-posta adresi değiştirilemez. Değiştirmek için destek ekibiyle iletişime geçin.</small>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label">Website</label>
+                            <input type="url" class="form-input" name="website" id="website" placeholder="https://example.com">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label">Biyografi</label>
+                            <textarea class="form-textarea" name="bio" id="bio" rows="4" placeholder="Kendiniz hakkında kısa bir açıklama yazın... (maksimum 500 karakter)"></textarea>
+                            <div class="char-counter">
+                                <span id="bioCharCount">0</span>/500
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group full-width">
-                    <label class="form-label">E-posta</label>
-                    <input type="email" class="form-input" name="email" value="kullanici@example.com">
+
+                <!-- Social Media Links -->
+                <div class="form-section">
+                    <h3 class="section-title">Sosyal Medya Bağlantıları</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fab fa-facebook-f" style="color: #1877f2;"></i> Facebook
+                            </label>
+                            <input type="url" class="form-input" name="facebookUrl" id="facebookUrl" placeholder="https://facebook.com/kullaniciadi">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fab fa-twitter" style="color: #1da1f2;"></i> Twitter
+                            </label>
+                            <input type="url" class="form-input" name="twitterUrl" id="twitterUrl" placeholder="https://twitter.com/kullaniciadi">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fab fa-instagram" style="color: #e4405f;"></i> Instagram
+                            </label>
+                            <input type="url" class="form-input" name="instagramUrl" id="instagramUrl" placeholder="https://instagram.com/kullaniciadi">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fab fa-linkedin-in" style="color: #0077b5;"></i> LinkedIn
+                            </label>
+                            <input type="url" class="form-input" name="linkedInUrl" id="linkedInUrl" placeholder="https://linkedin.com/in/kullaniciadi">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fab fa-tiktok" style="color: #000;"></i> TikTok
+                            </label>
+                            <input type="url" class="form-input" name="tikTokUrl" id="tikTokUrl" placeholder="https://tiktok.com/@@kullaniciadi">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fab fa-youtube" style="color: #ff0000;"></i> YouTube
+                            </label>
+                            <input type="url" class="form-input" name="youTubeUrl" id="youTubeUrl" placeholder="https://youtube.com/c/kanaladi">
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group full-width">
-                    <label class="form-label">Biyografi</label>
-                    <textarea class="form-textarea" name="bio" placeholder="Kendin hakkında kısa bir açıklama yaz..."></textarea>
+
+                <!-- Password Change Section -->
+                <div class="form-section">
+                    <h3 class="section-title">Şifre Değiştir</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label">Mevcut Şifre</label>
+                            <input type="password" class="form-input" name="currentPassword" id="currentPassword" placeholder="Mevcut şifrenizi girin">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Yeni Şifre</label>
+                            <input type="password" class="form-input" name="newPassword" id="newPassword" placeholder="Yeni şifrenizi girin">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Yeni Şifre Onay</label>
+                            <input type="password" class="form-input" name="confirmPassword" id="confirmPassword" placeholder="Yeni şifrenizi tekrar girin">
+                        </div>
+                    </div>
+                    <div class="password-requirements">
+                        <small>Şifre en az 6 karakter uzunluğunda olmalıdır.</small>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Website</label>
-                    <input type="url" class="form-input" name="website" placeholder="https://example.com">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Telefon</label>
-                    <input type="tel" class="form-input" name="phone" placeholder="+90 555 123 45 67">
-                </div>
-                
-                <div class="form-group full-width">
-                    <button type="submit" class="save-btn">Değişiklikleri Kaydet</button>
+
+                <!-- Action Buttons -->
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelBtn">İptal</button>
+                    <button type="submit" class="save-btn" id="saveBtn">
+                        <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                    </button>
                 </div>
             </form>
         </div>
@@ -234,6 +342,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="~/js/profile-api.js"></script>
 <script>
     // Reading Stats Chart (günlük okuma istatistikleri için)
     document.addEventListener('DOMContentLoaded', function() {

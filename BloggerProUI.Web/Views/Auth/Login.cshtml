@@ -10,98 +10,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"] - Q. Studio</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link href="~/css/style.css" rel="stylesheet" />
 </head>
-<body class="auth-body">
-    <div class="auth-container">
-        <div class="auth-content">
-            <div class="auth-left">
-                <div class="auth-logo">Q. Studio</div>
-                <div class="auth-subtitle">
-                    Yaratıcılığınızı paylaşın, hikayelerinizi anlatın ve topluluğumuzun bir parçası olun.
-                </div>
-                <ul class="auth-features">
-                    <li>
-                        <i class="fas fa-pen-nib"></i>
-                        <span>Kolay ve güçlü editör</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-users"></i>
-                        <span>Aktif topluluk</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-chart-line"></i>
-                        <span>Detaylı analitik</span>
-                    </li>
-                    <li>
-                        <i class="fas fa-mobile-alt"></i>
-                        <span>Mobil uyumlu</span>
-                    </li>
-                </ul>
+<body class="auth-body auth-body-login">
+    <div class="auth-main-container">
+        <div class="auth-brand-panel auth-brand-panel-login">
+            <div class="auth-brand-logo">Q. Studio</div>
+            <div class="auth-brand-tagline">
+                Yaratıcılığınızı paylaşın, hikayelerinizi anlatın ve ilham veren bir topluluğun parçası olun.
             </div>
-            
-            <div class="auth-right">
-                <div class="auth-header">
-                    <h1 class="auth-title">Hoş Geldiniz</h1>
-                    <p class="auth-description">Hesabınıza giriş yapın ve yazmaya başlayın</p>
+            <ul class="auth-features-list">
+                <li>
+                    <i class="fas fa-pen-fancy"></i>
+                    <span>Güçlü yazı editörü</span>
+                </li>
+                <li>
+                    <i class="fas fa-users"></i>
+                    <span>Aktif okuyucu kitlesi</span>
+                </li>
+                <li>
+                    <i class="fas fa-chart-line"></i>
+                    <span>Detaylı performans analizi</span>
+                </li>
+                <li>
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Her cihazda erişim</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="auth-form-panel">
+            <div class="auth-welcome-header">
+                <h1 class="auth-welcome-title">Hoş Geldiniz</h1>
+                <p class="auth-welcome-subtitle">Hesabınıza giriş yapın ve yazmaya devam edin</p>
+            </div>
+
+            @if (ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="auth-validation-summary">
+                    <ul>
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="auth-alert auth-alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                </div>
+            }
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="auth-alert auth-alert-success">
+                    <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                </div>
+            }
+
+            <form asp-action="Login" method="post" class="auth-form-container" id="loginForm">
+                <div class="auth-form-group">
+                    <label asp-for="Username" class="auth-form-label">Kullanıcı Adı veya E-posta</label>
+                    <div class="auth-input-wrapper">
+                        <input asp-for="Username" class="auth-form-input" placeholder="Kullanıcı adınızı veya e-posta adresinizi girin" autocomplete="username" />
+                        <i class="fas fa-user auth-input-icon"></i>
+                    </div>
+                    <span asp-validation-for="Username" class="auth-validation-error"></span>
                 </div>
 
-                @if (Html.ValidationSummary() != null)
-                {
-                    <div class="auth-validation-summary">
-                        @Html.ValidationSummary()
+                <div class="auth-form-group">
+                    <label asp-for="Password" class="auth-form-label">Şifre</label>
+                    <div class="auth-input-wrapper">
+                        <input asp-for="Password" type="password" class="auth-form-input" placeholder="Şifrenizi girin" autocomplete="current-password" />
+                        <i class="fas fa-lock auth-input-icon"></i>
                     </div>
-                }
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="auth-alert danger">
-                        @TempData["ErrorMessage"]
-                    </div>
-                }
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <div class="auth-alert success">
-                        @TempData["SuccessMessage"]
-                    </div>
-                }
-
-                <form asp-action="Login" method="post">
-                    <div class="auth-form-group">
-                        <label asp-for="Username" class="auth-form-label">Kullanıcı Adı</label>
-                        <div class="auth-input-group">
-                            <span class="auth-input-group-text"><i class="fas fa-user"></i></span>
-                            <input asp-for="Username" class="auth-form-control" placeholder="Kullanıcı adınızı veya e-posta adresinizi giriniz" />
-                        </div>
-                        <span asp-validation-for="Username" class="auth-field-validation-error"></span>
-                    </div>
-
-                    <div class="auth-form-group">
-                        <label asp-for="Password" class="auth-form-label">Şifre</label>
-                        <div class="auth-input-group">
-                            <span class="auth-input-group-text"><i class="fas fa-lock"></i></span>
-                            <input asp-for="Password" type="password" class="auth-form-control" placeholder="Şifrenizi giriniz" />
-                        </div>
-                        <span asp-validation-for="Password" class="auth-field-validation-error"></span>
-                    </div>
-
-                    <button type="submit" class="auth-btn">
-                        <i class="fas fa-sign-in-alt"></i> Giriş Yap
-                    </button>
-                </form>
-
-                <div class="auth-links">
-                    <a asp-action="Register">Hesabınız yok mu? Kayıt Olun</a>
+                    <span asp-validation-for="Password" class="auth-validation-error"></span>
                 </div>
+
+                <button type="submit" class="auth-login-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                </button>
+            </form>
+
+            <div class="auth-footer-links">
+                <a asp-action="Register">Henüz hesabınız yok mu? Kayıt olun</a>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    @section Scripts {
-        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    }
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('loginBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Giriş yapılıyor...';
+            btn.disabled = true;
+            btn.classList.add('loading');
+        });
+
+        // Input focus animations
+        document.querySelectorAll('.auth-form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+
 </body>
 </html>
