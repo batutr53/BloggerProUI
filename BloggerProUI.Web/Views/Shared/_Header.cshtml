@@ -26,6 +26,12 @@
             
             @if (User.Identity.IsAuthenticated)
             {
+                <a href="@Url.Action("Index", "UserSearch")" style="color: inherit;" title="Kullanıcı Ara">
+                    <i class="fas fa-user-friends"></i>
+                </a>
+                <a href="@Url.Action("Index", "Chat")" style="color: inherit;" title="Mesajlar">
+                    <i class="fas fa-comments"></i>
+                </a>
                 <a href="@Url.Action("Bookmarks", "UserPanel")" style="color: inherit;" title="Favorilerim">
                     <i class="fas fa-bookmark"></i>
                 </a>

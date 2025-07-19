@@ -1,0 +1,317 @@
+@{
+    ViewData["Title"] = "Kullanıcı Arama";
+    Layout = "_Layout";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search me-2"></i>Kullanıcı Arama
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg" 
+                                   id="searchInput" placeholder="Kullanıcı adı veya ad soyad ara...">
+                            <button class="btn btn-primary" type="button" id="searchButton">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="mutualOnly" checked>
+                            <label class="form-check-label" for="mutualOnly">
+                                Sadece karşılıklı takipçiler
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="searchResults">
+                        <!-- Search results will be displayed here -->
+                    </div>
+                    
+                    <div id="loadingSpinner" class="text-center" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recommendations Section -->
+    <div class="row mt-4">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Size Önerilen Kullanıcılar
+                    </h5>
+                </div>
+                <div class="card-body" id="recommendationsContainer">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Profile Modal -->
+<div class="modal fade" id="userProfileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kullanıcı Profili</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="userProfileContent">
+                <!-- User profile content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.user-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+}
+
+.user-info h6 {
+    color: #333;
+    font-weight: 600;
+}
+
+.user-info small {
+    color: #6c757d;
+}
+
+.follow-stats {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.btn-follow {
+    transition: all 0.2s;
+}
+
+.btn-follow:hover {
+    transform: scale(1.05);
+}
+
+.recommendation-reason {
+    background-color: #f8f9fa;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    color: #6c757d;
+    display: inline-block;
+    margin-top: 5px;
+}
+</style>
+
+@section Scripts {
+    <script>
+        let searchTimeout;
+        
+        $(document).ready(function() {
+            loadRecommendations();
+            
+            // Search input with debounce
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                const query = $(this).val().trim();
+                
+                if (query.length < 2) {
+                    $('#searchResults').empty();
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => {
+                    performSearch(query);
+                }, 300);
+            });
+            
+            // Search button click
+            $('#searchButton').on('click', function() {
+                const query = $('#searchInput').val().trim();
+                if (query.length >= 2) {
+                    performSearch(query);
+                }
+            });
+            
+            // Enter key search
+            $('#searchInput').on('keypress', function(e) {
+                if (e.which === 13) {
+                    const query = $(this).val().trim();
+                    if (query.length >= 2) {
+                        performSearch(query);
+                    }
+                }
+            });
+        });
+        
+        function performSearch(query) {
+            showLoading(true);
+            const mutual = $('#mutualOnly').is(':checked');
+            
+            $.get('/UserSearch/Search', { q: query, mutual: mutual, limit: 20 })
+                .done(function(response) {
+                    showLoading(false);
+                    displaySearchResults(response.data || []);
+                })
+                .fail(function() {
+                    showLoading(false);
+                    $('#searchResults').html('<div class="alert alert-danger">Arama sırasında hata oluştu.</div>');
+                });
+        }
+        
+        function loadRecommendations() {
+            $.get('/UserSearch/Recommendations', { limit: 10 })
+                .done(function(response) {
+                    displayRecommendations(response.data || []);
+                })
+                .fail(function() {
+                    $('#recommendationsContainer').html('<div class="alert alert-danger">Öneriler yüklenirken hata oluştu.</div>');
+                });
+        }
+        
+        function displaySearchResults(users) {
+            if (users.length === 0) {
+                $('#searchResults').html('<div class="alert alert-info">Arama kriterlerinize uygun kullanıcı bulunamadı.</div>');
+                return;
+            }
+            
+            let html = '<h6 class="mb-3">Arama Sonuçları (' + users.length + ')</h6>';
+            users.forEach(user => {
+                html += createUserCard(user, 'search');
+            });
+            
+            $('#searchResults').html(html);
+        }
+        
+        function displayRecommendations(users) {
+            if (users.length === 0) {
+                $('#recommendationsContainer').html('<div class="alert alert-info">Şu anda öneriniz bulunmuyor.</div>');
+                return;
+            }
+            
+            let html = '';
+            users.forEach(user => {
+                html += createUserCard(user, 'recommendation');
+            });
+            
+            $('#recommendationsContainer').html(html);
+        }
+        
+        function createUserCard(user, type) {
+            const reasonHtml = type === 'recommendation' && user.reason ? 
+                '<div class="recommendation-reason">' + user.reason + '</div>' : '';
+            
+            return '<div class="user-card">' +
+                '<div class="d-flex align-items-center">' +
+                    '<img src="' + (user.profilePicture || '/images/default-avatar.png') + '" ' +
+                         'alt="' + user.displayName + '" ' +
+                         'class="user-avatar rounded-circle me-3">' +
+                    '<div class="flex-grow-1 user-info">' +
+                        '<h6 class="mb-1">' + user.displayName + '</h6>' +
+                        '<p class="mb-1 text-muted">@@' + user.userName + '</p>' +
+                        (user.bio ? '<p class="mb-1 small">' + user.bio + '</p>' : '') +
+                        '<div class="follow-stats">' +
+                            '<span class="me-3"><strong>' + (user.followersCount || 0) + '</strong> takipçi</span>' +
+                            '<span><strong>' + (user.followingCount || 0) + '</strong> takip</span>' +
+                        '</div>' +
+                        reasonHtml +
+                    '</div>' +
+                    '<div class="btn-group-vertical">' +
+                        '<button class="btn btn-primary btn-sm btn-follow mb-2" ' +
+                                'onclick="followUser(\'' + user.id + '\', this)">' +
+                            '<i class="fas fa-user-plus me-1"></i>Takip Et' +
+                        '</button>' +
+                        '<button class="btn btn-outline-primary btn-sm" ' +
+                                'onclick="startChat(\'' + user.id + '\')">' +
+                            '<i class="fas fa-comment me-1"></i>Mesaj' +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+        
+        function followUser(userId, button) {
+            const $button = $(button);
+            const originalHtml = $button.html();
+            
+            $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+            
+            $.post('/UserSearch/Follow', { userId: userId })
+                .done(function(response) {
+                    if (response.success) {
+                        $button.removeClass('btn-primary')
+                               .addClass('btn-success')
+                               .html('<i class="fas fa-check me-1"></i>Takip Ediliyor')
+                               .prop('disabled', true);
+                        
+                        // Show success message
+                        showNotification('Kullanıcı başarıyla takip edildi!', 'success');
+                    } else {
+                        $button.prop('disabled', false).html(originalHtml);
+                        showNotification(response.message || 'Takip etme işlemi başarısız.', 'error');
+                    }
+                })
+                .fail(function() {
+                    $button.prop('disabled', false).html(originalHtml);
+                    showNotification('Takip etme işlemi sırasında hata oluştu.', 'error');
+                });
+        }
+        
+        function startChat(userId) {
+            window.location.href = '/Chat/Conversation/' + userId;
+        }
+        
+        function showLoading(show) {
+            if (show) {
+                $('#loadingSpinner').show();
+                $('#searchResults').empty();
+            } else {
+                $('#loadingSpinner').hide();
+            }
+        }
+        
+        function showNotification(message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const notification = 
+                '<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+                    message +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                '</div>';
+            
+            // Prepend to the container and auto-dismiss after 3 seconds
+            $('.container').prepend(notification);
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 3000);
+        }
+    </script>
+}

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BloggerProUI.Web.Controllers;
 
@@ -15,5 +16,11 @@ public class BaseController : Controller
         Response.Headers.LastModified = DateTime.UtcNow.ToString("R");
         
         base.OnActionExecuting(context);
+    }
+
+    protected Guid GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
     }
 }

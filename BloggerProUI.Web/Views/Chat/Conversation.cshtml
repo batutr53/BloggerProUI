@@ -1,0 +1,334 @@
+@model List<BloggerProUI.Models.Chat.MessageDto>
+@{
+    ViewData["Title"] = "Sohbet";
+    Layout = "_Layout";
+    var receiverUserId = ViewBag.ReceiverUserId;
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <a href="@Url.Action("Index")" class="text-decoration-none">
+                            <i class="fas fa-arrow-left me-2"></i>Sohbetler
+                        </a>
+                    </h6>
+                </div>
+                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
+                    <!-- Conversation list will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center">
+                    <div class="avatar-container me-3">
+                        <img id="receiverAvatar" src="/images/default-avatar.png" 
+                             alt="User" class="rounded-circle" width="40" height="40">
+                        <span class="presence-indicator" id="receiverPresence"></span>
+                    </div>
+                    <div>
+                        <h6 class="mb-0" id="receiverName">Kullanıcı</h6>
+                        <small class="text-muted" id="receiverStatus">Çevrimdışı</small>
+                    </div>
+                    <div class="ms-auto">
+                        <span id="typingIndicator" class="text-muted small" style="display: none;">
+                            <i class="fas fa-circle-notch fa-spin"></i> Yazıyor...
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0" style="height: 400px; overflow-y: auto;" id="messagesContainer">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var message in Model)
+                        {
+                            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                            var isSentByCurrentUser = message.SenderId.ToString() == currentUserId;
+                            <div class="message @(isSentByCurrentUser ? "message-sent" : "message-received")" 
+                                 data-message-id="@message.Id">
+                                <div class="message-content">
+                                    <p class="mb-1">@message.Content</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">@message.SentAt.ToString("HH:mm")</small>
+                                        @if (isSentByCurrentUser)
+                                        {
+                                            <span class="message-status">
+                                                @if (message.ReadAt.HasValue)
+                                                {
+                                                    <i class="fas fa-check-double text-primary" title="Okundu: @message.ReadAt.Value.ToString("HH:mm")"></i>
+                                                }
+                                                else if (message.DeliveredAt.HasValue)
+                                                {
+                                                    <i class="fas fa-check text-secondary" title="Teslim edildi: @message.DeliveredAt.Value.ToString("HH:mm")"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fas fa-clock text-muted" title="Gönderiliyor..."></i>
+                                                }
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center p-4">
+                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Henüz mesaj yok. İlk mesajı gönderin!</p>
+                        </div>
+                    }
+                </div>
+                
+                <div class="card-footer">
+                    <form id="messageForm" class="d-flex">
+                        <input type="text" class="form-control me-2" id="messageInput" 
+                               placeholder="Mesajınızı yazın..." maxlength="1000">
+                        <button type="submit" class="btn btn-primary" id="sendButton">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-container {
+    position: relative;
+}
+
+.presence-indicator {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background-color: #6c757d;
+}
+
+.presence-indicator.online {
+    background-color: #28a745;
+}
+
+#messagesContainer {
+    padding: 15px;
+    background-color: #f8f9fa;
+}
+
+.message {
+    margin-bottom: 15px;
+    display: flex;
+}
+
+.message-sent {
+    justify-content: flex-end;
+}
+
+.message-received {
+    justify-content: flex-start;
+}
+
+.message-content {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    word-wrap: break-word;
+}
+
+.message-sent .message-content {
+    background-color: #007bff;
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.message-received .message-content {
+    background-color: white;
+    color: #333;
+    border: 1px solid #e9ecef;
+    border-bottom-left-radius: 5px;
+}
+
+.message-status {
+    font-size: 0.75rem;
+}
+
+#messageForm {
+    gap: 10px;
+}
+
+#messageInput:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+</style>
+
+@section Scripts {
+    <script src="~/js/chat-hub.js"></script>
+    <script>
+        const receiverUserId = '@receiverUserId';
+        let typingTimer;
+        let isTyping = false;
+        
+        $(document).ready(async function() {
+            // Initialize SignalR connection
+            const accessToken = '@(ViewBag.AccessToken ?? "")';
+            if (accessToken) {
+                await window.chatHub.connect(accessToken);
+                
+                // Listen for new messages
+                window.chatHub.onMessage((message) => {
+                    if (message.senderId === receiverUserId || message.receiverId === receiverUserId) {
+                        appendMessage(message);
+                        scrollToBottom();
+                        
+                        // Mark as read if message is from the other user
+                        if (message.senderId === receiverUserId) {
+                            markMessageAsRead(message.id);
+                        }
+                    }
+                });
+                
+                // Listen for presence updates
+                window.chatHub.onPresence((userId, isOnline) => {
+                    if (userId === receiverUserId) {
+                        updatePresenceStatus(isOnline);
+                    }
+                });
+                
+                // Listen for typing indicators
+                window.chatHub.connection.on("UserTyping", (data) => {
+                    if (data.UserId === receiverUserId) {
+                        showTypingIndicator(data.IsTyping);
+                    }
+                });
+            }
+            
+            // Scroll to bottom on load
+            scrollToBottom();
+            
+            // Mark existing messages as read
+            markExistingMessagesAsRead();
+        });
+        
+        // Send message form
+        $('#messageForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const messageText = $('#messageInput').val().trim();
+            if (!messageText) return;
+            
+            // Send message via SignalR
+            window.chatHub.sendMessage(receiverUserId, messageText)
+                .then(success => {
+                    if (success) {
+                        $('#messageInput').val('');
+                        stopTyping();
+                    } else {
+                        alert('Mesaj gönderilemedi. Lütfen tekrar deneyin.');
+                    }
+                });
+        });
+        
+        // Typing indicators
+        $('#messageInput').on('input', function() {
+            if (!isTyping) {
+                isTyping = true;
+                window.chatHub.sendTypingIndicator(receiverUserId, true);
+            }
+            
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                stopTyping();
+            }, 1000);
+        });
+        
+        function stopTyping() {
+            if (isTyping) {
+                isTyping = false;
+                window.chatHub.sendTypingIndicator(receiverUserId, false);
+            }
+        }
+        
+        function appendMessage(message) {
+            const isSent = message.senderId !== receiverUserId;
+            const messageHtml = `
+                <div class="message ${isSent ? 'message-sent' : 'message-received'}" data-message-id="${message.id}">
+                    <div class="message-content">
+                        <p class="mb-1">${escapeHtml(message.content)}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">${formatTime(message.sentAt)}</small>
+                            ${isSent ? '<span class="message-status"><i class="fas fa-clock text-muted"></i></span>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('#messagesContainer').append(messageHtml);
+        }
+        
+        function markMessageAsRead(messageId) {
+            $.post('/Chat/MarkAsRead', {
+                SenderId: receiverUserId,
+                MessageIds: [messageId]
+            });
+        }
+        
+        function markExistingMessagesAsRead() {
+            const unreadMessages = $('.message-received').map(function() {
+                return $(this).data('message-id');
+            }).get();
+            
+            if (unreadMessages.length > 0) {
+                $.post('/Chat/MarkAsRead', {
+                    SenderId: receiverUserId,
+                    MessageIds: unreadMessages
+                });
+            }
+        }
+        
+        function updatePresenceStatus(isOnline) {
+            const indicator = document.getElementById('receiverPresence');
+            const status = document.getElementById('receiverStatus');
+            
+            if (indicator) {
+                indicator.classList.toggle('online', isOnline);
+            }
+            
+            if (status) {
+                status.textContent = isOnline ? 'Çevrimiçi' : 'Çevrimdışı';
+            }
+        }
+        
+        function showTypingIndicator(isTyping) {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.style.display = isTyping ? 'inline' : 'none';
+            }
+        }
+        
+        function scrollToBottom() {
+            const container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+}
