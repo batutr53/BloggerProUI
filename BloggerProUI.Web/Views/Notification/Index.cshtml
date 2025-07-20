@@ -1,0 +1,202 @@
+@model List<BloggerProUI.Models.Notification.NotificationDto>
+@{
+    ViewData["Title"] = "Bildirimler";
+    ViewData["Description"] = "insanlikHallerimiz topluluğundaki etkileşimlerinizi ve güncellemeleri takip edin.";
+}
+
+<!-- Hero Section -->
+<section class="notification-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="notification-hero-title">Bildirimleriniz</h1>
+                <p class="notification-hero-subtitle">Topluluktaki etkileşimlerinizi ve önemli güncellemeleri takip edin</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Notifications Section -->
+<section class="notification-main-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="notification-container">
+                    <!-- Header -->
+                    <div class="notification-header">
+                        <div class="notification-title-section">
+                            <h3 class="notification-section-title">Tüm Bildirimler</h3>
+                            <span class="notification-count">@(Model?.Count(n => !n.IsRead) ?? 0) okunmamış</span>
+                        </div>
+                        @if (Model != null && Model.Any(n => !n.IsRead))
+                        {
+                            <button type="button" class="notification-btn-modern notification-btn-primary-modern" onclick="markAllAsRead()">
+                                <i class="fas fa-check-double"></i>
+                                <span>Tümünü Okundu İşaretle</span>
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Notifications List -->
+                    <div class="notification-content">
+                        @if (Model != null && Model.Any())
+                        {
+                            <div class="notification-list">
+                                @foreach (var notification in Model)
+                                {
+                                    <div class="notification-item @(notification.IsRead ? "notification-read" : "notification-unread")" data-id="@notification.Id">
+                                        @if (!notification.IsRead)
+                                        {
+                                            <div class="notification-unread-indicator"></div>
+                                        }
+                                        <div class="notification-icon">
+                                            @switch (notification.Type?.ToLower())
+                                            {
+                                                case "follow":
+                                                    <i class="fas fa-user-plus"></i>
+                                                    break;
+                                                case "comment":
+                                                    <i class="fas fa-comment"></i>
+                                                    break;
+                                                case "like":
+                                                    <i class="fas fa-heart"></i>
+                                                    break;
+                                                case "message":
+                                                    <i class="fas fa-envelope"></i>
+                                                    break;
+                                                default:
+                                                    <i class="fas fa-bell"></i>
+                                                    break;
+                                            }
+                                        </div>
+                                        <div class="notification-content-wrapper">
+                                            <div class="notification-message">
+                                                @notification.Message
+                                            </div>
+                                            <div class="notification-time">
+                                                @notification.CreatedAt.ToString("dd MMMM yyyy, HH:mm")
+                                            </div>
+                                        </div>
+                                        <div class="notification-actions">
+                                            @if (!notification.IsRead)
+                                            {
+                                                <button type="button" class="notification-mark-read-btn" onclick="markAsRead('@notification.Id')" title="Okundu İşaretle">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="notification-empty-state">
+                                <div class="notification-empty-icon">
+                                    <i class="fas fa-bell-slash"></i>
+                                </div>
+                                <h4 class="notification-empty-title">Henüz bildirim bulunmuyor</h4>
+                                <p class="notification-empty-text">Topluluktaki aktiviteleriniz ve etkileşimleriniz burada görünecek. Platformda aktif olmaya başlayın!</p>
+                                <a href="/" class="notification-btn-modern notification-btn-outline-modern">
+                                    <i class="fas fa-home"></i>
+                                    Ana Sayfaya Dön
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script>
+    function markAsRead(notificationId) {
+        fetch('/Notification/MarkAsRead', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            body: JSON.stringify(notificationId)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const notificationItem = document.querySelector(`[data-id="${notificationId}"]`);
+                if (notificationItem) {
+                    notificationItem.classList.remove('notification-unread');
+                    notificationItem.classList.add('notification-read');
+                    
+                    // Remove the unread indicator and mark as read button
+                    const indicator = notificationItem.querySelector('.notification-unread-indicator');
+                    const markButton = notificationItem.querySelector('.notification-mark-read-btn');
+                    if (indicator) indicator.remove();
+                    if (markButton) markButton.remove();
+                }
+                
+                updateNotificationCount();
+            } else {
+                alert(data.message || 'Bir hata oluştu.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu.');
+        });
+    }
+
+    function markAllAsRead() {
+        fetch('/Notification/MarkAllAsRead', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mark all notifications as read visually
+                document.querySelectorAll('.notification-item.unread').forEach(item => {
+                    item.classList.remove('unread');
+                    item.classList.add('read');
+                    
+                    const indicator = item.querySelector('.notification-indicator');
+                    const markButton = item.querySelector('.btn-link');
+                    if (indicator) indicator.remove();
+                    if (markButton) markButton.remove();
+                });
+                
+                // Hide the "Mark All as Read" button
+                const markAllButton = document.querySelector('.btn-outline-primary');
+                if (markAllButton) markAllButton.style.display = 'none';
+                
+                updateNotificationCount();
+            } else {
+                alert(data.message || 'Bir hata oluştu.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu.');
+        });
+    }
+
+    function updateNotificationCount() {
+        // Update notification count in header or other places if needed
+        const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+        
+        // If you have a notification counter in the header, update it here
+        const notificationCounter = document.querySelector('.notification-counter');
+        if (notificationCounter) {
+            if (unreadCount > 0) {
+                notificationCounter.textContent = unreadCount;
+                notificationCounter.style.display = 'inline';
+            } else {
+                notificationCounter.style.display = 'none';
+            }
+        }
+    }
+</script>

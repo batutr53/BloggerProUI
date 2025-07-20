@@ -1,12 +1,13 @@
 ﻿using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Comment;
+using BloggerProUI.Web.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [AdminAuthorize]
     public class CommentController : Controller
     {
         private readonly ICommentApiService _commentApiService;

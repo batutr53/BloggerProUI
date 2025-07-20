@@ -94,8 +94,8 @@ app.UseEndpoints(endpoints =>
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
         
-    // SignalR Hub - will be implemented when API is available
-    // endpoints.MapHub<ChatHub>("/chathub");
+    // SignalR Hub mapping will connect to API's ChatHub
+    // Note: ChatHub is hosted on API side at https://localhost:7028/chathub
 });
 
 app.Run();

@@ -1,11 +1,12 @@
 ﻿using BloggerProUI.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using BloggerProUI.Web.Attributes;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")]
+[AdminAuthorize]
 public class AdminDashboardController : Controller
 {
     private readonly IAdminDashboardApiService _dashboardService;

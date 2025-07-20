@@ -1,41 +1,59 @@
 @model BloggerProUI.Web.Models.AboutPageViewModel
 @{
     ViewData["Title"] = "Hakkımızda";
+    ViewData["Description"] = "insanlıkHallerimiz hakkında - İnsan deneyiminin derinliklerini keşfeden blog platformumuzun hikayesi ve misyonu.";
 }
 
-<!-- Main Content -->
-<main class="content-container">
-    <!-- Page Header -->
-    <section class="page-header" style="text-align: center; margin-bottom: 60px;">
-        <h1 class="page-title">@(Model?.AboutUs?.Title ?? "Hakkımızda")</h1>
-        <p class="page-subtitle">@(Model?.AboutUs?.Mission ?? "Sanat, tasarım ve fotoğrafçılık tutkumuz")</p>
-    </section>
-
-    <!-- About Content -->
-    <section>
-        <div class="article-text">
-            @if (Model?.AboutUs != null && !string.IsNullOrEmpty(Model.AboutUs.Content))
-            {
-                @Html.Raw(Model.AboutUs.Content.Replace("\n", "</p><p>").Insert(0, "<p>") + "</p>")
-            }
-            else
-            {
-                <p>Q. Studio, sanat ve tasarım dünyasının en yenilikçi projelerini keşfetmeniz için kurulmuş bir platformdur. 2020 yılında kurulan stüdyomuz, fotoğrafçılık, grafik tasarım ve modern sanat alanlarında öncü içerikler üretmektedir.</p>
-                
-                <p>Misyonumuz, yaratıcı endüstrilerin sınırlarını zorlayan projeleri sizlerle buluşturmak ve sanat dünyasının nabzını tutmanıza yardımcı olmaktır. Deneyimli editör kadromuz ve uzman yazarlarımızla, sektörün en güncel trendlerini ve derinlemesine analizleri sunuyoruz.</p>
-                
-                <p>Q. Studio olarak, her yaştan okuyucunun sanat ve tasarıma olan bakış açısını genişletmeyi hedefliyoruz. Podcast'lerimiz, özel röportajlarımız ve kapsamlı makalelerimizle sizleri ilham verici bir yolculuğa çıkarıyoruz.</p>
-            }
-            
-            @if (Model?.AboutUs != null && !string.IsNullOrEmpty(Model.AboutUs.Vision))
-            {
-                <p><strong>Vizyonumuz:</strong> @Model.AboutUs.Vision</p>
-            }
+<!-- Hero Section -->
+<section class="about-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="about-hero-title">@(Model?.AboutUs?.Title ?? "Hakkımızda")</h1>
+                <p class="about-hero-subtitle">@(Model?.AboutUs?.Mission ?? "İnsan deneyiminin derinliklerinde yolculuk")</p>
+            </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Team Section -->
-    <section style="margin-top: 60px;">
+<!-- About Content Section -->
+<section class="about-main-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="about-content-container">
+                        @if (Model?.AboutUs != null && !string.IsNullOrEmpty(Model.AboutUs.Content))
+                        {
+                            @Html.Raw(Model.AboutUs.Content.Replace("\n", "</p><p>").Insert(0, "<p>") + "</p>")
+                        }
+                        else
+                        {
+                            <p class="about-paragraph"><strong>insanlıkHallerimiz</strong>, insan deneyiminin en derin katmanlarını keşfeden, duyguların ve düşüncelerin karmaşık dünyasını anlatan bir blog platformudur. Her bir yazımızda, yaşamın farklı tonlarını, insanlığın ortak paydasında buluşan duyguları ve deneyimleri ele alıyoruz.</p>
+                            
+                            <p class="about-paragraph">Burada sanat, edebiyat, felsefe ve gündelik yaşamın kesişim noktalarında durarak, okuyucularımıza düşündüren, hissettiren ve ilham veren içerikler sunuyoruz. Amacımız, her bireyin kendi insanlık hikayesini keşfetmesine yardımcı olmak ve duygusal zekamızı geliştiren perspektifler sunmaktır.</p>
+                            
+                            <p class="about-paragraph">İnsanlığın evrensel dili olan duygular, deneyimler ve düşünceler etrafında toplanan bu platform, okuyucularımızla derin bir bağ kurarak, birlikte büyümeyi ve öğrenmeyi hedefliyoruz. Her yazı, bir ayna görevi görerek, kendi içsel yolculuğunuzda size eşlik etmeyi amaçlıyor.</p>
+                            
+                            <p class="about-paragraph">Hayatın karmaşıklığını anlamaya çalışırken, bazen kırılgan bazen güçlü olan insanlık hallerimizi keşfetmeye davet ediyoruz. Çünkü her insan, kendine özgü bir hikayeye sahiptir ve bu hikayelerin kesiştiği noktada, güzel şeyler doğar.</p>
+                        }
+                        
+                        @if (Model?.AboutUs != null && !string.IsNullOrEmpty(Model.AboutUs.Vision))
+                        {
+                            <div class="about-vision">
+                                <h3 class="about-vision-title">Vizyonumuz</h3>
+                                <p class="about-vision-text">@Model.AboutUs.Vision</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Team Section - Temporarily Hidden -->
+    <!-- 
+    <section style="margin-top: 60px; display: none;">
         <div class="section-header">
             <h2 class="section-title">Ekibimiz</h2>
         </div>
@@ -83,4 +101,4 @@
             }
         </div>
     </section>
-</main>
+    -->

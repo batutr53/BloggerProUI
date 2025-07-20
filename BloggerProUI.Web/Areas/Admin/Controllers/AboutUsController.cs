@@ -1,12 +1,13 @@
 using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.AboutUs;
+using BloggerProUI.Web.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")]
+[AdminAuthorize]
 public class AboutUsController : Controller
 {
     private readonly IAboutUsApiService _aboutUsApiService;

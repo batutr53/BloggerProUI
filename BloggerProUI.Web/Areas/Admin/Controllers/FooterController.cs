@@ -1,12 +1,13 @@
 using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Footer;
+using BloggerProUI.Web.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")]
+[AdminAuthorize]
 public class FooterController : Controller
 {
     private readonly IFooterApiService _footerApiService;
@@ -37,7 +38,7 @@ public class FooterController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(FooterCreateDto model)
-    {
+    {   
         if (!ModelState.IsValid)
         {
             return View(model);

@@ -32,6 +32,12 @@
                 <a href="@Url.Action("Index", "Chat")" style="color: inherit;" title="Mesajlar">
                     <i class="fas fa-comments"></i>
                 </a>
+                <div style="position: relative; display: inline-block;">
+                    <a href="@Url.Action("Index", "Notification")" style="color: inherit;" title="Bildirimler" class="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                    </a>
+                </div>
                 <a href="@Url.Action("Bookmarks", "UserPanel")" style="color: inherit;" title="Favorilerim">
                     <i class="fas fa-bookmark"></i>
                 </a>

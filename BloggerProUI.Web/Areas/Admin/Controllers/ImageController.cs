@@ -1,4 +1,5 @@
 using BloggerProUI.Business.Interfaces;
+using BloggerProUI.Web.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 namespace BloggerProUI.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")]
+    [AdminAuthorize]
     public class ImageController : Controller
     {
         private readonly IImageApiService _imageApiService;

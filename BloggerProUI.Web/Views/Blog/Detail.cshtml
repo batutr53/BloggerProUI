@@ -402,24 +402,7 @@ else
                                     <div class="replies" style="margin-top: 15px; padding-left: 20px; border-left: 2px solid #eee;">
                                         @foreach (var reply in comment.Replies)
                                         {
-                                            <div class="reply" style="margin: 15px 0; padding: 15px; background: #f8f8f8; border-radius: 6px;">
-                                                <div class="reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                                    <div class="reply-author" style="font-weight: bold; color: #333; font-size: 14px;">
-                                                        @reply.Username
-                                                    </div>
-                                                    <div class="reply-date" style="color: #666; font-size: 12px;">
-                                                        @reply.CreatedAt.ToString("dd MMMM yyyy HH:mm")
-                                                    </div>
-                                                </div>
-                                                <div class="reply-content" style="margin: 8px 0; line-height: 1.5; font-size: 14px;">
-                                                    @reply.Content
-                                                </div>
-                                                <div class="reply-actions" style="margin-top: 8px;">
-                                                    <button class="reply-like-btn" onclick="likeComment('@reply.Id')" data-comment-id="@reply.Id" data-liked="@(reply.HasLiked ? "true" : "false")" style="background: none; border: none; color: @(reply.HasLiked ? "#ff4757" : "#666"); cursor: pointer; font-size: 12px;">
-                                                        @(reply.HasLiked ? "❤️" : "🤍") @reply.LikeCount
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            @await Html.PartialAsync("_CommentReply", reply)
                                         }
                                     </div>
                                 }

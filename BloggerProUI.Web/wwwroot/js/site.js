@@ -683,9 +683,10 @@ function toggleMobileMenu() {
 }
 
 // Search functionality
-let searchTimeout;
+(function() {
+    let searchTimeout;
 
-function showSearchBox() {
+    window.showSearchBox = function() {
     const dropdown = document.getElementById('searchDropdown');
     const input = document.getElementById('searchInput');
     
@@ -700,17 +701,17 @@ function showSearchBox() {
     }
 }
 
-function hideSearchBox() {
-    const dropdown = document.getElementById('searchDropdown');
-    const input = document.getElementById('searchInput');
-    
-    if (dropdown && input) {
-        dropdown.classList.remove('show');
-        input.value = '';
-    }
-}
+    window.hideSearchBox = function() {
+        const dropdown = document.getElementById('searchDropdown');
+        const input = document.getElementById('searchInput');
+        
+        if (dropdown && input) {
+            dropdown.classList.remove('show');
+            input.value = '';
+        }
+    };
 
-function performSearch() {
+    window.performSearch = function() {
     const input = document.getElementById('searchInput');
     if (!input) return;
     
@@ -728,9 +729,9 @@ function performSearch() {
     searchTimeout = setTimeout(() => {
         searchPosts(keyword);
     }, 300);
-}
+    };
 
-async function searchPosts(keyword) {
+    async function searchPosts(keyword) {
     const results = document.getElementById('searchResults');
     
     if (!results) return;
@@ -756,9 +757,9 @@ async function searchPosts(keyword) {
         console.error('Search error:', error);
         results.innerHTML = '<div class="search-no-results">Arama hatası oluştu</div>';
     }
-}
+    }
 
-function displaySearchResults(posts) {
+    function displaySearchResults(posts) {
     const results = document.getElementById('searchResults');
     if (!results) return;
     
@@ -780,7 +781,8 @@ function displaySearchResults(posts) {
     });
     
     results.innerHTML = html;
-}
+    }
+})();
 
 function escapeHtml(text) {
     if (!text) return '';

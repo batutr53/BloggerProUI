@@ -1,6 +1,320 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+@{
+    ViewData["Title"] = "Gizlilik Politikası";
+    ViewData["Description"] = "insanlıkHallerimiz gizlilik politikası - Kişisel verilerinizin korunması ve kullanımı hakkında detaylı bilgiler.";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<!-- Hero Section -->
+<section class="privacy-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="privacy-hero-title">Gizlilik Politikası</h1>
+                <p class="privacy-hero-subtitle">Kişisel verilerinizin korunması bizim için önemlidir</p>
+                <div class="privacy-hero-meta">
+                    <span class="privacy-update-date">Son Güncelleme: @DateTime.Now.ToString("dd MMMM yyyy")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Privacy Content Section -->
+<section class="privacy-main-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="privacy-content-container">
+                    
+                    <!-- Introduction -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Giriş</h2>
+                        <p class="privacy-paragraph">
+                            <strong>insanlıkHallerimiz</strong> olarak, kullanıcılarımızın gizliliğini korumak ve kişisel verilerini güvende tutmak en önemli önceliklerimizden biridir. Bu Gizlilik Politikası, platformumuzu kullanırken kişisel verilerinizin nasıl toplandığını, işlendiğini, saklandığını ve korunduğunu açıklamaktadır.
+                        </p>
+                        <p class="privacy-paragraph">
+                            Bu politika, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK), Avrupa Birliği Genel Veri Koruma Yönetmeliği (GDPR) ve diğer ilgili veri koruma mevzuatlarına uygun olarak hazırlanmıştır.
+                        </p>
+                    </div>
+
+                    <!-- Data Controller -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Veri Sorumlusu</h2>
+                        <div class="privacy-contact-info">
+                            <p class="privacy-paragraph"><strong>Veri Sorumlusu:</strong> insanlıkHallerimiz</p>
+                            <p class="privacy-paragraph"><strong>İletişim:</strong> iletisim@insanlikhallerimiz.com</p>
+                            <p class="privacy-paragraph"><strong>Adres:</strong> Türkiye</p>
+                        </div>
+                    </div>
+
+                    <!-- Data Collection -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Toplanan Kişisel Veriler</h2>
+                        <p class="privacy-paragraph">Platformumuzda aşağıdaki kişisel veriler toplanmaktadır:</p>
+                        
+                        <div class="privacy-data-categories">
+                            <div class="privacy-data-category">
+                                <h3 class="privacy-data-category-title">
+                                    <i class="fas fa-user privacy-data-icon"></i>
+                                    Kimlik Bilgileri
+                                </h3>
+                                <ul class="privacy-data-list">
+                                    <li>Ad, soyad</li>
+                                    <li>Kullanıcı adı</li>
+                                    <li>E-posta adresi</li>
+                                    <li>Profil fotoğrafı (isteğe bağlı)</li>
+                                </ul>
+                            </div>
+
+                            <div class="privacy-data-category">
+                                <h3 class="privacy-data-category-title">
+                                    <i class="fas fa-globe privacy-data-icon"></i>
+                                    İletişim Bilgileri
+                                </h3>
+                                <ul class="privacy-data-list">
+                                    <li>E-posta adresi</li>
+                                    <li>Sosyal medya hesap bilgileri (isteğe bağlı)</li>
+                                    <li>İletişim formları aracılığıyla paylaşılan bilgiler</li>
+                                </ul>
+                            </div>
+
+                            <div class="privacy-data-category">
+                                <h3 class="privacy-data-category-title">
+                                    <i class="fas fa-chart-line privacy-data-icon"></i>
+                                    Kullanım Verileri
+                                </h3>
+                                <ul class="privacy-data-list">
+                                    <li>IP adresi</li>
+                                    <li>Tarayıcı türü ve versiyonu</li>
+                                    <li>Ziyaret edilen sayfalar</li>
+                                    <li>Oturum süreleri</li>
+                                    <li>Çerezler (cookies)</li>
+                                </ul>
+                            </div>
+
+                            <div class="privacy-data-category">
+                                <h3 class="privacy-data-category-title">
+                                    <i class="fas fa-edit privacy-data-icon"></i>
+                                    İçerik Verileri
+                                </h3>
+                                <ul class="privacy-data-list">
+                                    <li>Blog yazıları ve paylaşımlar</li>
+                                    <li>Yorumlar</li>
+                                    <li>Mesajlar</li>
+                                    <li>Beğeniler ve etkileşimler</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Purpose of Processing -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Verilerin İşlenme Amaçları</h2>
+                        <p class="privacy-paragraph">Kişisel verileriniz aşağıdaki amaçlarla işlenmektedir:</p>
+                        
+                        <div class="privacy-purposes">
+                            <div class="privacy-purpose-item">
+                                <i class="fas fa-check-circle privacy-purpose-icon"></i>
+                                <div class="privacy-purpose-content">
+                                    <h4>Hesap Yönetimi</h4>
+                                    <p>Kullanıcı hesabınızın oluşturulması, yönetimi ve kimlik doğrulama işlemleri</p>
+                                </div>
+                            </div>
+
+                            <div class="privacy-purpose-item">
+                                <i class="fas fa-check-circle privacy-purpose-icon"></i>
+                                <div class="privacy-purpose-content">
+                                    <h4>Platform Hizmetleri</h4>
+                                    <p>Blog yazma, yorum yapma, mesajlaşma ve diğer platform özelliklerinin sunulması</p>
+                                </div>
+                            </div>
+
+                            <div class="privacy-purpose-item">
+                                <i class="fas fa-check-circle privacy-purpose-icon"></i>
+                                <div class="privacy-purpose-content">
+                                    <h4>İletişim</h4>
+                                    <p>Sizinle iletişim kurma, bildirimler gönderme ve destek hizmetleri sunma</p>
+                                </div>
+                            </div>
+
+                            <div class="privacy-purpose-item">
+                                <i class="fas fa-check-circle privacy-purpose-icon"></i>
+                                <div class="privacy-purpose-content">
+                                    <h4>Platform İyileştirme</h4>
+                                    <p>Hizmet kalitesini artırma, analiz yapma ve yeni özellikler geliştirme</p>
+                                </div>
+                            </div>
+
+                            <div class="privacy-purpose-item">
+                                <i class="fas fa-check-circle privacy-purpose-icon"></i>
+                                <div class="privacy-purpose-content">
+                                    <h4>Güvenlik</h4>
+                                    <p>Platform güvenliğini sağlama, dolandırıcılık ve kötüye kullanımı önleme</p>
+                                </div>
+                            </div>
+
+                            <div class="privacy-purpose-item">
+                                <i class="fas fa-check-circle privacy-purpose-icon"></i>
+                                <div class="privacy-purpose-content">
+                                    <h4>Yasal Yükümlülükler</h4>
+                                    <p>Mevzuattan kaynaklanan yasal yükümlülüklerin yerine getirilmesi</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Sharing -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Verilerin Paylaşılması</h2>
+                        <p class="privacy-paragraph">
+                            Kişisel verileriniz, açık rızanız olmaksızın üçüncü taraflarla paylaşılmaz. Ancak aşağıdaki durumlarda verileriniz paylaşılabilir:
+                        </p>
+                        <ul class="privacy-list">
+                            <li>Yasal zorunluluklar gereği (mahkeme kararı, yasal talep vb.)</li>
+                            <li>Platform güvenliğini tehdit eden durumların tespiti</li>
+                            <li>Hizmet sağlayıcılar (hosting, e-posta servisleri vb.) ile sınırlı olarak</li>
+                            <li>Açık rızanızın bulunduğu durumlarda</li>
+                        </ul>
+                    </div>
+
+                    <!-- Data Security -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Veri Güvenliği</h2>
+                        <p class="privacy-paragraph">
+                            Kişisel verilerinizin güvenliğini sağlamak için çeşitli teknik ve idari önlemler almaktayız:
+                        </p>
+                        <div class="privacy-security-measures">
+                            <div class="privacy-security-item">
+                                <i class="fas fa-shield-alt privacy-security-icon"></i>
+                                <span>SSL/TLS şifreleme</span>
+                            </div>
+                            <div class="privacy-security-item">
+                                <i class="fas fa-lock privacy-security-icon"></i>
+                                <span>Güvenli şifre politikaları</span>
+                            </div>
+                            <div class="privacy-security-item">
+                                <i class="fas fa-server privacy-security-icon"></i>
+                                <span>Güvenli sunucu altyapısı</span>
+                            </div>
+                            <div class="privacy-security-item">
+                                <i class="fas fa-user-shield privacy-security-icon"></i>
+                                <span>Erişim kontrolü ve yetkilendirme</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Rights -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Kişisel Veri Sahibi Hakları</h2>
+                        <p class="privacy-paragraph">KVKK ve GDPR kapsamında aşağıdaki haklara sahipsiniz:</p>
+                        
+                        <div class="privacy-rights-grid">
+                            <div class="privacy-right-item">
+                                <i class="fas fa-eye privacy-right-icon"></i>
+                                <h4>Bilgi Alma Hakkı</h4>
+                                <p>Kişisel verilerinizin işlenip işlenmediğini öğrenme hakkı</p>
+                            </div>
+
+                            <div class="privacy-right-item">
+                                <i class="fas fa-search privacy-right-icon"></i>
+                                <h4>Erişim Hakkı</h4>
+                                <p>İşlenen kişisel verilerinize erişim talep etme hakkı</p>
+                            </div>
+
+                            <div class="privacy-right-item">
+                                <i class="fas fa-edit privacy-right-icon"></i>
+                                <h4>Düzeltme Hakkı</h4>
+                                <p>Yanlış veya eksik verilerin düzeltilmesini talep etme hakkı</p>
+                            </div>
+
+                            <div class="privacy-right-item">
+                                <i class="fas fa-trash privacy-right-icon"></i>
+                                <h4>Silme Hakkı</h4>
+                                <p>Kişisel verilerinizin silinmesini talep etme hakkı</p>
+                            </div>
+
+                            <div class="privacy-right-item">
+                                <i class="fas fa-ban privacy-right-icon"></i>
+                                <h4>İşlemeyi Durdurma Hakkı</h4>
+                                <p>Belirli şartlarda işlemenin durdurulmasını talep etme hakkı</p>
+                            </div>
+
+                            <div class="privacy-right-item">
+                                <i class="fas fa-download privacy-right-icon"></i>
+                                <h4>Veri Taşınabilirliği</h4>
+                                <p>Verilerinizi başka bir platforma taşıma hakkı</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cookies -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Çerezler (Cookies)</h2>
+                        <p class="privacy-paragraph">
+                            Platformumuz, kullanıcı deneyimini iyileştirmek için çerezler kullanmaktadır. Çerezler hakkında detaylı bilgi:
+                        </p>
+                        <ul class="privacy-list">
+                            <li><strong>Zorunlu Çerezler:</strong> Platform işlevselliği için gerekli</li>
+                            <li><strong>Performans Çerezleri:</strong> Platform performansını ölçmek için</li>
+                            <li><strong>İşlevsellik Çerezleri:</strong> Tercihlerinizi hatırlamak için</li>
+                            <li><strong>Analitik Çerezler:</strong> Kullanım istatistikleri için</li>
+                        </ul>
+                        <p class="privacy-paragraph">
+                            Tarayıcı ayarlarınızdan çerezleri yönetebilir, kabul etmeyebilir veya silebilirsiniz.
+                        </p>
+                    </div>
+
+                    <!-- Data Retention -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Veri Saklama Süreleri</h2>
+                        <p class="privacy-paragraph">Kişisel verileriniz aşağıdaki süreler boyunca saklanmaktadır:</p>
+                        <ul class="privacy-list">
+                            <li><strong>Hesap Bilgileri:</strong> Hesabınız aktif olduğu sürece</li>
+                            <li><strong>İçerik Verileri:</strong> İçeriği silene kadar veya hesap kapatılana kadar</li>
+                            <li><strong>Kullanım Verileri:</strong> 2 yıl</li>
+                            <li><strong>İletişim Kayıtları:</strong> 3 yıl</li>
+                            <li><strong>Yasal Zorunluluklar:</strong> İlgili mevzuatta belirtilen süreler</li>
+                        </ul>
+                    </div>
+
+                    <!-- Contact -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">İletişim</h2>
+                        <p class="privacy-paragraph">
+                            Gizlilik politikamız hakkında sorularınız veya kişisel veri haklarınızı kullanmak istiyorsanız bizimle iletişime geçebilirsiniz:
+                        </p>
+                        <div class="privacy-contact-methods">
+                            <div class="privacy-contact-method">
+                                <i class="fas fa-envelope privacy-contact-icon"></i>
+                                <div>
+                                    <strong>E-posta:</strong>
+                                    <a href="mailto:gizlilik@insanlikhallerimiz.com">gizlilik@insanlikhallerimiz.com</a>
+                                </div>
+                            </div>
+                            <div class="privacy-contact-method">
+                                <i class="fas fa-phone privacy-contact-icon"></i>
+                                <div>
+                                    <strong>İletişim Formu:</strong>
+                                    <a href="/Home/Contact">İletişim sayfamızı</a> kullanabilirsiniz
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Updates -->
+                    <div class="privacy-section">
+                        <h2 class="privacy-section-title">Politika Güncellemeleri</h2>
+                        <p class="privacy-paragraph">
+                            Bu Gizlilik Politikası, yasal değişiklikler veya hizmetlerimizdeki değişiklikler nedeniyle güncellenebilir. 
+                            Önemli değişiklikler durumunda kullanıcılarımız e-posta veya platform bildirimleri ile bilgilendirilecektir.
+                        </p>
+                        <div class="privacy-update-info">
+                            <p><strong>İlk Yayın Tarihi:</strong> @DateTime.Now.ToString("dd MMMM yyyy")</p>
+                            <p><strong>Son Güncelleme:</strong> @DateTime.Now.ToString("dd MMMM yyyy")</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

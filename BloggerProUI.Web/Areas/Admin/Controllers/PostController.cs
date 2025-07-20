@@ -3,6 +3,7 @@ using BloggerProUI.Business.Services;
 using BloggerProUI.Models.Enums;
 using BloggerProUI.Models.Post;
 using BloggerProUI.Models.PostModule;
+using BloggerProUI.Web.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -11,7 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")]
+[AdminAuthorize]
 public class PostController : Controller
 {
     private readonly IPostApiService _postApiService;

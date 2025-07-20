@@ -1,14 +1,36 @@
-<!-- Footer -->
-<footer class="footer">
-    <div class="footer-container" id="footer-container">
+<!-- Modern Footer -->
+<footer class="modern-footer">
+    <div class="modern-footer-container" id="footer-container">
         <!-- Footer sections will be loaded dynamically -->
     </div>
     
     <!-- Copyright -->
-    <div style="border-top: 1px solid #555; margin-top: 30px; padding-top: 20px; text-align: center;" id="footer-copyright">
-        <p style="color: #999; font-size: 13px; margin: 0;">
-            © @DateTime.Now.Year insanlikHallerimiz. Tüm hakları saklıdır. | Tasarım ve geliştirme: insanlikHallerimiz Team
-        </p>
+    <div class="modern-footer-copyright" id="footer-copyright">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="modern-footer-copyright-text">
+                        © @DateTime.Now.Year <strong>insanlıkHallerimiz</strong>. Tüm hakları saklıdır.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="modern-footer-social">
+                        <a href="#" class="modern-footer-social-link" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="modern-footer-social-link" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="modern-footer-social-link" title="LinkedIn">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="mailto:iletisim@insanlikhallerimiz.com" class="modern-footer-social-link" title="E-posta">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </footer>
 
@@ -20,6 +42,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadFooterContent() {
     try {
+        // Check if dynamic footer system is enabled
+        const footerSystemEnabled = localStorage.getItem('footerSystemEnabled');
+        
+        // If disabled, always show static footer
+        if (footerSystemEnabled === 'false') {
+            renderStaticFooter();
+            return;
+        }
+        
+        // Try to load dynamic footer (default behavior)
         const response = await fetch('/Footer/GetActiveFooters');
         const footers = await response.json();
         
@@ -27,11 +59,11 @@ async function loadFooterContent() {
             renderFooterSections(footers);
             renderCopyright(footers);
         } else {
-            renderDefaultFooter();
+            renderStaticFooter();
         }
     } catch (error) {
         console.log('Footer loading error:', error);
-        renderDefaultFooter();
+        renderStaticFooter();
     }
 }
 
@@ -102,49 +134,61 @@ function renderCopyright(footers) {
     }
 }
 
-function renderDefaultFooter() {
+function renderStaticFooter() {
     const container = document.getElementById('footer-container');
     container.innerHTML = `
-        <div class="footer-section">
-            <h5>insanlikHallerimiz</h5>
-            <ul class="footer-links">
-                <li><a href="/Home/About">Hakkımızda</a></li>
-                <li><a href="/Home/Contact">İletişim</a></li>
-                <li><a href="/Home/Privacy">Gizlilik Politikası</a></li>
-                <li><a href="/Home/Terms">Kullanım Şartları</a></li>
-            </ul>
-        </div>
-        
-        <div class="footer-section">
-            <h5>Kategoriler</h5>
-            <ul class="footer-links">
-                <li><a href="#">Fotoğraf</a></li>
-                <li><a href="#">Sanat</a></li>
-                <li><a href="#">Tasarım</a></li>
-                <li><a href="#">Mimarlık</a></li>
-            </ul>
-        </div>
-        
-        <div class="footer-section">
-            <h5>Kaynak</h5>
-            <ul class="footer-links">
-                <li><a href="#">Kitaplar</a></li>
-                <li><a href="#">Podcast'ler</a></li>
-                <li><a href="#">Dergiler</a></li>
-                <li><a href="#">Videolar</a></li>
-            </ul>
-        </div>
-        
-        <div class="footer-section">
-            <h5>E-bülten</h5>
-            <p style="color: #ccc; font-size: 14px; margin-bottom: 15px;">
-                Yeni içeriklerden haberdar olmak için e-bültenimize abone olun.
-            </p>
-            <div class="newsletter-footer">
-                <input type="email" placeholder="E-posta adresiniz">
-                <button type="button">Abone Ol</button>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="modern-footer-section">
+                        <h5 class="modern-footer-title">
+                            <i class="fas fa-heart modern-footer-icon"></i>
+                            insanlıkHallerimiz
+                        </h5>
+                        <p class="modern-footer-description">
+                            İnsan deneyiminin derinliklerini keşfeden, duyguların ve düşüncelerin karmaşık dünyasını anlatan blog platformu.
+                        </p>
+                        <ul class="modern-footer-links">
+                            <li><a href="/Home/About">Hakkımızda</a></li>
+                            <li><a href="/Home/Contact">İletişim</a></li>
+                            <li><a href="/Home/Privacy">Gizlilik Politikası</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="modern-footer-section">
+                        <h5 class="modern-footer-title">
+                            <i class="fas fa-compass modern-footer-icon"></i>
+                            Keşfet
+                        </h5>
+                        <ul class="modern-footer-links">
+                            <li><a href="/Blog">Tüm Yazılar</a></li>
+                            <li><a href="/Category/duygu">Duygular</a></li>
+                            <li><a href="/Category/dusunce">Düşünceler</a></li>
+                            <li><a href="/Category/deneyim">Deneyimler</a></li>
+                            <li><a href="/Category/sanat">Sanat & Kültür</a></li>
+                            <li><a href="/Category/felsefe">Felsefe</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <div class="modern-footer-section">
+                        <h5 class="modern-footer-title">
+                            <i class="fas fa-users modern-footer-icon"></i>
+                            Topluluk
+                        </h5>
+                        <ul class="modern-footer-links">
+                            <li><a href="/UserSearch">Yazar Keşfi</a></li>
+                            <li><a href="/Chat">Sohbet</a></li>
+                            <li><a href="/Notification">Bildirimler</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     `;
 }
+
 </script>

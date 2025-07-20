@@ -1,0 +1,47 @@
+@model BloggerProUI.Models.Comment.CommentListDto
+
+<div class="reply" style="margin: 15px 0; padding: 15px; background: #f8f8f8; border-radius: 6px;">
+    <div class="reply-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div class="reply-author" style="font-weight: bold; color: #333; font-size: 14px;">
+            @Model.Username
+        </div>
+        <div class="reply-date" style="color: #666; font-size: 12px;">
+            @Model.CreatedAt.ToString("dd MMMM yyyy HH:mm")
+        </div>
+    </div>
+    <div class="reply-content" style="margin: 8px 0; line-height: 1.5; font-size: 14px;">
+        @Model.Content
+    </div>
+    <div class="reply-actions" style="margin-top: 8px;">
+        <button class="reply-like-btn" onclick="likeComment('@Model.Id')" data-comment-id="@Model.Id" data-liked="@(Model.HasLiked ? "true" : "false")" style="background: none; border: none; color: @(Model.HasLiked ? "#ff4757" : "#666"); cursor: pointer; font-size: 12px;">
+            @(Model.HasLiked ? "❤️" : "🤍") @Model.LikeCount
+        </button>
+        <button class="nested-reply-btn" onclick="replyToComment('@Model.Id')" style="background: none; border: none; color: #666; cursor: pointer; font-size: 12px; margin-left: 10px;">
+            💬 Yanıtla
+        </button>
+    </div>
+    
+    <!-- Nested Reply Form (Initially Hidden) -->
+    <div id="replyForm_@Model.Id" class="nested-reply-form" style="display: none; margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 4px;">
+        <textarea id="replyContent_@Model.Id" rows="2" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;" placeholder="Yanıtınızı yazın..."></textarea>
+        <div style="margin-top: 8px;">
+            <button onclick="submitReply('@Model.Id')" style="background: #333; color: #fff; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px; font-size: 12px;">
+                Yanıtla
+            </button>
+            <button onclick="cancelReply('@Model.Id')" style="background: #ccc; color: #333; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                İptal
+            </button>
+        </div>
+    </div>
+
+    <!-- Recursive Nested Replies -->
+    @if (Model.Replies != null && Model.Replies.Any())
+    {
+        <div class="nested-replies" style="margin-top: 15px; padding-left: 15px; border-left: 1px solid #ddd;">
+            @foreach (var nestedReply in Model.Replies)
+            {
+                @await Html.PartialAsync("_CommentReply", nestedReply)
+            }
+        </div>
+    }
+</div>

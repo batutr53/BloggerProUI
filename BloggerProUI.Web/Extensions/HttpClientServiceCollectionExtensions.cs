@@ -126,6 +126,12 @@ public static class HttpClientServiceCollectionExtensions
         })
         .AddHttpMessageHandler<AuthTokenHandler>();
 
+        services.AddHttpClient<INotificationApiService, NotificationApiService>(client =>
+        {
+            client.BaseAddress = baseAddress;
+        })
+        .AddHttpMessageHandler<AuthTokenHandler>();
+
         return services;
     }
 }

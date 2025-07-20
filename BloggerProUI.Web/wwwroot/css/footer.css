@@ -1,0 +1,400 @@
+/* Modern Footer Styles */
+
+.modern-footer {
+    background: linear-gradient(135deg, #2c2c2c 0%, #333 100%);
+    color: #ffffff;
+    margin-top: 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modern-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+}
+
+.modern-footer-container {
+    padding: 3rem 0 2rem;
+    position: relative;
+}
+
+.modern-footer-section {
+    padding: 1rem;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.modern-footer-section:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modern-footer-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.modern-footer-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #ffffff 0%, transparent 100%);
+    border-radius: 1px;
+}
+
+.modern-footer-icon {
+    color: #ffffff;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.modern-footer-description {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    color: #cccccc;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    text-align: justify;
+}
+
+.modern-footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.modern-footer-links li {
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.modern-footer-links li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #999;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.modern-footer-links li:hover::before {
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+.modern-footer-links a {
+    font-family: 'Inter', sans-serif;
+    color: #cccccc;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.modern-footer-links a:hover {
+    color: #ffffff;
+    text-decoration: none;
+    padding-left: 5px;
+}
+
+/* Copyright Section */
+.modern-footer-copyright {
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 0;
+    backdrop-filter: blur(10px);
+}
+
+.modern-footer-copyright-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: #cccccc;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.modern-footer-copyright-text strong {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Social Links */
+.modern-footer-social {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.modern-footer-social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: #cccccc;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.modern-footer-social-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Dynamic Footer Integration */
+.footer-section {
+    padding: 1rem;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.footer-section:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.footer-section h5 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.footer-section h5::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #ffffff 0%, transparent 100%);
+    border-radius: 1px;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.75rem;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.footer-links li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #999;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.footer-links li:hover::before {
+    color: #ffffff;
+    transform: translateX(3px);
+}
+
+.footer-links a {
+    font-family: 'Inter', sans-serif;
+    color: #cccccc;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #ffffff;
+    text-decoration: none;
+    padding-left: 5px;
+}
+
+/* Newsletter Styles (for dynamic footer) */
+.newsletter-input {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.newsletter-input input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+}
+
+.newsletter-input input::placeholder {
+    color: #cccccc;
+}
+
+.newsletter-input input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.newsletter-input button {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    color: #333;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.newsletter-input button:hover {
+    background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .modern-footer-container {
+        padding: 2rem 0 1.5rem;
+    }
+    
+    .modern-footer-section {
+        margin-bottom: 2rem;
+    }
+    
+    .modern-footer-social {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .modern-footer {
+        margin-top: 2rem;
+    }
+    
+    .modern-footer-container {
+        padding: 1.5rem 0 1rem;
+    }
+    
+    .modern-footer-section {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .modern-footer-title {
+        justify-content: center;
+        font-size: 1.125rem;
+    }
+    
+    .modern-footer-title::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .modern-footer-links li {
+        padding-left: 0;
+    }
+    
+    .modern-footer-links li::before {
+        display: none;
+    }
+    
+    .modern-footer-copyright {
+        text-align: center;
+    }
+    
+    .modern-footer-social {
+        justify-content: center;
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modern-footer-container {
+        padding: 1rem 0;
+    }
+    
+    .modern-footer-section {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .modern-footer-title {
+        font-size: 1rem;
+    }
+    
+    .modern-footer-social-link {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .modern-footer-copyright-text {
+        font-size: 0.8rem;
+    }
+}
+
+/* Animation for smooth entrance */
+.modern-footer-section {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

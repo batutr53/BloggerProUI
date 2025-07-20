@@ -7,9 +7,20 @@
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Footer Yönetimi</h1>
-    <a asp-action="Create" class="btn btn-primary btn-sm">
-        <i class="fas fa-plus fa-sm text-white-50"></i> Yeni Footer Ekle
-    </a>
+    <div class="d-flex align-items-center">
+        <div class="mr-3">
+            <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="footerSystemToggle" onchange="toggleFooterSystem(this)">
+                <label class="custom-control-label" for="footerSystemToggle">
+                    <strong>Dinamik Footer Sistemi</strong>
+                </label>
+            </div>
+            <small class="text-muted">Kapalı olduğunda statik footer gösterilir</small>
+        </div>
+        <a asp-action="Create" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Yeni Footer Ekle
+        </a>
+    </div>
 </div>
 
 @if (TempData["SuccessMessage"] != null)
@@ -120,6 +131,51 @@
                 },
                 "order": [[ 0, "asc" ]]
             });
+            
+            // Load footer system status
+            loadFooterSystemStatus();
         });
+        
+        function loadFooterSystemStatus() {
+            const status = localStorage.getItem('footerSystemEnabled');
+            const toggle = document.getElementById('footerSystemToggle');
+            
+            if (status === null || status === 'true') {
+                toggle.checked = true;
+            } else {
+                toggle.checked = false;
+            }
+        }
+        
+        function toggleFooterSystem(toggle) {
+            const isEnabled = toggle.checked;
+            localStorage.setItem('footerSystemEnabled', isEnabled.toString());
+            
+            // Show confirmation message
+            if (isEnabled) {
+                showAlert('success', 'Dinamik footer sistemi aktif edildi. Artık admin panelden girilen veriler gösterilecek.');
+            } else {
+                showAlert('warning', 'Dinamik footer sistemi pasif edildi. Artık statik footer gösterilecek.');
+            }
+        }
+        
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+            
+            // Insert alert after the header
+            $('.d-sm-flex').after(alertHtml);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 5000);
+        }
     </script>
 }

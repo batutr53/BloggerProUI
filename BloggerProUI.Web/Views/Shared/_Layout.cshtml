@@ -73,6 +73,12 @@
     <link rel="stylesheet" href="~/css/style.css?v=@DateTime.Now.Ticks" />
     <link rel="stylesheet" href="~/css/post-content.css?v=@DateTime.Now.Ticks" />
     <link rel="stylesheet" href="~/css/header-search.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/css/user-search.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/css/chat.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/css/notification.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/css/about.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/css/footer.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/css/privacy.css?v=@DateTime.Now.Ticks" />
     
     <!-- Structured Data -->
     @if(ViewData["StructuredData"] != null)
@@ -125,10 +131,18 @@
             }
         });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.14/signalr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js?v=@DateTime.Now.Ticks&nocache=@Guid.NewGuid()"></script>
     <script src="~/js/seo-enhancements.js?v=@DateTime.Now.Ticks&nocache=@Guid.NewGuid()"></script>
     <script src="~/js/cache-busting.js?v=@DateTime.Now.Ticks&nocache=@Guid.NewGuid()"></script>
+    
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script src="~/js/notifications.js?v=@DateTime.Now.Ticks&nocache=@Guid.NewGuid()"></script>
+    }
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -11,7 +11,7 @@ class ChatHubManager {
     async connect(accessToken) {
         try {
             this.connection = new signalR.HubConnectionBuilder()
-                .withUrl("/chathub", {
+                .withUrl("https://localhost:7028/chathub", {
                     accessTokenFactory: () => accessToken
                 })
                 .withAutomaticReconnect()

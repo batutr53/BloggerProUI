@@ -2,92 +2,127 @@
 @{
     ViewData["Title"] = "Sohbetler";
     Layout = "_Layout";
+    ViewData["Description"] = "insanlikHallerimiz topluluğundaki dostlarınızla anlık mesajlaşın, fikirlerinizi paylaşın ve bağlantılarınızı güçlendirin.";
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Sohbetler</h5>
-                    <button class="btn btn-primary btn-sm" onclick="openUserSearch()">
-                        <i class="fas fa-plus"></i> Yeni Sohbet
-                    </button>
-                </div>
-                <div class="card-body p-0">
-                    @if (Model != null && Model.Any())
-                    {
-                        <div class="list-group list-group-flush">
-                            @foreach (var conversation in Model)
-                            {
-                                <a href="@Url.Action("Conversation", new { userId = conversation.OtherUserId })" 
-                                   class="list-group-item list-group-item-action conversation-item"
-                                   data-user-id="@conversation.OtherUserId">
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar-container me-3">
-                                            <img src="@(string.IsNullOrEmpty(conversation.OtherUserProfileImage) ? "/images/default-avatar.png" : conversation.OtherUserProfileImage)" 
-                                                 alt="@conversation.OtherUserDisplayName" 
-                                                 class="rounded-circle" 
-                                                 width="40" height="40">
-                                            <span class="presence-indicator" id="presence-@conversation.OtherUserId"></span>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <div class="d-flex justify-content-between">
-                                                <h6 class="mb-1">@conversation.OtherUserDisplayName</h6>
-                                                <small class="text-muted">@(conversation.LastMessageTime?.ToString("HH:mm") ?? "")</small>
-                                            </div>
-                                            <p class="mb-1 text-muted small">@conversation.LastMessage</p>
-                                            @if (conversation.UnreadCount > 0)
-                                            {
-                                                <span class="badge bg-primary rounded-pill">@conversation.UnreadCount</span>
-                                            }
-                                        </div>
-                                    </div>
-                                </a>
-                            }
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center p-4">
-                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Henüz sohbetiniz yok</p>
-                            <button class="btn btn-primary" onclick="openUserSearch()">
-                                İlk Sohbetinizi Başlatın
-                            </button>
-                        </div>
-                    }
-                </div>
+<!-- Hero Section -->
+<section class="chat-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="chat-hero-title">Sohbetleriniz</h1>
+                <p class="chat-hero-subtitle">Topluluğumuzdaki dostlarınızla anlık mesajlaşın ve bağlantılarınızı güçlendirin</p>
             </div>
         </div>
-        
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body text-center">
-                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
-                    <h5 class="text-muted">Bir sohbet seçin</h5>
-                    <p class="text-muted">Sohbet başlatmak için sol taraftan bir kullanıcı seçin veya yeni sohbet oluşturun.</p>
+    </div>
+</section>
+
+<!-- Chat Section -->
+<section class="chat-main-section">
+    <div class="container">
+        <div class="row">
+            <!-- Conversations Sidebar -->
+            <div class="col-lg-4 col-md-5">
+                <div class="chat-sidebar">
+                    <div class="chat-sidebar-header">
+                        <h3 class="chat-sidebar-title">Sohbetler</h3>
+                        <button class="chat-btn-modern chat-btn-primary-modern" onclick="openUserSearch()">
+                            <i class="fas fa-plus"></i>
+                            <span>Yeni Sohbet</span>
+                        </button>
+                    </div>
+                    
+                    <div class="chat-conversations-container">
+                        @if (Model != null && Model.Any())
+                        {
+                            <div class="chat-conversations-list">
+                                @foreach (var conversation in Model)
+                                {
+                                    <a href="@Url.Action("Conversation", new { userId = conversation.OtherUserId })" 
+                                       class="chat-conversation-item"
+                                       data-user-id="@conversation.OtherUserId">
+                                        <div class="chat-conversation-content">
+                                            <div class="chat-avatar-container">
+                                                <img src="@(string.IsNullOrEmpty(conversation.OtherUserProfileImage) ? "/images/default-avatar.png" : conversation.OtherUserProfileImage)" 
+                                                     alt="@conversation.OtherUserDisplayName" 
+                                                     class="chat-conversation-avatar">
+                                                <span class="chat-presence-indicator" id="presence-@conversation.OtherUserId"></span>
+                                            </div>
+                                            <div class="chat-conversation-info">
+                                                <div class="chat-conversation-header">
+                                                    <h4 class="chat-conversation-name">@conversation.OtherUserDisplayName</h4>
+                                                    <span class="chat-conversation-time">@(conversation.LastMessageTime?.ToString("HH:mm") ?? "")</span>
+                                                </div>
+                                                <div class="chat-conversation-preview">
+                                                    <p class="chat-last-message">@conversation.LastMessage</p>
+                                                    @if (conversation.UnreadCount > 0)
+                                                    {
+                                                        <span class="chat-unread-badge">@conversation.UnreadCount</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="chat-empty-state">
+                                <div class="chat-empty-icon">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <h4 class="chat-empty-title">Henüz sohbetiniz yok</h4>
+                                <p class="chat-empty-text">Topluluktaki insanlarla sohbet etmeye başlayın ve yeni dostluklar kurun.</p>
+                                <button class="chat-btn-modern chat-btn-primary-modern" onclick="openUserSearch()">
+                                    <i class="fas fa-plus"></i>
+                                    İlk Sohbetinizi Başlatın
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Area -->
+            <div class="col-lg-8 col-md-7">
+                <div class="chat-main-area">
+                    <div class="chat-welcome-state">
+                        <div class="chat-welcome-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h4 class="chat-welcome-title">Bir sohbet seçin</h4>
+                        <p class="chat-welcome-text">Sol taraftan devam etmek istediğiniz sohbeti seçin veya yeni bir sohbet başlatın.</p>
+                        <button class="chat-btn-modern chat-btn-outline-modern" onclick="openUserSearch()">
+                            <i class="fas fa-search"></i>
+                            Kullanıcı Ara
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <!-- User Search Modal -->
-<div class="modal fade" id="userSearchModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Kullanıcı Ara</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="userSearchModal" tabindex="-1" aria-labelledby="userSearchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content chat-modal">
+            <div class="modal-header chat-modal-header">
+                <h5 class="modal-title chat-modal-title" id="userSearchModalLabel">Yeni Sohbet Başlat</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="userSearchInput" placeholder="Kullanıcı adı ara...">
+            <div class="modal-body chat-modal-body">
+                <div class="chat-search-container">
+                    <div class="chat-search-box">
+                        <i class="fas fa-search chat-search-icon"></i>
+                        <input type="text" class="chat-search-input" id="userSearchInput" placeholder="Kullanıcı adı ile arama yapın...">
+                    </div>
                 </div>
-                <div id="searchResults">
-                    <div class="text-center">
-                        <p class="text-muted">Kullanıcı aramak için yazmaya başlayın</p>
+                <div id="searchResults" class="chat-search-results">
+                    <div class="chat-search-placeholder">
+                        <i class="fas fa-search chat-search-placeholder-icon"></i>
+                        <p class="chat-search-placeholder-text">Kullanıcı aramak için yazmaya başlayın</p>
                     </div>
                 </div>
             </div>
@@ -95,105 +130,142 @@
     </div>
 </div>
 
-<style>
-.avatar-container {
-    position: relative;
-}
-
-.presence-indicator {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid white;
-    background-color: #6c757d;
-}
-
-.presence-indicator.online {
-    background-color: #28a745;
-}
-
-.conversation-item:hover {
-    background-color: #f8f9fa;
-}
-</style>
-
 @section Scripts {
     <script src="~/js/chat-hub.js"></script>
     <script>
-        let searchTimeout;
-        
-        function openUserSearch() {
-            $('#userSearchModal').modal('show');
-        }
-        
-        $('#userSearchInput').on('input', function() {
-            clearTimeout(searchTimeout);
-            const query = $(this).val().trim();
+        (function() {
+            'use strict';
             
-            if (query.length < 2) {
-                $('#searchResults').html('<div class="text-center"><p class="text-muted">En az 2 karakter girin</p></div>');
-                return;
-            }
+            let searchTimeout;
+            let userSearchModal;
             
-            searchTimeout = setTimeout(() => {
-                searchUsers(query);
-            }, 300);
-        });
-        
-        function searchUsers(query) {
-            $.get('/UserSearch/Search', { q: query, mutual: true })
-                .done(function(response) {
-                    if (response.success && response.data.length > 0) {
-                        let html = '<div class="list-group">';
-                        response.data.forEach(user => {
-                            html += '<div class="list-group-item d-flex justify-content-between align-items-center">' +
-                                '<div class="d-flex align-items-center">' +
-                                    '<img src="' + (user.profilePicture || '/images/default-avatar.png') + '" ' +
-                                         'alt="' + user.displayName + '" ' +
-                                         'class="rounded-circle me-3" ' +
-                                         'width="40" height="40">' +
-                                    '<div>' +
-                                        '<h6 class="mb-0">' + user.displayName + '</h6>' +
-                                        '<small class="text-muted">@@' + user.userName + '</small>' +
-                                    '</div>' +
-                                '</div>' +
-                                '<button class="btn btn-primary btn-sm" onclick="startChat(\'' + user.id + '\')">' +
-                                    'Sohbet Et' +
-                                '</button>' +
-                            '</div>';
-                        });
-                        html += '</div>';
-                        $('#searchResults').html(html);
-                    } else {
-                        $('#searchResults').html('<div class="text-center"><p class="text-muted">Kullanıcı bulunamadı</p></div>');
+            // Global function for opening user search
+            window.openUserSearch = function() {
+                if (typeof bootstrap !== 'undefined') {
+                    // Bootstrap 5 syntax
+                    if (!userSearchModal) {
+                        userSearchModal = new bootstrap.Modal(document.getElementById('userSearchModal'));
                     }
-                })
-                .fail(function() {
-                    $('#searchResults').html('<div class="text-center"><p class="text-danger">Arama hatası oluştu</p></div>');
-                });
-        }
-        
-        function startChat(userId) {
-            window.location.href = '/Chat/Conversation/' + userId;
-        }
-        
-        // Initialize SignalR connection
-        $(document).ready(async function() {
-            const accessToken = '@(ViewBag.AccessToken ?? "")';
-            if (accessToken) {
-                await window.chatHub.connect(accessToken);
+                    userSearchModal.show();
+                } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                    // Bootstrap 4 with jQuery fallback
+                    $('#userSearchModal').modal('show');
+                } else {
+                    // Fallback - direct DOM manipulation
+                    const modal = document.getElementById('userSearchModal');
+                    if (modal) {
+                        modal.style.display = 'block';
+                        modal.classList.add('show');
+                        document.body.classList.add('modal-open');
+                    }
+                }
+            };
+            
+            // Global function for starting chat
+            window.startChat = function(userId) {
+                window.location.href = '/Chat/Conversation/' + userId;
+            };
+            
+            // Wait for DOM and libraries to load
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check if jQuery is available
+                if (typeof $ === 'undefined') {
+                    console.error('jQuery is not loaded. Chat functionality may not work properly.');
+                    return;
+                }
                 
-                // Listen for presence updates
-                window.chatHub.onPresence((userId, isOnline) => {
-                    const indicator = document.getElementById('presence-' + userId);
-                    if (indicator) {
-                        indicator.classList.toggle('online', isOnline);
-                    }
-                });
+                // Setup search input handler
+                const searchInput = document.getElementById('userSearchInput');
+                if (searchInput) {
+                    searchInput.addEventListener('input', function() {
+                        clearTimeout(searchTimeout);
+                        const query = this.value.trim();
+                        
+                        if (query.length < 2) {
+                            document.getElementById('searchResults').innerHTML = 
+                                '<div class="chat-search-placeholder">' +
+                                    '<i class="fas fa-search chat-search-placeholder-icon"></i>' +
+                                    '<p class="chat-search-placeholder-text">En az 2 karakter girin</p>' +
+                                '</div>';
+                            return;
+                        }
+                        
+                        searchTimeout = setTimeout(() => {
+                            searchUsers(query);
+                        }, 300);
+                    });
+                }
+                
+                // Initialize SignalR connection
+                initializeSignalR();
+            });
+            
+            function searchUsers(query) {
+                if (typeof $ === 'undefined') {
+                    console.error('jQuery not available for search');
+                    return;
+                }
+                
+                $.get('/UserSearch/Search', { q: query, mutual: true })
+                    .done(function(response) {
+                        const resultsDiv = document.getElementById('searchResults');
+                        if (response.success && response.data.length > 0) {
+                            let html = '<div class="chat-search-results-list">';
+                            response.data.forEach(user => {
+                                const profileImage = user.profilePicture || user.profileImageUrl || '/images/default-avatar.png';
+                                const displayName = user.displayName || user.userName;
+                                html += '<div class="chat-search-result-item">' +
+                                    '<div class="chat-search-result-content">' +
+                                        '<img src="' + profileImage + '" ' +
+                                             'alt="' + displayName + '" ' +
+                                             'class="chat-search-result-avatar">' +
+                                        '<div class="chat-search-result-info">' +
+                                            '<h6 class="chat-search-result-name">' + displayName + '</h6>' +
+                                            '<small class="chat-search-result-username">@@' + user.userName + '</small>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<button class="chat-btn-modern chat-btn-primary-modern chat-btn-small" onclick="startChat(\'' + user.id + '\')">' +
+                                        '<i class="fas fa-comment"></i>' +
+                                        'Sohbet Et' +
+                                    '</button>' +
+                                '</div>';
+                            });
+                            html += '</div>';
+                            resultsDiv.innerHTML = html;
+                        } else {
+                            resultsDiv.innerHTML = '<div class="chat-search-empty">' +
+                                '<i class="fas fa-user-slash chat-search-empty-icon"></i>' +
+                                '<p class="chat-search-empty-text">Kullanıcı bulunamadı</p>' +
+                            '</div>';
+                        }
+                    })
+                    .fail(function() {
+                        document.getElementById('searchResults').innerHTML = 
+                            '<div class="chat-search-error">' +
+                                '<i class="fas fa-exclamation-triangle chat-search-error-icon"></i>' +
+                                '<p class="chat-search-error-text">Arama hatası oluştu. Lütfen tekrar deneyin.</p>' +
+                            '</div>';
+                    });
             }
-        });
+            
+            async function initializeSignalR() {
+                const accessToken = '@(ViewBag.AccessToken ?? "")';
+                if (accessToken && window.chatHub) {
+                    try {
+                        await window.chatHub.connect(accessToken);
+                        
+                        // Listen for presence updates
+                        window.chatHub.onPresence((userId, isOnline) => {
+                            const indicator = document.getElementById('presence-' + userId);
+                            if (indicator) {
+                                indicator.classList.toggle('online', isOnline);
+                            }
+                        });
+                    } catch (error) {
+                        console.error('SignalR connection failed:', error);
+                    }
+                }
+            }
+        })();
     </script>
 }

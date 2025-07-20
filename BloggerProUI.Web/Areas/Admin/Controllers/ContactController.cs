@@ -1,12 +1,13 @@
 using BloggerProUI.Business.Interfaces;
 using BloggerProUI.Models.Contact;
+using BloggerProUI.Web.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloggerProUI.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Admin")]
+[AdminAuthorize]
 public class ContactController : Controller
 {
     private readonly IContactApiService _contactApiService;
