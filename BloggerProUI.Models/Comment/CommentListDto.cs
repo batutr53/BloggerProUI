@@ -5,9 +5,12 @@ namespace BloggerProUI.Models.Comment
         public Guid Id { get; set; }
         public string Content { get; set; } = null!;
         public string Username { get; set; } = null!;
+        public string AuthorName { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public int LikeCount { get; set; }
         public bool HasLiked { get; set; }
+        public bool IsApproved { get; set; }
+        public int Rating { get; set; } = 5;
         public List<CommentListDto> Replies { get; set; } = new();
         public Guid? PostId { get; set; }
         public string? PostTitle { get; set; }

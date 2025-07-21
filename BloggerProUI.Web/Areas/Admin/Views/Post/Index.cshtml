@@ -1,54 +1,173 @@
 ﻿@model List<BloggerProUI.Models.Post.PostListDto>
 
 @{
-    ViewData["Title"] = "Postlar";
+    ViewData["Title"] = "Yazı Yönetimi";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Postlar</h1>
-    <a asp-area="Admin" asp-controller="Post" asp-action="Create" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Yeni Post Oluştur
-    </a>
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Yazı Yönetimi</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "AdminDashboard")">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item active">Yazılar</li>
+                </ol>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <a asp-area="Admin" asp-controller="Post" asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus mr-1"></i> Yeni Yazı Oluştur
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-}
-
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        
+        <!-- DataTables Card -->
 <div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Tüm Yazılar (@Model.Count adet)</h6>
+        <div class="dropdown no-arrow">
+            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                 aria-labelledby="dropdownMenuLink">
+                <div class="dropdown-header">Eylemler:</div>
+                <a class="dropdown-item" href="#" onclick="exportTable()">
+                    <i class="fas fa-file-excel fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Excel'e Aktar
+                </a>
+                <a class="dropdown-item" href="#" onclick="refreshTable()">
+                    <i class="fas fa-sync fa-sm fa-fw mr-2 text-gray-400"></i>
+                    Yenile
+                </a>
+            </div>
+        </div>
+    </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-bordered table-striped" width="100%" cellspacing="0">
-                <thead class="thead-dark">
+            <table class="table table-bordered table-hover admin-datatable" id="dataTable" width="100%" cellspacing="0">
+                <thead class="thead-light">
                     <tr>
-                        <th>Başlık</th>
+                        <th>Yazı</th>
                         <th>Yazar</th>
-                        <th>Açıklama</th>
-                        <th>Yayın Tarihi</th>
-                        <th style="width: 150px;">İşlemler</th>
+                        <th>Kategoriler</th>
+                        <th>Durum</th>
+                        <th>İstatistikler</th>
+                        <th>Tarih</th>
+                        <th class="text-center">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var post in Model)
                     {
                         <tr>
-                            <td>@post.Title</td>
-                            <td>@post.Author</td>
-                            <td>@post.Excerpt)</td>
-                            <td>@(post.PublishDate?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @if (!string.IsNullOrEmpty(post.FeaturedImage))
+                                    {
+                                        <img src="@post.FeaturedImage" alt="@post.Title" class="rounded mr-3" style="width: 50px; height: 35px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light rounded mr-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 35px;">
+                                            <i class="fas fa-image text-gray-400"></i>
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="font-weight-bold text-dark">@post.Title</div>
+                                        <div class="small text-gray-600">@(post.Excerpt != null && post.Excerpt.Length > 50 ? post.Excerpt.Substring(0, 50) + "..." : post.Excerpt)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="mr-2">
+                                        <div class="icon-circle bg-primary">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-weight-bold">@(post.Author?.Username ?? "Bilinmeyen")</div>
+                                        <div class="small text-gray-500">Yazar</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if (post.Categories?.Any() == true)
+                                {
+                                    @foreach (var category in post.Categories.Take(2))
+                                    {
+                                        <span class="badge badge-info badge-pill mr-1">@category</span>
+                                    }
+                                    @if (post.Categories.Count > 2)
+                                    {
+                                        <span class="badge badge-secondary badge-pill">+@(post.Categories.Count - 2)</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Kategori Yok</span>
+                                }
+                            </td>
+                            <td>
+                                @if (post.PublishDate.HasValue && post.PublishDate <= DateTime.Now)
+                                {
+                                    <span class="badge badge-success">Yayında</span>
+                                }
+                                else if (post.PublishDate.HasValue)
+                                {
+                                    <span class="badge badge-warning">Zamanlanmış</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">Taslak</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="small">
+                                    <div><i class="fas fa-eye text-info"></i> @post.ViewCount.ToString("N0")</div>
+                                    <div><i class="fas fa-heart text-danger"></i> @post.LikeCount.ToString("N0")</div>
+                                    <div><i class="fas fa-comment text-warning"></i> @post.CommentCount.ToString("N0")</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="small">
+                                    <div class="font-weight-bold">@(post.PublishDate?.ToString("dd.MM.yyyy") ?? post.CreatedAt.ToString("dd.MM.yyyy"))</div>
+                                    <div class="text-muted">@(post.PublishDate?.ToString("HH:mm") ?? post.CreatedAt.ToString("HH:mm"))</div>
+                                </div>
+                            </td>
                             <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@post.Id" class="btn btn-sm btn-warning mr-1" title="Düzenle">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-danger btn-sm" onclick="deletePost('@post.Id')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Edit" asp-route-id="@post.Id" class="btn btn-sm btn-outline-primary btn-action" 
+                                       data-toggle="tooltip" title="Düzenle">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-sm btn-outline-info btn-action" 
+                                       data-toggle="tooltip" title="Görüntüle" onclick="viewPost('@post.Id')">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-action btn-delete" 
+                                            data-toggle="tooltip" title="Sil" 
+                                            data-url="@Url.Action("Delete", "Post")" 
+                                            data-id="@post.Id"
+                                            data-title="Bu yazıyı silmek istediğinizden emin misiniz?"
+                                            data-text="@post.Title yazısı kalıcı olarak silinecek!">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -58,40 +177,108 @@
     </div>
 </div>
 
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function deletePost(id) {
-            Swal.fire({
-                title: 'Emin misiniz?',
-                text: "Bu post kalıcı olarak silinecek!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Evet, sil!',
-                cancelButtonText: 'Vazgeç'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '@Url.Action("Delete", "Post")',
-                        type: 'POST',
-                        data: { id: id },
-                        success: function (response) {
-                            if (response.success) {
-                                Swal.fire('Silindi!', response.message, 'success').then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire('Hata!', response.message || 'Silme işlemi başarısız.', 'error');
-                            }
-                        },
-                        error: function () {
-                            Swal.fire('Hata!', 'Sunucuya ulaşılamadı.', 'error');
-                        }
-                    });
-                }
+        $(document).ready(function() {
+            // Initialize DataTable with custom options
+            $('#dataTable').DataTable({
+                responsive: true,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/tr.json'
+                },
+                order: [[5, 'desc']], // Order by date
+                columnDefs: [
+                    { 
+                        targets: [6], // Actions column
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                pageLength: 25,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]]
             });
+
+            // Handle delete with confirmation
+            $(document).on('click', '.btn-delete', function(e) {
+                e.preventDefault();
+                
+                const postId = $(this).data('id');
+                const title = $(this).data('title') || 'Bu öğeyi silmek istediğinizden emin misiniz?';
+                const text = $(this).data('text') || 'Bu işlem geri alınamaz!';
+                const url = $(this).data('url');
+                
+                Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74a3b',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Evet, Sil',
+                    cancelButtonText: 'İptal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            data: { id: postId },
+                            beforeSend: function() {
+                                Swal.fire({
+                                    title: 'Siliniyor...',
+                                    allowEscapeKey: false,
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading()
+                                    }
+                                });
+                            },
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Silindi!',
+                                        text: response.message || 'Yazı başarıyla silindi.',
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Hata!',
+                                        text: response.message || 'Silme işlemi başarısız.'
+                                    });
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Sunucu Hatası!',
+                                    text: 'Bağlantı hatası oluştu. Lütfen tekrar deneyin.'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        function viewPost(id) {
+            showMessage('info', 'Yönlendiriliyor', 'Yazı görüntüleme sayfasına yönlendiriliyorsunuz...');
+        }
+
+        function exportTable() {
+            showMessage('info', 'Dışa Aktarılıyor', 'Yazı listesi Excel formatında hazırlanıyor...');
+        }
+
+        function refreshTable() {
+            location.reload();
         }
     </script>
 }

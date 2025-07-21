@@ -1,75 +1,218 @@
-﻿<ul class="navbar-nav bg-gradient-dark sidebar sidebar-dark accordion" id="accordionSidebar">
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/Admin">
-        <div class="sidebar-brand-text mx-3">BloggerPro Admin</div>
+<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-light-white elevation-1 sidebar-no-expand">
+    <!-- Brand Logo -->
+    <a href="@Url.Action("Index", "AdminDashboard", new { area = "Admin" })" class="brand-link">
+        <img src="https://via.placeholder.com/33x33/007bff/ffffff?text=BP" alt="BloggerPro Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-light">BloggerPro</span>
     </a>
 
-    <hr class="sidebar-divider my-0" />
+    <!-- Sidebar -->
+    <div class="sidebar os-host os-theme-light os-host-overflow os-host-overflow-y os-host-resize-disabled os-host-scrollbar-horizontal-hidden os-host-transition">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img src="https://via.placeholder.com/160x160/007bff/ffffff?text=Admin" class="img-circle elevation-2" alt="User Image">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block">Admin Kullanıcı</a>
+            </div>
+        </div>
 
-    <li class="nav-item">
-        <a class="nav-link" href="/Admin/AdminDashboard">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span>
-        </a>
-    </li>
+        <!-- SidebarSearch Form -->
+        <div class="form-inline">
+            <div class="input-group" data-widget="sidebar-search">
+                <input class="form-control form-control-sidebar" type="search" placeholder="Ara..." aria-label="Search">
+                <div class="input-group-append">
+                    <button class="btn btn-sidebar">
+                        <i class="fas fa-search fa-fw"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <li class="nav-item">
-        <a class="nav-link" href="/Admin/Post">
-            <i class="fas fa-fw fa-file-alt"></i>
-            <span>Post</span>
-        </a>
-    </li>
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column nav-flat nav-compact nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
+                
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "AdminDashboard", new { area = "Admin" })" 
+                       class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminDashboard" ? "active" : "")">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
 
-    <li class="nav-item">
-        <a class="nav-link" href="/Admin/Tag">
-            <i class="fas fa-fw fa-file-alt"></i>
-            <span>Etiketler</span>
-        </a>
-    </li>
+                <!-- Content Management -->
+                <li class="nav-header">İÇERİK YÖNETİMİ</li>
+                
+                <li class="nav-item @(new[] {"Post"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) ? "menu-open" : "")">
+                    <a href="#" class="nav-link @(new[] {"Post"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) ? "active" : "")">
+                        <i class="nav-icon fas fa-edit"></i>
+                        <p>
+                            Blog Yazıları
+                            <i class="fas fa-angle-left right"></i>
+                            <span class="badge badge-info right">6</span>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Post", new { area = "Admin" })" 
+                               class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Post" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Tüm Yazılar</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Create", "Post", new { area = "Admin" })" 
+                               class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Post" && ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Yeni Yazı Ekle</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
-    <li class="nav-item">
-        <a class="nav-link" href="/Admin/Category">
-            <i class="fas fa-fw fa-tags"></i>
-            <span>Kategoriler</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/Admin/Users">
-            <i class="fas fa-users"></i>
-            <span>Kullanıcılar</span>
-        </a>
-    </li>
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Category", new { area = "Admin" })" 
+                       class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "active" : "")">
+                        <i class="nav-icon fas fa-folder-open"></i>
+                        <p>Kategoriler</p>
+                    </a>
+                </li>
 
-    <hr class="sidebar-divider" />
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Tag", new { area = "Admin" })" 
+                       class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tag" ? "active" : "")">
+                        <i class="nav-icon fas fa-tags"></i>
+                        <p>Etiketler</p>
+                    </a>
+                </li>
 
-    <div class="sidebar-heading">
-        Sayfalar
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Comment", new { area = "Admin" })" 
+                       class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Comment" ? "active" : "")">
+                        <i class="nav-icon far fa-comments"></i>
+                        <p>
+                            Yorumlar
+                            <span class="badge badge-danger right">New</span>
+                        </p>
+                    </a>
+                </li>
+
+                <!-- User Management -->
+                <li class="nav-header">KULLANICI YÖNETİMİ</li>
+                
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Users", new { area = "Admin" })" 
+                       class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>Kullanıcılar</p>
+                    </a>
+                </li>
+
+                <!-- Site Management -->
+                <li class="nav-header">SİTE YÖNETİMİ</li>
+
+                <li class="nav-item @(new[] {"AboutUs", "TeamMember", "Footer"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) ? "menu-open" : "")">
+                    <a href="#" class="nav-link @(new[] {"AboutUs", "TeamMember", "Footer"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) ? "active" : "")">
+                        <i class="nav-icon fas fa-copy"></i>
+                        <p>
+                            Sayfalar
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "AboutUs", new { area = "Admin" })" 
+                               class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AboutUs" ? "active" : "")">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Hakkımızda</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "TeamMember", new { area = "Admin" })" 
+                               class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "TeamMember" ? "active" : "")">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Ekip Üyeleri</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index", "Footer", new { area = "Admin" })" 
+                               class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Footer" ? "active" : "")">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Footer</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Contact", new { area = "Admin" })" 
+                       class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Contact" ? "active" : "")">
+                        <i class="nav-icon fas fa-envelope"></i>
+                        <p>
+                            İletişim Mesajları
+                            <span class="badge badge-success right">5</span>
+                        </p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Image", new { area = "Admin" })" 
+                       class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Image" ? "active" : "")">
+                        <i class="nav-icon far fa-image"></i>
+                        <p>Medya Yönetimi</p>
+                    </a>
+                </li>
+
+                <!-- Tools -->
+                <li class="nav-header">ARAÇLAR</li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-chart-pie"></i>
+                        <p>
+                            Raporlar
+                            <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Trafik Raporu</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>İçerik Raporu</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-cogs"></i>
+                        <p>Ayarlar</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="@Url.Action("Index", "Home", new { area = "" })" target="_blank" class="nav-link">
+                        <i class="nav-icon fas fa-external-link-alt"></i>
+                        <p>
+                            Siteyi Görüntüle
+                            <span class="badge badge-info right">Yeni</span>
+                        </p>
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
     </div>
-
-    <li class="nav-item">
-        <a class="nav-link" href="/Admin/AboutUs">
-            <i class="fas fa-fw fa-info-circle"></i>
-            <span>Hakkımızda</span>
-        </a>
-    </li>
-
-    <li class="nav-item">
-        <a class="nav-link" href="/Admin/TeamMember">
-            <i class="fas fa-fw fa-users-cog"></i>
-            <span>Ekip Üyeleri</span>
-        </a>
-    </li>
-
-    <li class="nav-item">
-        <a class="nav-link" href="/Admin/Contact">
-            <i class="fas fa-fw fa-envelope"></i>
-            <span>İletişim Mesajları</span>
-        </a>
-    </li>
-
-    <li class="nav-item">
-        <a class="nav-link" href="/Admin/Footer">
-            <i class="fas fa-fw fa-window-minimize"></i>
-            <span>Footer Yönetimi</span>
-        </a>
-    </li>
-</ul>
+    <!-- /.sidebar -->
+</aside>

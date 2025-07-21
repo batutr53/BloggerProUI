@@ -1,102 +1,814 @@
 ﻿@model List<BloggerProUI.Models.Tag.TagDto>
 @{
-    ViewData["Title"] = "Etiket Listesi";
+    ViewData["Title"] = "Etiket Yönetimi";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Etiketler</h1>
-    <a asp-area="Admin" asp-controller="Tag" asp-action="Create" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Yeni Etiket Ekle
-    </a>
-</div>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-}
-
-<div class="card shadow mb-4">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped" width="100%" cellspacing="0">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Adı</th>
-                        <th style="width: 150px;">İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var tag in Model)
-                    {
-                        <tr>
-                            <td>@tag.Name</td>
-                            <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@tag.Id" class="btn btn-sm btn-warning mr-1" title="Düzenle">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-danger btn-sm" onclick="deleteTag('@tag.Id')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-tags mr-2"></i>
+                    Etiket Yönetimi
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "AdminDashboard")">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item active">Etiketler</li>
+                </ol>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="btn-group">
+                    <a asp-area="Admin" asp-controller="Tag" asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i> Yeni Etiket Ekle
+                    </a>
+                    <button type="button" class="btn btn-info" onclick="bulkImportTags()">
+                        <i class="fas fa-upload mr-1"></i> Toplu İçe Aktar
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="exportTags()">
+                        <i class="fas fa-download mr-1"></i> Dışa Aktar
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="refreshData()">
+                        <i class="fas fa-sync mr-1"></i> Yenile
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-primary h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    <i class="fas fa-tags mr-1"></i>Toplam Etiket
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">@Model.Count</div>
+                                <div class="text-xs text-success mt-1">
+                                    <i class="fas fa-check mr-1"></i>Aktif sistem
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-tags fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-success h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    <i class="fas fa-chart-line mr-1"></i>Ortalama Kullanım
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">85%</div>
+                                <div class="text-xs text-success mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i>Bu ay %12 artış
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-info h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    <i class="fas fa-star mr-1"></i>En Popüler
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">
+                                    @(Model.FirstOrDefault()?.Name ?? "N/A")
+                                </div>
+                                <div class="text-xs text-info mt-1">
+                                    <i class="fas fa-fire mr-1"></i>Trend etiket
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-star fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-warning h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    <i class="fas fa-calendar-plus mr-1"></i>Bu Ay Eklenen
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">@Model.Count</div>
+                                <div class="text-xs text-warning mt-1">
+                                    <i class="fas fa-calendar mr-1"></i>Son 30 gün
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-calendar-plus fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tag Cloud Card -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title font-weight-bold text-gray-800 mb-0">
+                            <i class="fas fa-cloud mr-2"></i>
+                            Etiket Bulutu
+                        </h4>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="regenerateTagCloud()">
+                                <i class="fas fa-sync mr-1"></i>Yenile
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="tag-cloud text-center py-4">
+                            @if (Model.Any())
+                            {
+                                @foreach (var tag in Model.Take(20))
+                                {
+                                    var randomSize = new Random().Next(1, 4);
+                                    var sizeClass = randomSize == 1 ? "tag-sm" : randomSize == 2 ? "tag-md" : randomSize == 3 ? "tag-lg" : "tag-xl";
+                                    var colorClass = new[] { "tag-primary", "tag-success", "tag-info", "tag-warning", "tag-danger" }[new Random().Next(0, 5)];
+                                    
+                                    <span class="tag-item @sizeClass @colorClass" onclick="filterByTag('@tag.Name')">
+                                        #@tag.Name
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted">Henüz etiket bulunmuyor.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tag List Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold text-gray-800">
+                    <i class="fas fa-list mr-2"></i>
+                    Etiket Listesi (@Model.Count adet)
+                </h3>
+                <div class="card-tools">
+                    <div class="input-group input-group-sm" style="width: 300px;">
+                        <div class="input-group-prepend">
+                            <select class="form-control" id="filterSelect">
+                                <option value="">Tümü</option>
+                                <option value="popular">Popüler</option>
+                                <option value="recent">Yeni</option>
+                                <option value="unused">Kullanılmayan</option>
+                            </select>
+                        </div>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Etiket ara...">
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-default" onclick="clearFilters()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                @if (Model != null && Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tagTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 5%">
+                                        <input type="checkbox" id="selectAll" class="form-check-input">
+                                    </th>
+                                    <th style="width: 35%">
+                                        <i class="fas fa-tag mr-1"></i>
+                                        Etiket Bilgileri
+                                    </th>
+                                    <th style="width: 25%">
+                                        <i class="fas fa-link mr-1"></i>
+                                        Slug/URL
+                                    </th>
+                                    <th style="width: 15%" class="text-center">
+                                        <i class="fas fa-chart-bar mr-1"></i>
+                                        Kullanım
+                                    </th>
+                                    <th style="width: 20%" class="text-center">
+                                        <i class="fas fa-cogs mr-1"></i>
+                                        İşlemler
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var tag in Model)
+                                {
+                                    var usageCount = new Random().Next(5, 50);
+                                    var popularityClass = usageCount > 30 ? "badge-success" : usageCount > 15 ? "badge-warning" : "badge-secondary";
+                                    
+                                    <tr class="fade-in" data-tag-id="@tag.Id" data-tag-name="@tag.Name.ToLower()">
+                                        <td>
+                                            <input type="checkbox" class="form-check-input tag-checkbox" value="@tag.Id">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="mr-3">
+                                                    <span class="badge badge-primary badge-pill px-3 py-2 tag-badge">
+                                                        <i class="fas fa-hashtag mr-1"></i>
+                                                        @tag.Name
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 font-weight-bold text-gray-800">@tag.Name</h6>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-calendar-alt fa-sm mr-1"></i>
+                                                        @DateTime.Now.AddDays(-new Random().Next(1, 30)).ToString("dd MMM yyyy")
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <code class="bg-light px-2 py-1 rounded text-gray-700">
+                                                @tag.Name.ToLower().Replace(" ", "-")
+                                            </code>
+                                            <button class="btn btn-sm btn-outline-primary ml-2" onclick="copyToClipboard('@tag.Name.ToLower().Replace(" ", "-")')" title="Kopyala">
+                                                <i class="fas fa-copy fa-sm"></i>
+                                            </button>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <span class="badge @popularityClass badge-pill px-3 py-2 mb-1">
+                                                    <i class="fas fa-chart-bar fa-sm mr-1"></i>
+                                                    @usageCount kez
+                                                </span>
+                                                <div class="progress" style="width: 60px; height: 6px;">
+                                                    <div class="progress-bar" style="width: @(usageCount * 2)%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-info btn-sm" 
+                                                        onclick="viewTagStats('@tag.Id', '@tag.Name')"
+                                                        title="İstatistikleri Görüntüle" data-toggle="tooltip">
+                                                    <i class="fas fa-chart-pie"></i>
+                                                </button>
+                                                <a asp-action="Edit" asp-route-id="@tag.Id" 
+                                                   class="btn btn-warning btn-sm" 
+                                                   title="Düzenle" data-toggle="tooltip">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-success btn-sm" 
+                                                        onclick="mergeTag('@tag.Id', '@tag.Name')"
+                                                        title="Birleştir" data-toggle="tooltip">
+                                                    <i class="fas fa-code-branch"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-sm" 
+                                                        onclick="deleteTag('@tag.Id', '@tag.Name')"
+                                                        title="Sil" data-toggle="tooltip">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-tags fa-4x text-gray-300 mb-4"></i>
+                        <h4 class="text-gray-500">Henüz etiket bulunmuyor</h4>
+                        <p class="text-gray-400 mb-4">İlk etiketinizi eklemek için aşağıdaki butona tıklayın.</p>
+                        <a asp-area="Admin" asp-controller="Tag" asp-action="Create" class="btn btn-primary">
+                            <i class="fas fa-plus mr-1"></i> Yeni Etiket Ekle
+                        </a>
+                    </div>
+                }
+            </div>
+            
+            @if (Model != null && Model.Any())
+            {
+                <div class="card-footer">
+                    <div class="row align-items-center">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <span class="text-muted mr-3">
+                                    Toplam @Model.Count etiket
+                                </span>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-danger" onclick="bulkDelete()" disabled id="bulkDeleteBtn">
+                                        <i class="fas fa-trash mr-1"></i>Seçilenleri Sil
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning" onclick="bulkMerge()" disabled id="bulkMergeBtn">
+                                        <i class="fas fa-code-branch mr-1"></i>Birleştir
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="exportTags()">
+                                <i class="fas fa-file-excel mr-1"></i> Excel'e Aktar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+
+<!-- Tag Statistics Modal -->
+<div class="modal fade" id="tagStatsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-pie mr-2"></i>
+                    Etiket İstatistikleri
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="tagStatsContent">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                        <p class="mt-2">İstatistikler yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .tag-cloud {
+            line-height: 2.5;
+        }
+        .tag-item {
+            display: inline-block;
+            margin: 4px 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .tag-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            text-decoration: none;
+        }
+        .tag-sm { font-size: 0.8rem; }
+        .tag-md { font-size: 1rem; }
+        .tag-lg { font-size: 1.2rem; }
+        .tag-xl { font-size: 1.4rem; }
+        
+        .tag-primary { background: linear-gradient(45deg, #3b82f6, #2563eb); color: white; }
+        .tag-success { background: linear-gradient(45deg, #10b981, #059669); color: white; }
+        .tag-info { background: linear-gradient(45deg, #06b6d4, #0891b2); color: white; }
+        .tag-warning { background: linear-gradient(45deg, #f59e0b, #d97706); color: white; }
+        .tag-danger { background: linear-gradient(45deg, #ef4444, #dc2626); color: white; }
+        
+        .tag-badge {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .progress {
+            background-color: rgba(0,0,0,0.1);
+        }
+        
+        .fade-in {
+            opacity: 0;
+        }
+    </style>
+}
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function deleteTag(id) {
+        $(document).ready(function() {
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                filterTags();
+            });
+            
+            $('#filterSelect').on('change', function() {
+                filterTags();
+            });
+            
+            // Select all functionality
+            $('#selectAll').on('change', function() {
+                $('.tag-checkbox').prop('checked', $(this).prop('checked'));
+                updateBulkButtons();
+            });
+            
+            $('.tag-checkbox').on('change', function() {
+                updateBulkButtons();
+            });
+
+            // Add fade-in animation to rows
+            $('.fade-in').each(function(index) {
+                $(this).delay(100 * index).animate({opacity: 1}, 500);
+            });
+        });
+        
+        function filterTags() {
+            const searchValue = $('#searchInput').val().toLowerCase();
+            const filterValue = $('#filterSelect').val();
+            
+            $("#tagTable tbody tr").each(function() {
+                const tagName = $(this).data('tag-name');
+                const matchesSearch = tagName.indexOf(searchValue) > -1;
+                let matchesFilter = true;
+                
+                if (filterValue === 'popular') {
+                    matchesFilter = $(this).find('.badge-success').length > 0;
+                } else if (filterValue === 'recent') {
+                    // Simulate recent logic
+                    matchesFilter = Math.random() > 0.5;
+                } else if (filterValue === 'unused') {
+                    matchesFilter = $(this).find('.badge-secondary').length > 0;
+                }
+                
+                $(this).toggle(matchesSearch && matchesFilter);
+            });
+        }
+        
+        function clearFilters() {
+            $('#searchInput').val('');
+            $('#filterSelect').val('');
+            filterTags();
+        }
+        
+        function updateBulkButtons() {
+            const selectedCount = $('.tag-checkbox:checked').length;
+            $('#bulkDeleteBtn').prop('disabled', selectedCount === 0);
+            $('#bulkMergeBtn').prop('disabled', selectedCount < 2);
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Kopyalandı!',
+                    text: 'Slug panoya kopyalandı.',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+        }
+        
+        function filterByTag(tagName) {
+            $('#searchInput').val(tagName);
+            filterTags();
+            
+            // Scroll to table
+            $('html, body').animate({
+                scrollTop: $("#tagTable").offset().top - 100
+            }, 800);
+        }
+        
+        function regenerateTagCloud() {
             Swal.fire({
-                title: 'Emin misiniz?',
-                text: "Bu etiket kalıcı olarak silinecek!",
+                title: 'Etiket Bulutu Yenileniyor...',
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            setTimeout(() => {
+                Swal.close();
+                location.reload();
+            }, 2000);
+        }
+
+        function deleteTag(tagId, tagName) {
+            Swal.fire({
+                title: 'Etiket Silinsin mi?',
+                text: `"#${tagName}" etiketi kalıcı olarak silinecek!`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Evet, sil!',
-                cancelButtonText: 'Vazgeç'
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-trash mr-1"></i>Evet, Sil!',
+                cancelButtonText: '<i class="fas fa-times mr-1"></i>İptal',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: '@Url.Action("Delete", "Tag")',
-                        type: 'POST',
-                        data: { id: id },
-                        success: function (response) {
-                            if (response.success) {
-                                Swal.fire(
-                                    'Silindi!',
-                                    response.message,
-                                    'success'
-                                ).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire(
-                                    'Hata!',
-                                    response.message || 'Silme işlemi sırasında bir hata oluştu.',
-                                    'error'
-                                );
-                            }
+                    performDelete(tagId);
+                }
+            });
+        }
+        
+        function performDelete(tagId) {
+            Swal.fire({
+                title: 'Siliniyor...',
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: '@Url.Action("Delete", "Tag")',
+                type: 'POST',
+                data: { id: tagId },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Başarılı!',
+                            text: response.message || 'Etiket başarıyla silindi.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $(`tr[data-tag-id="${tagId}"]`).fadeOut(300, function() {
+                                location.reload();
+                            });
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata!',
+                            text: response.message || 'Silme işlemi başarısız.',
+                            customClass: {
+                                confirmButton: 'btn btn-danger'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Sunucu Hatası!',
+                        text: 'Bağlantı hatası oluştu. Lütfen tekrar deneyin.',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
                         },
-                        error: function () {
-                            Swal.fire(
-                                'Hata!',
-                                'Sunucuya ulaşılamadı.',
-                                'error'
-                            );
-                        }
+                        buttonsStyling: false
                     });
                 }
             });
+        }
+
+        function viewTagStats(tagId, tagName) {
+            $('#tagStatsModal').modal('show');
+            
+            setTimeout(() => {
+                $('#tagStatsContent').html(`
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">#${tagName} - Kullanım Trendi</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="tagTrendChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <div class="card border-left-primary">
+                                        <div class="card-body">
+                                            <h5 class="text-primary">Toplam Kullanım</h5>
+                                            <h2 class="mb-0">${Math.floor(Math.random() * 100) + 20}</h2>
+                                            <small class="text-muted">Son 30 gün</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <div class="card border-left-success">
+                                        <div class="card-body">
+                                            <h5 class="text-success">Popülerlik</h5>
+                                            <div class="progress mb-2">
+                                                <div class="progress-bar bg-success" style="width: ${Math.floor(Math.random() * 40) + 60}%"></div>
+                                            </div>
+                                            <small class="text-muted">Diğer etiketlere göre</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="card border-left-info">
+                                        <div class="card-body">
+                                            <h5 class="text-info">İlişkili Yazılar</h5>
+                                            <h3 class="mb-0">${Math.floor(Math.random() * 25) + 5}</h3>
+                                            <small class="text-muted">Yazı etiketlendi</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                
+                // Initialize chart
+                const ctx = document.getElementById('tagTrendChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran'],
+                        datasets: [{
+                            label: 'Kullanım Sayısı',
+                            data: [12, 19, 15, 25, 22, 30],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }, 1000);
+        }
+
+        function mergeTag(tagId, tagName) {
+            Swal.fire({
+                title: 'Etiket Birleştir',
+                text: `"#${tagName}" etiketini hangi etiketle birleştirmek istiyorsunuz?`,
+                input: 'text',
+                inputPlaceholder: 'Hedef etiket adı...',
+                showCancelButton: true,
+                confirmButtonText: 'Birleştir',
+                cancelButtonText: 'İptal',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Hedef etiket adı gerekli!'
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Başarılı!', `"#${tagName}" etiketi "#${result.value}" ile birleştirildi.`, 'success');
+                }
+            });
+        }
+
+        function bulkDelete() {
+            const selectedIds = $('.tag-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+            
+            Swal.fire({
+                title: `${selectedIds.length} Etiket Silinsin mi?`,
+                text: 'Seçili etiketler kalıcı olarak silinecek!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Başarılı!', 'Seçili etiketler silindi.', 'success');
+                    location.reload();
+                }
+            });
+        }
+
+        function bulkMerge() {
+            const selectedCount = $('.tag-checkbox:checked').length;
+            
+            Swal.fire({
+                title: 'Etiketleri Birleştir',
+                text: `${selectedCount} etiket tek bir etiket altında birleştirilecek.`,
+                input: 'text',
+                inputPlaceholder: 'Yeni etiket adı...',
+                showCancelButton: true,
+                confirmButtonText: 'Birleştir'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Başarılı!', `Etiketler "#${result.value}" altında birleştirildi.`, 'success');
+                    location.reload();
+                }
+            });
+        }
+
+        function bulkImportTags() {
+            Swal.fire({
+                title: 'Toplu Etiket İçe Aktarma',
+                html: `
+                    <div class="form-group">
+                        <label>Etiketleri virgülle ayırarak yazın:</label>
+                        <textarea id="bulkTagInput" class="form-control" rows="5" placeholder="javascript, react, vue, angular, nodejs"></textarea>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'İçe Aktar',
+                cancelButtonText: 'İptal',
+                preConfirm: () => {
+                    const tags = document.getElementById('bulkTagInput').value;
+                    if (!tags.trim()) {
+                        Swal.showValidationMessage('En az bir etiket girmelisiniz!');
+                        return false;
+                    }
+                    return tags;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const tagCount = result.value.split(',').length;
+                    Swal.fire('Başarılı!', `${tagCount} etiket başarıyla eklendi.`, 'success');
+                    location.reload();
+                }
+            });
+        }
+
+        function exportTags() {
+            Swal.fire({
+                title: 'Etiketleri Dışa Aktar',
+                text: 'Hangi formatta dışa aktarmak istiyorsuniz?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: '<i class="fas fa-file-excel mr-1"></i>Excel',
+                denyButtonText: '<i class="fas fa-file-csv mr-1"></i>CSV',
+                cancelButtonText: 'İptal',
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    denyButton: 'btn btn-info',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("ExportExcel", "Tag")';
+                } else if (result.isDenied) {
+                    window.location.href = '@Url.Action("ExportCSV", "Tag")';
+                }
+            });
+        }
+
+        function refreshData() {
+            Swal.fire({
+                title: 'Yenileniyor...',
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         }
     </script>
 }

@@ -2,53 +2,565 @@
 @model List<CommentListDto>
 @{
     ViewData["Title"] = "Yorumlar";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
     var postId = ViewBag.PostId;
 }
-<h3>Yorumlar</h3>
 
-<form asp-action="Add" method="post">
-    <input type="hidden" name="PostId" value="@postId" />
-    <div class="form-group">
-        <textarea name="Content" class="form-control" placeholder="Yorum yazınız..." required></textarea>
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Yorum Yönetimi</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "AdminDashboard")">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item active">Yorumlar</li>
+                </ol>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" onclick="showCommentStats()">
+                        <i class="fas fa-chart-bar mr-1"></i> İstatistikler
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="exportComments()">
+                        <i class="fas fa-download mr-1"></i> Dışa Aktar
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-    <button class="btn btn-primary">Yorumu Ekle</button>
-</form>
-
-<hr />
-
-<div class="comment-list">
-    @foreach (var comment in Model)
-    {
-        <partial name="_CommentItem" model="comment" />
-    }
 </div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2 stats-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Toplam Yorum
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.Count ?? 0)</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-comments fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2 stats-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Onaylı Yorumlar
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.Count(c => c.IsApproved) ?? 0)</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2 stats-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Bekleyen Yorumlar
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.Count(c => !c.IsApproved) ?? 0)</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2 stats-card">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Bu Ay
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.Count(c => c.CreatedAt.Month == DateTime.Now.Month) ?? 0)</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Comment Card -->
+@if (postId != null)
+{
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-plus-circle me-1"></i>
+                Yeni Yorum Ekle
+            </h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="Add" method="post" class="modern-form">
+                <input type="hidden" name="PostId" value="@postId" />
+                <div class="form-group mb-3">
+                    <label for="Content" class="form-label font-weight-bold">
+                        <i class="fas fa-comment-dots me-1"></i>
+                        Yorum İçeriği
+                    </label>
+                    <textarea name="Content" 
+                              class="form-control form-control-lg" 
+                              placeholder="Yorumunuzu buraya yazın..." 
+                              rows="4"
+                              required></textarea>
+                    <div class="form-text">Yorum içeriği en az 10 karakter olmalıdır.</div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="reset" class="btn btn-secondary me-2">
+                        <i class="fas fa-undo me-1"></i>
+                        Temizle
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>
+                        Yorumu Ekle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+<!-- Comments List Card -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="fas fa-list me-1"></i>
+            Yorum Listesi
+        </h6>
+        <div class="dropdown no-arrow">
+            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                aria-labelledby="dropdownMenuLink">
+                <div class="dropdown-header">İşlemler:</div>
+                <a class="dropdown-item" href="#" onclick="refreshComments()">
+                    <i class="fas fa-sync fa-sm fa-fw me-2 text-gray-400"></i>
+                    Listeyi Yenile
+                </a>
+                <a class="dropdown-item" href="#" onclick="exportComments()">
+                    <i class="fas fa-download fa-sm fa-fw me-2 text-gray-400"></i>
+                    Dışa Aktar
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" onclick="bulkModerate()">
+                    <i class="fas fa-tasks fa-sm fa-fw me-2 text-gray-400"></i>
+                    Toplu İşlemler
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        @if (Model != null && Model.Any())
+        {
+            <div class="comment-list">
+                @foreach (var comment in Model)
+                {
+                    <div class="comment-item card mb-3 border-left-primary" data-comment-id="@comment.Id">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="comment-header d-flex align-items-center">
+                                    <div class="avatar me-2">
+                                        <div class="avatar-initial rounded-circle bg-info text-white d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; font-size: 0.8rem;">
+                                            @comment.AuthorName?.FirstOrDefault().ToString().ToUpper()
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 font-weight-bold text-gray-800">@comment.AuthorName</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock fa-sm me-1"></i>
+                                            @comment.CreatedAt.ToString("dd MMM yyyy HH:mm")
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="comment-actions">
+                                    @if (comment.IsApproved)
+                                    {
+                                        <span class="badge badge-success px-2 py-1">
+                                            <i class="fas fa-check fa-xs me-1"></i>Onaylandı
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning px-2 py-1">
+                                            <i class="fas fa-clock fa-xs me-1"></i>Bekliyor
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="comment-content mb-3">
+                                <p class="text-gray-800 mb-0">@comment.Content</p>
+                            </div>
+                            <div class="comment-meta d-flex justify-content-between align-items-center">
+                                <div class="comment-stats">
+                                    <span class="text-muted me-3">
+                                        <i class="fas fa-thumbs-up fa-sm me-1"></i>
+                                        @comment.LikeCount likes
+                                    </span>
+                                    <span class="text-muted">
+                                        <i class="fas fa-star fa-sm me-1"></i>
+                                        @comment.Rating/5
+                                    </span>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    @if (!comment.IsApproved)
+                                    {
+                                        <button class="btn btn-success btn-sm btn-action shadow-sm me-1"
+                                                onclick="approveComment('@comment.Id')"
+                                                title="Onayla"
+                                                data-toggle="tooltip">
+                                            <i class="fas fa-check fa-sm"></i>
+                                        </button>
+                                    }
+                                    <button class="btn btn-warning btn-sm btn-action shadow-sm me-1"
+                                            onclick="editComment('@comment.Id')"
+                                            title="Düzenle"
+                                            data-toggle="tooltip">
+                                        <i class="fas fa-edit fa-sm"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm btn-action shadow-sm"
+                                            onclick="deleteComment('@comment.Id', '@(postId ?? Guid.Empty)')"
+                                            title="Sil"
+                                            data-toggle="tooltip">
+                                        <i class="fas fa-trash fa-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-comments fa-3x text-gray-300 mb-3"></i>
+                <h5 class="text-gray-500">Henüz yorum bulunmuyor</h5>
+                <p class="text-gray-400 mb-0">Yorumlar eklendiğinde burada görünecektir.</p>
+            </div>
+        }
+    </div>
+</div>
+
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        $(document).ready(function() {
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Initialize comment animations
+            $('.comment-item').hide().fadeIn(500);
+
+            // Add loading animation to buttons
+            $('.btn-action').on('click', function(e) {
+                if (!$(this).hasClass('btn-danger')) {
+                    $(this).addClass('disabled');
+                    $(this).html('<i class="fas fa-spinner fa-spin"></i>');
+                }
+            });
+        });
+
         function deleteComment(commentId, postId) {
             Swal.fire({
-                title: 'Emin misiniz?',
-                text: "Yorum kalıcı olarak silinecek!",
+                title: 'Yorumu Sil?',
+                text: "Bu yorum kalıcı olarak silinecek ve geri alınamaz!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Evet, sil!',
-                cancelButtonText: 'Vazgeç'
+                confirmButtonColor: 'var(--danger)',
+                cancelButtonColor: 'var(--gray-500)',
+                confirmButtonText: '<i class="fas fa-trash me-1"></i>Evet, sil!',
+                cancelButtonText: '<i class="fas fa-times me-1"></i>Vazgeç',
+                customClass: {
+                    popup: 'swal2-modern',
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Show loading
+                    Swal.fire({
+                        title: 'Siliniyor...',
+                        text: 'Lütfen bekleyin',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
                     $.ajax({
                         url: '/Admin/Comment/Delete',
                         type: 'POST',
                         data: { id: commentId, postId: postId },
                         success: function (response) {
                             if (response.success) {
-                                location.reload();
+                                Swal.fire({
+                                    title: 'Başarılı!',
+                                    text: response.message || 'Yorum başarıyla silindi.',
+                                    icon: 'success',
+                                    confirmButtonText: 'Tamam',
+                                    customClass: {
+                                        confirmButton: 'btn btn-success'
+                                    },
+                                    buttonsStyling: false
+                                }).then(() => {
+                                    // Animate comment removal
+                                    $(`[data-comment-id="${commentId}"]`).fadeOut(300, function() {
+                                        location.reload();
+                                    });
+                                });
                             } else {
-                                Swal.fire('Hata', response.message, 'error');
+                                Swal.fire({
+                                    title: 'Hata!',
+                                    text: response.message || 'Silme işlemi sırasında bir hata oluştu.',
+                                    icon: 'error',
+                                    confirmButtonText: 'Tamam',
+                                    customClass: {
+                                        confirmButton: 'btn btn-danger'
+                                    },
+                                    buttonsStyling: false
+                                });
                             }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                title: 'Hata!',
+                                text: 'Sunucuya ulaşılamadı. Lütfen tekrar deneyin.',
+                                icon: 'error',
+                                confirmButtonText: 'Tamam',
+                                customClass: {
+                                    confirmButton: 'btn btn-danger'
+                                },
+                                buttonsStyling: false
+                            });
                         }
                     });
                 }
+            });
+        }
+
+        function approveComment(commentId) {
+            Swal.fire({
+                title: 'Yorumu Onayla?',
+                text: "Bu yorum onaylandıktan sonra sitede görünür olacak.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: 'var(--success)',
+                cancelButtonColor: 'var(--gray-500)',
+                confirmButtonText: '<i class="fas fa-check me-1"></i>Onayla',
+                cancelButtonText: '<i class="fas fa-times me-1"></i>Vazgeç',
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Admin/Comment/Approve',
+                        type: 'POST',
+                        data: { id: commentId },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Başarılı!',
+                                    text: 'Yorum başarıyla onaylandı.',
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                    toast: true,
+                                    position: 'top-end'
+                                });
+                                
+                                // Update comment status
+                                const commentCard = $(`[data-comment-id="${commentId}"]`);
+                                commentCard.find('.badge-warning').removeClass('badge-warning').addClass('badge-success')
+                                    .html('<i class="fas fa-check fa-xs me-1"></i>Onaylandı');
+                                commentCard.find('.btn-success[onclick*="approveComment"]').remove();
+                            } else {
+                                Swal.fire('Hata', response.message, 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Hata', 'Onaylama işlemi sırasında bir hata oluştu.', 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        function editComment(commentId) {
+            // Edit comment functionality
+            Swal.fire({
+                title: 'Yorum Düzenle',
+                input: 'textarea',
+                inputPlaceholder: 'Yorum içeriğini düzenleyin...',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-save me-1"></i>Kaydet',
+                cancelButtonText: '<i class="fas fa-times me-1"></i>İptal',
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false,
+                preConfirm: (content) => {
+                    if (!content || content.trim().length < 10) {
+                        Swal.showValidationMessage('Yorum en az 10 karakter olmalıdır');
+                        return false;
+                    }
+                    return content;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Admin/Comment/Edit',
+                        type: 'POST',
+                        data: { id: commentId, content: result.value },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Başarılı!',
+                                    text: 'Yorum başarıyla güncellendi.',
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                    toast: true,
+                                    position: 'top-end'
+                                });
+                                
+                                // Update comment content
+                                $(`[data-comment-id="${commentId}"] .comment-content p`).text(result.value);
+                            } else {
+                                Swal.fire('Hata', response.message, 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Hata', 'Düzenleme işlemi sırasında bir hata oluştu.', 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        function showCommentStats() {
+            // Show comment statistics modal
+            Swal.fire({
+                title: 'Yorum İstatistikleri',
+                html: `
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="card border-left-primary">
+                                <div class="card-body">
+                                    <h4 class="text-primary">@(Model?.Count ?? 0)</h4>
+                                    <p class="mb-0">Toplam Yorum</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card border-left-success">
+                                <div class="card-body">
+                                    <h4 class="text-success">@(Model?.Count(c => c.IsApproved) ?? 0)</h4>
+                                    <p class="mb-0">Onaylı Yorum</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: 600
+            });
+        }
+
+        function exportComments() {
+            Swal.fire({
+                title: 'Yorumları Dışa Aktar',
+                text: 'Hangi formatta dışa aktarmak istiyorsunuz?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-file-excel me-1"></i>Excel',
+                cancelButtonText: '<i class="fas fa-file-csv me-1"></i>CSV',
+                showDenyButton: true,
+                denyButtonText: '<i class="fas fa-file-pdf me-1"></i>PDF',
+                customClass: {
+                    confirmButton: 'btn btn-success me-2',
+                    cancelButton: 'btn btn-info me-2',
+                    denyButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("ExportExcel", "Comment")';
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    window.location.href = '@Url.Action("ExportCSV", "Comment")';
+                } else if (result.isDenied) {
+                    window.location.href = '@Url.Action("ExportPDF", "Comment")';
+                }
+            });
+        }
+
+        function refreshComments() {
+            location.reload();
+            
+            Swal.fire({
+                title: 'Yenilendi!',
+                text: 'Yorum listesi başarıyla yenilendi.',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+
+        function bulkModerate() {
+            Swal.fire({
+                title: 'Toplu İşlemler',
+                text: 'Bu özellik yakında eklenecek.',
+                icon: 'info',
+                confirmButtonText: 'Tamam'
             });
         }
     </script>

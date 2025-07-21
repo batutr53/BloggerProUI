@@ -1,122 +1,538 @@
 ﻿@model BloggerProUI.Models.Dashboard.AdminDashboardStatsDto
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Dashboard";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Dashboard</h1>
-
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <strong>Uyarı!</strong> @TempData["ErrorMessage"]
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-    }
-
-    <!-- Stat Kartları -->
-    <div class="row">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Toplam Kullanıcı</div>
-                    <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.TotalUsers ?? 0)</div>
-                </div>
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-tachometer-alt mr-2"></i>
+                    Dashboard
+                </h1>
             </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Toplam Post</div>
-                    <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.TotalPosts ?? 0)</div>
-                </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
             </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Toplam Yorum</div>
-                    <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.TotalComments ?? 0)</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-danger shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Toplam Beğeni</div>
-                    <div class="h5 mb-0 font-weight-bold text-gray-800">@(Model?.TotalLikes ?? 0)</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Top Beğenilen Postlar -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">En Çok Beğenilen Postlar</h6>
-        </div>
-        <div class="card-body">
-            @if (Model?.TopLikedPosts?.Any() == true)
-            {
-                <div class="table-responsive">
-                    <table class="table table-bordered" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>Başlık</th>
-                                <th>Beğeni</th>
-                                <th>Yorum</th>
-                                <th>Puan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var post in Model.TopLikedPosts)
-                            {
-                                <tr>
-                                    <td>@post.Title</td>
-                                    <td>@post.LikeCount</td>
-                                    <td>@post.CommentCount</td>
-                                    <td>@post.AverageRating</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <p class="text-muted">Hiç beğenilen post yok.</p>
-            }
-        </div>
-    </div>
-
-    <!-- En Aktif Kullanıcılar -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-info">En Aktif Kullanıcılar</h6>
-        </div>
-        <div class="card-body">
-            @if (Model?.MostActiveUsers?.Any() == true)
-            {
-                <ul class="list-group">
-                    @foreach (var user in Model.MostActiveUsers)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @user.UserName
-                            <span class="badge badge-primary badge-pill">
-                                Post: @user.TotalPosts, Yorum: @user.TotalComments, Puan: @user.TotalRatings
-                            </span>
-                        </li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p class="text-muted">Henüz aktif kullanıcı verisi yok.</p>
-            }
         </div>
     </div>
 </div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        
+        <!-- Overview Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="card stats-card border-left-info h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    <i class="fas fa-users mr-1"></i>Toplam Kullanıcı
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">
+                                    @((Model?.TotalUsers ?? 0).ToString("N0"))
+                                </div>
+                                <div class="text-xs text-success mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i>12% bu ay
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-users fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="@Url.Action("Index", "Users")" class="btn btn-info btn-sm btn-block">
+                            <i class="fas fa-eye mr-1"></i>Detayları Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="card stats-card border-left-success h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    <i class="fas fa-edit mr-1"></i>Toplam Yazı
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">
+                                    @((Model?.TotalPosts ?? 0).ToString("N0"))
+                                </div>
+                                <div class="text-xs text-success mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i>8% bu ay
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-edit fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="@Url.Action("Index", "Post")" class="btn btn-success btn-sm btn-block">
+                            <i class="fas fa-eye mr-1"></i>Detayları Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="card stats-card border-left-warning h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    <i class="fas fa-comments mr-1"></i>Toplam Yorum
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">
+                                    @((Model?.TotalComments ?? 0).ToString("N0"))
+                                </div>
+                                <div class="text-xs text-warning mt-1">
+                                    <i class="fas fa-clock mr-1"></i>5 yeni bekliyor
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-comments fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="@Url.Action("Index", "Comment")" class="btn btn-warning btn-sm btn-block">
+                            <i class="fas fa-eye mr-1"></i>Detayları Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="card stats-card border-left-danger h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                    <i class="fas fa-heart mr-1"></i>Toplam Beğeni
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">
+                                    @((Model?.TotalLikes ?? 0).ToString("N0"))
+                                </div>
+                                <div class="text-xs text-success mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i>24% bu ay
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-heart fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="#" class="btn btn-danger btn-sm btn-block">
+                            <i class="fas fa-chart-line mr-1"></i>Analitikleri Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.overview cards -->
+
+        <!-- Charts Row -->
+        <div class="row">
+            <!-- Analytics Chart -->
+            <div class="col-xl-8 col-lg-7">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title font-weight-bold text-gray-800 mb-0">
+                            <i class="fas fa-chart-area mr-2"></i>
+                            İçerik Analitikleri
+                        </h4>
+                        <div class="card-tools">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary active" data-chart="posts">Yazılar</button>
+                                <button type="button" class="btn btn-outline-primary" data-chart="comments">Yorumlar</button>
+                                <button type="button" class="btn btn-outline-primary" data-chart="likes">Beğeniler</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="position-relative mb-4">
+                            <canvas id="analytics-chart" height="400"></canvas>
+                        </div>
+                        <div class="row">
+                            <div class="col-4 text-center">
+                                <span class="text-success">
+                                    <i class="fas fa-arrow-up mr-1"></i>12.5%
+                                </span>
+                                <h5 class="font-weight-bold mb-0">Yazılar</h5>
+                                <small class="text-muted">Son 30 gün</small>
+                            </div>
+                            <div class="col-4 text-center">
+                                <span class="text-info">
+                                    <i class="fas fa-arrow-up mr-1"></i>3.2%
+                                </span>
+                                <h5 class="font-weight-bold mb-0">Yorumlar</h5>
+                                <small class="text-muted">Son 30 gün</small>
+                            </div>
+                            <div class="col-4 text-center">
+                                <span class="text-warning">
+                                    <i class="fas fa-arrow-up mr-1"></i>8.7%
+                                </span>
+                                <h5 class="font-weight-bold mb-0">Etkileşim</h5>
+                                <small class="text-muted">Son 30 gün</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="col-xl-4 col-lg-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title font-weight-bold text-gray-800 mb-0">
+                            <i class="fas fa-clock mr-2"></i>
+                            Son Aktiviteler
+                        </h4>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <div class="timeline timeline-inverse">
+                            
+                            <div class="time-label">
+                                <span class="bg-primary">Bugün</span>
+                            </div>
+                            
+                            <div>
+                                <i class="fas fa-edit bg-success"></i>
+                                <div class="timeline-item">
+                                    <span class="time"><i class="far fa-clock"></i> 2 saat önce</span>
+                                    <h3 class="timeline-header">Yeni blog yazısı eklendi</h3>
+                                    <div class="timeline-body">
+                                        "ASP.NET Core ile Modern Web Geliştirme" başlıklı yazı yayınlandı.
+                                    </div>
+                                    <div class="timeline-footer">
+                                        <a href="#" class="btn btn-primary btn-sm">Görüntüle</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <i class="fas fa-comment bg-info"></i>
+                                <div class="timeline-item">
+                                    <span class="time"><i class="far fa-clock"></i> 4 saat önce</span>
+                                    <h3 class="timeline-header">3 yeni yorum</h3>
+                                    <div class="timeline-body">
+                                        Kullanıcılar yazılarınıza yorum bıraktı. Onay bekleyen yorumlar var.
+                                    </div>
+                                    <div class="timeline-footer">
+                                        <a href="@Url.Action("Index", "Comment")" class="btn btn-info btn-sm">Yorumları İncele</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <i class="fas fa-user bg-warning"></i>
+                                <div class="timeline-item">
+                                    <span class="time"><i class="far fa-clock"></i> 6 saat önce</span>
+                                    <h3 class="timeline-header">2 yeni kullanıcı kaydı</h3>
+                                    <div class="timeline-body">
+                                        Bugün 2 yeni kullanıcı sisteme kayıt oldu.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="time-label">
+                                <span class="bg-secondary">Dün</span>
+                            </div>
+                            
+                            <div>
+                                <i class="fas fa-heart bg-danger"></i>
+                                <div class="timeline-item">
+                                    <span class="time"><i class="far fa-clock"></i> 1 gün önce</span>
+                                    <h3 class="timeline-header">Yazılarınız 50+ beğeni aldı</h3>
+                                    <div class="timeline-body">
+                                        Son yazılarınız toplamda 50'den fazla beğeni aldı. Harika!
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <i class="far fa-clock bg-gray"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.charts row -->
+
+        <!-- Quick Actions & Stats Row -->
+        <div class="row">
+            <!-- Quick Actions -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title font-weight-bold text-gray-800 mb-0">
+                            <i class="fas fa-bolt mr-2"></i>
+                            Hızlı İşlemler
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <a href="@Url.Action("Create", "Post")" class="btn btn-primary btn-block p-3">
+                                    <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                    <br>
+                                    <strong>Yeni Yazı Ekle</strong>
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <a href="@Url.Action("Index", "Comment")" class="btn btn-warning btn-block p-3">
+                                    <i class="fas fa-comments fa-2x mb-2"></i>
+                                    <br>
+                                    <strong>Yorumları Yönet</strong>
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <a href="@Url.Action("Create", "Category")" class="btn btn-success btn-block p-3">
+                                    <i class="fas fa-folder-plus fa-2x mb-2"></i>
+                                    <br>
+                                    <strong>Kategori Ekle</strong>
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <a href="@Url.Action("Index", "Users")" class="btn btn-info btn-block p-3">
+                                    <i class="fas fa-users-cog fa-2x mb-2"></i>
+                                    <br>
+                                    <strong>Kullanıcı Yönet</strong>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title font-weight-bold text-gray-800 mb-0">
+                            <i class="fas fa-server mr-2"></i>
+                            Sistem Durumu
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-sm font-weight-bold">CPU Kullanımı</span>
+                                <span class="text-sm">45%</span>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-success" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-sm font-weight-bold">Bellek Kullanımı</span>
+                                <span class="text-sm">72%</span>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-warning" style="width: 72%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-sm font-weight-bold">Disk Kullanımı</span>
+                                <span class="text-sm">28%</span>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-primary" style="width: 28%"></div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="text-success">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                                <small class="text-muted">Sistem Sağlıklı</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-info">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                                <small class="text-muted">Çalışma Süresi<br>15 gün</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-primary">
+                                    <i class="fas fa-shield-alt fa-2x"></i>
+                                </div>
+                                <small class="text-muted">Son Backup<br>2 saat önce</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.quick actions row -->
+
+    </div><!-- /.container-fluid -->
+</section>
+
+@section Styles {
+    <style>
+        .stats-card {
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .timeline {
+            margin: 0;
+        }
+        .timeline > div > .timeline-item {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            margin-left: 55px;
+            margin-right: 15px;
+            padding: 10px;
+            position: relative;
+        }
+        .timeline > div > .timeline-item:before {
+            border-radius: 50%;
+            content: "";
+            height: 15px;
+            left: -7px;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+        }
+        .timeline > div > i {
+            background: #adb5bd;
+            border-radius: 50%;
+            font-size: 16px;
+            height: 30px;
+            left: 18px;
+            line-height: 30px;
+            position: absolute;
+            text-align: center;
+            top: 0;
+            width: 30px;
+            color: #fff;
+        }
+        .time-label > span {
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 10px;
+            text-transform: uppercase;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize analytics chart
+            initializeAnalyticsChart();
+            
+            // Chart type switcher
+            $('[data-chart]').on('click', function() {
+                $('[data-chart]').removeClass('active');
+                $(this).addClass('active');
+                // Here you would update the chart data based on selection
+            });
+        });
+
+        function initializeAnalyticsChart() {
+            const ctx = document.getElementById('analytics-chart').getContext('2d');
+            
+            // Sample data - replace with real data
+            const chartData = {
+                labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                datasets: [{
+                    label: 'Blog Yazıları',
+                    data: [12, 19, 15, 25, 22, 30, 28, 35, 32, 38, 42, 45],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            };
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                borderDash: [5, 5]
+                            },
+                            ticks: {
+                                color: '#6b7280',
+                                beginAtZero: true
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+    </script>
+}

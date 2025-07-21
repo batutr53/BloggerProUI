@@ -1,101 +1,505 @@
 ﻿@model List<BloggerProUI.Models.Category.CategoryDto>
 @{
-    ViewData["Title"] = "Kategori Listesi";
+    ViewData["Title"] = "Kategori Yönetimi";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Kategoriler</h1>
-    <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Yeni Kategori Ekle
-    </a>
-</div>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-}
-
-<div class="card shadow mb-4">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped" width="100%" cellspacing="0">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Adı</th>
-                        <th style="width: 150px;">İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var category in Model)
-                    {
-                        <tr>
-                            <td>@category.Name</td>
-                            <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-warning mr-1" title="Düzenle">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-danger btn-sm" onclick="deleteCategory('@category.Id')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-folder-open mr-2"></i>
+                    Kategori Yönetimi
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "AdminDashboard")">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item active">Kategoriler</li>
+                </ol>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="btn-group">
+                    <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus mr-1"></i> Yeni Kategori Ekle
+                    </a>
+                    <button type="button" class="btn btn-info" onclick="exportCategories()">
+                        <i class="fas fa-download mr-1"></i> Dışa Aktar
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="refreshData()">
+                        <i class="fas fa-sync mr-1"></i> Yenile
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-primary h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    <i class="fas fa-folder mr-1"></i>Toplam Kategori
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">@Model.Count</div>
+                                <div class="text-xs text-success mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i>Aktif sistemde
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-folder fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-success h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    <i class="fas fa-edit mr-1"></i>Toplam Yazı
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">@Model.Sum(c => c.PostCount ?? 0)</div>
+                                <div class="text-xs text-info mt-1">
+                                    <i class="fas fa-info-circle mr-1"></i>Tüm kategorilerde
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-edit fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-warning h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    <i class="fas fa-star mr-1"></i>En Popüler
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800" style="font-size: 1.1rem;">
+                                    @(Model.OrderByDescending(c => c.PostCount).FirstOrDefault()?.Name ?? "N/A")
+                                </div>
+                                <div class="text-xs text-warning mt-1">
+                                    <i class="fas fa-trophy mr-1"></i>@(Model.OrderByDescending(c => c.PostCount).FirstOrDefault()?.PostCount ?? 0) yazı
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-star fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-info h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    <i class="fas fa-calendar mr-1"></i>Ortalama Yazı
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">
+                                    @(Model.Any() ? Math.Round(Model.Average(c => c.PostCount ?? 0), 1) : 0)
+                                </div>
+                                <div class="text-xs text-info mt-1">
+                                    <i class="fas fa-chart-bar mr-1"></i>Kategori başına
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-chart-bar fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category List Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold text-gray-800">
+                    <i class="fas fa-list mr-2"></i>
+                    Kategori Listesi (@Model.Count adet)
+                </h3>
+                <div class="card-tools">
+                    <div class="input-group input-group-sm" style="width: 250px;">
+                        <input type="text" id="searchInput" class="form-control float-right" placeholder="Kategori ara...">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-default">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                @if (Model != null && Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="categoryTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 40%">
+                                        <i class="fas fa-folder mr-1"></i>
+                                        Kategori Bilgileri
+                                    </th>
+                                    <th style="width: 30%">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Açıklama
+                                    </th>
+                                    <th style="width: 15%" class="text-center">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        Yazı Sayısı
+                                    </th>
+                                    <th style="width: 15%" class="text-center">
+                                        <i class="fas fa-cogs mr-1"></i>
+                                        İşlemler
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var category in Model)
+                                {
+                                    <tr class="fade-in" data-category-id="@category.Id">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="mr-3">
+                                                    <div class="icon-circle bg-primary">
+                                                        <i class="fas fa-folder text-white"></i>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 font-weight-bold text-gray-800">@category.Name</h6>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-calendar-alt fa-sm mr-1"></i>
+                                                        @(category.CreatedAt?.ToString("dd MMM yyyy") ?? "Bilinmiyor")
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="text-wrap" style="max-width: 300px;">
+                                                @if (!string.IsNullOrEmpty(category.Description))
+                                                {
+                                                    <span class="text-gray-700">@category.Description</span>
+                                                }
+                                                else
+                                                {
+                                                    <em class="text-muted">Açıklama bulunmuyor</em>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (category.PostCount > 0)
+                                            {
+                                                <span class="badge badge-success badge-pill px-3 py-2">
+                                                    <i class="fas fa-edit fa-sm mr-1"></i>
+                                                    @category.PostCount yazı
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-secondary badge-pill px-3 py-2">
+                                                    <i class="fas fa-minus fa-sm mr-1"></i>
+                                                    Yazı yok
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-info btn-sm" 
+                                                        onclick="viewCategoryDetails('@category.Id', '@category.Name')"
+                                                        title="Detayları Görüntüle" data-toggle="tooltip">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <a asp-action="Edit" asp-route-id="@category.Id" 
+                                                   class="btn btn-warning btn-sm" 
+                                                   title="Düzenle" data-toggle="tooltip">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-danger btn-sm" 
+                                                        onclick="deleteCategory('@category.Id', '@category.Name')"
+                                                        title="Sil" data-toggle="tooltip">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-folder-open fa-4x text-gray-300 mb-4"></i>
+                        <h4 class="text-gray-500">Henüz kategori bulunmuyor</h4>
+                        <p class="text-gray-400 mb-4">İlk kategorinizi eklemek için aşağıdaki butona tıklayın.</p>
+                        <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="btn btn-primary">
+                            <i class="fas fa-plus mr-1"></i> Yeni Kategori Ekle
+                        </a>
+                    </div>
+                }
+            </div>
+            
+            @if (Model != null && Model.Any())
+            {
+                <div class="card-footer">
+                    <div class="row align-items-center">
+                        <div class="col-sm-6">
+                            <small class="text-muted">
+                                Toplam @Model.Count kategori gösteriliyor
+                            </small>
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportCategories()">
+                                <i class="fas fa-download mr-1"></i> Excel'e Aktar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+
+<!-- Category Details Modal -->
+<div class="modal fade" id="categoryDetailsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-folder mr-2"></i>
+                    Kategori Detayları
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="categoryDetailsContent">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                        <p class="mt-2">Yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function deleteCategory(id) {
+        $(document).ready(function() {
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                const value = $(this).val().toLowerCase();
+                $("#categoryTable tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
+
+            // Add fade-in animation to rows
+            $('.fade-in').each(function(index) {
+                $(this).delay(100 * index).fadeIn(500);
+            });
+        });
+
+        function deleteCategory(categoryId, categoryName) {
             Swal.fire({
-                title: 'Emin misiniz?',
-                text: "Bu kategori kalıcı olarak silinecek!",
+                title: 'Kategori Silinsin mi?',
+                text: `"${categoryName}" kategorisi kalıcı olarak silinecek!`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Evet, sil!',
-                cancelButtonText: 'Vazgeç'
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-trash mr-1"></i>Evet, Sil!',
+                cancelButtonText: '<i class="fas fa-times mr-1"></i>İptal',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Show loading
+                    Swal.fire({
+                        title: 'Siliniyor...',
+                        text: 'Lütfen bekleyin',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
                     $.ajax({
                         url: '@Url.Action("Delete", "Category")',
                         type: 'POST',
-                        data: { id: id },
+                        data: { id: categoryId },
                         success: function (response) {
                             if (response.success) {
-                                Swal.fire(
-                                    'Silindi!',
-                                    response.message,
-                                    'success'
-                                ).then(() => {
-                                    location.reload();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Başarılı!',
+                                    text: response.message || 'Kategori başarıyla silindi.',
+                                    timer: 2000,
+                                    showConfirmButton: false,
+                                    customClass: {
+                                        popup: 'fade-in'
+                                    }
+                                }).then(() => {
+                                    // Animate row removal
+                                    $(`tr[data-category-id="${categoryId}"]`).fadeOut(300, function() {
+                                        location.reload();
+                                    });
                                 });
                             } else {
-                                Swal.fire(
-                                    'Hata!',
-                                    response.message || 'Silme işlemi sırasında bir hata oluştu.',
-                                    'error'
-                                );
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Hata!',
+                                    text: response.message || 'Silme işlemi başarısız.',
+                                    customClass: {
+                                        confirmButton: 'btn btn-danger'
+                                    },
+                                    buttonsStyling: false
+                                });
                             }
                         },
-                        error: function () {
-                            Swal.fire(
-                                'Hata!',
-                                'Sunucuya ulaşılamadı.',
-                                'error'
-                            );
+                        error: function (xhr, status, error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Sunucu Hatası!',
+                                text: 'Bağlantı hatası oluştu. Lütfen tekrar deneyin.',
+                                customClass: {
+                                    confirmButton: 'btn btn-danger'
+                                },
+                                buttonsStyling: false
+                            });
                         }
                     });
                 }
             });
+        }
+
+        function viewCategoryDetails(categoryId, categoryName) {
+            $('#categoryDetailsModal').modal('show');
+            
+            // Simulate loading category details
+            setTimeout(() => {
+                $('#categoryDetailsContent').html(`
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-left-primary">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">${categoryName}</h5>
+                                    <p class="card-text">Bu kategori hakkında detaylı bilgiler burada görünecek.</p>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Yazı Sayısı</small>
+                                            <span class="h6">15</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Son Güncelleme</small>
+                                            <span class="h6">2 gün önce</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-left-success">
+                                <div class="card-body">
+                                    <h6 class="card-title text-success">İstatistikler</h6>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar bg-success" style="width: 75%"></div>
+                                    </div>
+                                    <small class="text-muted">Popülerlik: %75</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            }, 1000);
+        }
+
+        function exportCategories() {
+            Swal.fire({
+                title: 'Dışa Aktar',
+                text: 'Kategoriler Excel formatında dışa aktarılsın mı?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-file-excel mr-1"></i>Excel İndir',
+                cancelButtonText: 'İptal',
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Trigger download
+                    window.location.href = '@Url.Action("ExportExcel", "Category")';
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'İndiriliyor!',
+                        text: 'Excel dosyası indiriliyor...',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        function refreshData() {
+            Swal.fire({
+                title: 'Yenileniyor...',
+                text: 'Kategori listesi güncelleniyor',
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         }
     </script>
 }

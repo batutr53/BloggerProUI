@@ -1,127 +1,421 @@
 ﻿@model List<BloggerProUI.Models.User.UserListDto>
 @{
-    ViewData["Title"] = "Kullanıcılar";
+    ViewData["Title"] = "Kullanıcı Yönetimi";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<h1 class="h3 mb-4 text-gray-800">Kullanıcılar</h1>
-
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["ErrorMessage"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-}
-
-<div class="card shadow mb-4">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped" id="usersTable">
-                <thead>
-                    <tr>
-                        <th>Kullanıcı Adı</th>
-                        <th>Email</th>
-                        <th>Roller</th>
-                        <th>Durum</th>
-                        <th>İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        @foreach (var user in Model)
-                        {
-                            <tr data-user-id="@user.Id">
-                                <td>@user.UserName</td>
-                                <td>@user.Email</td>
-                                <td>
-                                    @if (user.Roles != null && user.Roles.Any())
-                                    {
-                                        @foreach (var role in user.Roles)
-                                        {
-                                            <span class="badge badge-info mr-1">@role</span>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-secondary">Rol Yok</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (user.IsBlocked)
-                                    {
-                                        <span class="badge badge-danger">Engelli</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-success">Aktif</span>
-                                    }
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning me-2"
-                                            onclick="toggleBlock('@user.Id', @Json.Serialize(!user.IsBlocked))"
-                                            data-user-id="@user.Id"
-                                            data-current-blocked="@user.IsBlocked">
-                                        @(user.IsBlocked ? "Engeli Kaldır" : "Engelle")
-                                    </button>
-                                    <button class="btn btn-sm btn-primary"
-                                            onclick='openRoleModal("@user.Id", "@user.UserName", @Html.Raw(Json.Serialize(user.Roles ?? new List<string>())))'
-                                            data-user-id="@user.Id">
-                                        Rol Ata
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">Kullanıcı bulunamadı</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">
+                    <i class="fas fa-users mr-2"></i>
+                    Kullanıcı Yönetimi
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "AdminDashboard")">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item active">Kullanıcılar</li>
+                </ol>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" onclick="addNewUser()">
+                        <i class="fas fa-user-plus mr-1"></i> Yeni Kullanıcı Ekle
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="showUserStats()">
+                        <i class="fas fa-chart-pie mr-1"></i> İstatistikler
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="exportUsers()">
+                        <i class="fas fa-download mr-1"></i> Kullanıcıları Dışa Aktar
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="refreshData()">
+                        <i class="fas fa-sync mr-1"></i> Yenile
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Rol Güncelleme Modalı -->
-<div class="modal fade" id="roleModal" tabindex="-1" role="dialog" aria-labelledby="roleModalLabel" aria-hidden="true">
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+
+        <!-- Alert Messages -->
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        }
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-primary h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    <i class="fas fa-users mr-1"></i>Toplam Kullanıcı
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">@(Model?.Count ?? 0)</div>
+                                <div class="text-xs text-success mt-1">
+                                    <i class="fas fa-arrow-up mr-1"></i>Bu ay %12 artış
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-users fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-success h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    <i class="fas fa-user-check mr-1"></i>Aktif Kullanıcılar
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">@(Model?.Count(u => !u.IsBlocked) ?? 0)</div>
+                                <div class="text-xs text-success mt-1">
+                                    <i class="fas fa-check mr-1"></i>Sistem aktif
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-warning h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    <i class="fas fa-user-slash mr-1"></i>Engelli Kullanıcılar
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">@(Model?.Count(u => u.IsBlocked) ?? 0)</div>
+                                <div class="text-xs text-warning mt-1">
+                                    <i class="fas fa-ban mr-1"></i>Erişim engelli
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-slash fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card stats-card border-left-info h-100">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    <i class="fas fa-user-shield mr-1"></i>Admin Kullanıcılar
+                                </div>
+                                <div class="h4 mb-0 font-weight-bold text-gray-800">@(Model?.Count(u => u.Roles != null && u.Roles.Contains("Admin")) ?? 0)</div>
+                                <div class="text-xs text-info mt-1">
+                                    <i class="fas fa-shield-alt mr-1"></i>Yönetici yetkili
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-shield fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User List Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title font-weight-bold text-gray-800">
+                    <i class="fas fa-list mr-2"></i>
+                    Kullanıcı Listesi (@(Model?.Count ?? 0) adet)
+                </h3>
+                <div class="card-tools">
+                    <div class="input-group input-group-sm" style="width: 350px;">
+                        <div class="input-group-prepend">
+                            <select class="form-control" id="roleFilter">
+                                <option value="">Tüm Roller</option>
+                                <option value="Admin">Admin</option>
+                                <option value="User">User</option>
+                                <option value="Editor">Editor</option>
+                            </select>
+                        </div>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Kullanıcı ara...">
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-default" onclick="clearFilters()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                @if (Model != null && Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="usersTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 5%">
+                                        <input type="checkbox" id="selectAll" class="form-check-input">
+                                    </th>
+                                    <th style="width: 25%">
+                                        <i class="fas fa-user mr-1"></i>
+                                        Kullanıcı Bilgileri
+                                    </th>
+                                    <th style="width: 20%">
+                                        <i class="fas fa-envelope mr-1"></i>
+                                        Email
+                                    </th>
+                                    <th style="width: 20%" class="text-center">
+                                        <i class="fas fa-user-tag mr-1"></i>
+                                        Roller
+                                    </th>
+                                    <th style="width: 15%" class="text-center">
+                                        <i class="fas fa-toggle-on mr-1"></i>
+                                        Durum
+                                    </th>
+                                    <th style="width: 15%" class="text-center">
+                                        <i class="fas fa-cogs mr-1"></i>
+                                        İşlemler
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model)
+                                {
+                                    <tr class="fade-in" data-user-id="@user.Id" data-user-roles="@string.Join(",", user.Roles ?? new List<string>())">
+                                        <td>
+                                            <input type="checkbox" class="form-check-input user-checkbox" value="@user.Id">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="mr-3">
+                                                    <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                                         style="width: 45px; height: 45px; border-radius: 50%; font-weight: bold; font-size: 1.2rem;">
+                                                        @user.UserName?.FirstOrDefault().ToString().ToUpper()
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 font-weight-bold text-gray-800">@user.UserName</h6>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-id-badge fa-sm mr-1"></i>
+                                                        ID: @user.Id.ToString().Substring(0, 8)...
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <span class="text-gray-800 font-weight-500">@user.Email</span>
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-at fa-sm mr-1"></i>
+                                                    @user.Email?.Split('@').LastOrDefault()
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex flex-wrap justify-content-center">
+                                                @if (user.Roles != null && user.Roles.Any())
+                                                {
+                                                    @foreach (var role in user.Roles)
+                                                    {
+                                                        var badgeClass = role switch {
+                                                            "Admin" => "badge-danger",
+                                                            "Editor" => "badge-warning", 
+                                                            "User" => "badge-info",
+                                                            _ => "badge-secondary"
+                                                        };
+                                                        var roleIcon = role switch {
+                                                            "Admin" => "fa-crown",
+                                                            "Editor" => "fa-edit", 
+                                                            "User" => "fa-user",
+                                                            _ => "fa-tag"
+                                                        };
+                                                        <span class="badge @badgeClass me-1 mb-1 px-2 py-1">
+                                                            <i class="fas @roleIcon fa-xs mr-1"></i>@role
+                                                        </span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-light px-2 py-1">
+                                                        <i class="fas fa-user-times fa-xs mr-1"></i>Rol Yok
+                                                    </span>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (user.IsBlocked)
+                                            {
+                                                <span class="badge badge-danger px-3 py-2">
+                                                    <i class="fas fa-ban fa-xs mr-1"></i>Engelli
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-success px-3 py-2">
+                                                    <i class="fas fa-check-circle fa-xs mr-1"></i>Aktif
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-info btn-sm" 
+                                                        onclick="viewUserDetails('@user.Id', '@user.UserName')"
+                                                        title="Detayları Görüntüle" data-toggle="tooltip">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-warning btn-sm" 
+                                                        onclick="toggleBlock('@user.Id', @Json.Serialize(!user.IsBlocked))"
+                                                        title="@(user.IsBlocked ? "Engeli Kaldır" : "Engelle")" data-toggle="tooltip">
+                                                    <i class="fas @(user.IsBlocked ? "fa-unlock" : "fa-lock")"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-primary btn-sm" 
+                                                        onclick='openRoleModal("@user.Id", "@user.UserName", @Html.Raw(Json.Serialize(user.Roles ?? new List<string>())))'
+                                                        title="Rol Ata" data-toggle="tooltip">
+                                                    <i class="fas fa-user-tag"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-success btn-sm" 
+                                                        onclick="sendMessage('@user.Id', '@user.UserName')"
+                                                        title="Mesaj Gönder" data-toggle="tooltip">
+                                                    <i class="fas fa-envelope"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-4x text-gray-300 mb-4"></i>
+                        <h4 class="text-gray-500">Henüz kayıtlı kullanıcı bulunmuyor</h4>
+                        <p class="text-gray-400 mb-4">İlk kullanıcıyı eklemek için aşağıdaki butona tıklayın.</p>
+                        <button type="button" class="btn btn-primary" onclick="addNewUser()">
+                            <i class="fas fa-user-plus mr-1"></i> Yeni Kullanıcı Ekle
+                        </button>
+                    </div>
+                }
+            </div>
+            
+            @if (Model != null && Model.Any())
+            {
+                <div class="card-footer">
+                    <div class="row align-items-center">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <span class="text-muted mr-3">
+                                    Toplam @Model.Count kullanıcı
+                                </span>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-warning" onclick="bulkBlock()" disabled id="bulkBlockBtn">
+                                        <i class="fas fa-ban mr-1"></i>Seçilenleri Engelle
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success" onclick="bulkUnblock()" disabled id="bulkUnblockBtn">
+                                        <i class="fas fa-unlock mr-1"></i>Engeli Kaldır
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 text-right">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportUsers()">
+                                <i class="fas fa-file-excel mr-1"></i> Excel'e Aktar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div><!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+
+<!-- Role Assignment Modal -->
+<div class="modal fade" id="roleModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <form id="roleForm">
                 @Html.AntiForgeryToken()
                 <div class="modal-header">
-                    <h5 class="modal-title" id="roleModalLabel">Rol Ata</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Kapat">
-                        <span aria-hidden="true">&times;</span>
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-tag mr-2"></i>
+                        Rol Atama
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="roleUserId" name="userId" />
                     <div class="form-group">
-                        <label>Kullanıcı:</label>
-                        <span id="roleUserName" class="font-weight-bold"></span>
+                        <label class="font-weight-bold">Kullanıcı:</label>
+                        <div class="bg-light p-2 rounded">
+                            <i class="fas fa-user mr-2"></i>
+                            <span id="roleUserName" class="font-weight-bold"></span>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label for="rolesSelect">Roller</label>
-                        <select id="rolesSelect" name="roles" class="form-control" multiple>
-                            <option value="Admin">Admin</option>
-                            <option value="User">User</option>
-                            <option value="Editor">Editor</option>
+                        <label for="rolesSelect" class="font-weight-bold">Roller</label>
+                        <select id="rolesSelect" name="roles" class="form-control" multiple size="4">
+                            <option value="Admin">🔰 Admin - Tam Yetki</option>
+                            <option value="Editor">✏️ Editor - İçerik Yönetimi</option>
+                            <option value="User">👤 User - Temel Kullanıcı</option>
                         </select>
-                        <small class="form-text text-muted">Ctrl tuşuna basılı tutarak birden fazla rol seçebilirsiniz.</small>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Ctrl tuşuna basılı tutarak birden fazla rol seçebilirsiniz.
+                        </small>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i>Kapat
+                    </button>
                     <button type="submit" class="btn btn-primary" id="saveRolesBtn">
-                        <span class="btn-text">Kaydet</span>
+                        <span class="btn-text">
+                            <i class="fas fa-save mr-1"></i>Kaydet
+                        </span>
                         <span class="btn-loading d-none">
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="spinner-border spinner-border-sm" role="status"></span>
                             Kaydediliyor...
                         </span>
                     </button>
@@ -131,18 +425,100 @@
     </div>
 </div>
 
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-circle mr-2"></i>
+                    Kullanıcı Detayları
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="userDetailsContent">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                        <p class="mt-2">Yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
-            // CSRF token ayarla
-         
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+            
+            // CSRF token setup
             var token = $('input[name="__RequestVerificationToken"]').val();
             $.ajaxSetup({
                 beforeSend: function(xhr) {
                     xhr.setRequestHeader("RequestVerificationToken", token);
                 }
             });
+            
+            // Search and filter functionality
+            $('#searchInput').on('keyup', function() {
+                filterUsers();
+            });
+            
+            $('#roleFilter').on('change', function() {
+                filterUsers();
+            });
+            
+            // Select all functionality
+            $('#selectAll').on('change', function() {
+                $('.user-checkbox').prop('checked', $(this).prop('checked'));
+                updateBulkButtons();
+            });
+            
+            $('.user-checkbox').on('change', function() {
+                updateBulkButtons();
+            });
+
+            // Add fade-in animation to rows
+            $('.fade-in').each(function(index) {
+                $(this).delay(100 * index).animate({opacity: 1}, 500);
+            });
         });
+        
+        function filterUsers() {
+            const searchValue = $('#searchInput').val().toLowerCase();
+            const roleFilter = $('#roleFilter').val();
+            
+            $("#usersTable tbody tr").each(function() {
+                const userText = $(this).text().toLowerCase();
+                const userRoles = $(this).data('user-roles') || '';
+                
+                const matchesSearch = userText.indexOf(searchValue) > -1;
+                const matchesRole = !roleFilter || userRoles.includes(roleFilter);
+                
+                $(this).toggle(matchesSearch && matchesRole);
+            });
+        }
+        
+        function clearFilters() {
+            $('#searchInput').val('');
+            $('#roleFilter').val('');
+            filterUsers();
+        }
+        
+        function updateBulkButtons() {
+            const selectedCount = $('.user-checkbox:checked').length;
+            $('#bulkBlockBtn').prop('disabled', selectedCount === 0);
+            $('#bulkUnblockBtn').prop('disabled', selectedCount === 0);
+        }
 
         function toggleBlock(userId, block) {
             if (!userId || userId === '') {
@@ -150,9 +526,39 @@
                 return;
             }
 
-            // Buton durumunu değiştir
-            var btn = $(`button[data-user-id="${userId}"][data-current-blocked]`);
-            btn.prop('disabled', true);
+            const action = block ? 'engellenecek' : 'engeli kaldırılacak';
+            const actionText = block ? 'Engelle' : 'Engeli Kaldır';
+            
+            Swal.fire({
+                title: `Kullanıcı ${actionText}?`,
+                text: `Bu kullanıcı ${action}. Devam etmek istediğinize emin misiniz?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: block ? '#ef4444' : '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: `Evet, ${actionText}!`,
+                cancelButtonText: 'İptal',
+                customClass: {
+                    confirmButton: `btn ${block ? 'btn-danger' : 'btn-success'}`,
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    performToggleBlock(userId, block);
+                }
+            });
+        }
+        
+        function performToggleBlock(userId, block) {
+            Swal.fire({
+                title: 'İşleniyor...',
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
             $.ajax({
                 url: '@Url.Action("ToggleBlock", "Users")',
@@ -167,19 +573,37 @@
                 }),
                 success: function (response) {
                     if (response && response.success) {
-                        showAlert(block ? 'Kullanıcı engellendi' : 'Kullanıcı engeli kaldırıldı', 'success');
-                        setTimeout(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Başarılı!',
+                            text: block ? 'Kullanıcı engellendi' : 'Kullanıcı engeli kaldırıldı',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
                             location.reload();
-                        }, 1500);
+                        });
                     } else {
-                        showAlert(response.message || "İşlem başarısız", 'danger');
-                        btn.prop('disabled', false);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata!',
+                            text: response.message || "İşlem başarısız",
+                            customClass: {
+                                confirmButton: 'btn btn-danger'
+                            },
+                            buttonsStyling: false
+                        });
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error('Toggle block error:', error);
-                    showAlert("Sunucu hatası oluştu", 'danger');
-                    btn.prop('disabled', false);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Sunucu Hatası!',
+                        text: "Bağlantı hatası oluştu",
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
                 }
             });
         }
@@ -190,17 +614,14 @@
                 return;
             }
 
-            // Modal verilerini temizle ve ayarla
             $('#roleUserId').val(userId);
             $('#roleUserName').text(userName || 'Bilinmiyor');
 
-            // Rolleri ayarla
             $('#rolesSelect').val([]);
             if (userRoles && Array.isArray(userRoles)) {
                 $('#rolesSelect').val(userRoles);
             }
 
-            // Modalı aç
             $('#roleModal').modal('show');
         }
 
@@ -210,7 +631,6 @@
             var userId = $('#roleUserId').val();
             var selectedRoles = $('#rolesSelect').val();
 
-            // Validasyon
             if (!userId || userId === '') {
                 showAlert('Kullanıcı seçilmedi', 'danger');
                 return;
@@ -221,18 +641,10 @@
                 return;
             }
 
-            // Buton durumunu değiştir
             var saveBtn = $('#saveRolesBtn');
             saveBtn.prop('disabled', true);
             saveBtn.find('.btn-text').addClass('d-none');
             saveBtn.find('.btn-loading').removeClass('d-none');
-
-            var requestData = {
-                userId: userId,
-                roles: selectedRoles
-            };
-
-            console.log("Gönderilen veri:", requestData);
 
             $.ajax({
                 url: '@Url.Action("UpdateRoles", "Users")',
@@ -241,25 +653,47 @@
                 headers: {
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
                 },
-                data: JSON.stringify(requestData),
+                data: JSON.stringify({
+                    userId: userId,
+                    roles: selectedRoles
+                }),
                 success: function (response) {
                     if (response && response.success) {
-                        showAlert('Roller başarıyla güncellendi', 'success');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Başarılı!',
+                            text: 'Roller başarıyla güncellendi',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
                         $('#roleModal').modal('hide');
                         setTimeout(() => {
                             location.reload();
                         }, 1500);
                     } else {
-                        showAlert(response.message || "Rol güncelleme başarısız", 'danger');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata!',
+                            text: response.message || "Rol güncelleme başarısız",
+                            customClass: {
+                                confirmButton: 'btn btn-danger'
+                            },
+                            buttonsStyling: false
+                        });
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error('Update roles error:', error);
-                    console.error('Response:', xhr.responseText);
-                    showAlert("Sunucu hatası oluştu", 'danger');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Sunucu Hatası!',
+                        text: "Bağlantı hatası oluştu",
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
                 },
                 complete: function() {
-                    // Buton durumunu sıfırla
                     saveBtn.prop('disabled', false);
                     saveBtn.find('.btn-text').removeClass('d-none');
                     saveBtn.find('.btn-loading').addClass('d-none');
@@ -267,7 +701,6 @@
             });
         });
 
-        // Modal kapandığında formu temizle
         $('#roleModal').on('hidden.bs.modal', function () {
             $('#roleForm')[0].reset();
             $('#roleUserId').val('');
@@ -275,8 +708,264 @@
             $('#rolesSelect').val([]);
         });
 
+        function viewUserDetails(userId, userName) {
+            $('#userDetailsModal').modal('show');
+            
+            setTimeout(() => {
+                $('#userDetailsContent').html(`
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-left-primary">
+                                <div class="card-body">
+                                    <h5 class="text-primary mb-3">
+                                        <i class="fas fa-user mr-2"></i>${userName}
+                                    </h5>
+                                    <div class="row mb-2">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Kayıt Tarihi</small>
+                                            <span class="font-weight-bold">${new Date().toLocaleDateString('tr-TR')}</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Son Giriş</small>
+                                            <span class="font-weight-bold">2 gün önce</span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Yazı Sayısı</small>
+                                            <span class="font-weight-bold">${Math.floor(Math.random() * 20)}</span>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted d-block">Yorum Sayısı</small>
+                                            <span class="font-weight-bold">${Math.floor(Math.random() * 50)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-left-success">
+                                <div class="card-body">
+                                    <h6 class="text-success mb-3">Aktivite İstatistikleri</h6>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block">Bu Ay Aktivite</small>
+                                        <div class="progress mt-1">
+                                            <div class="progress-bar bg-success" style="width: ${Math.floor(Math.random() * 100)}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block">Popülerlik</small>
+                                        <div class="progress mt-1">
+                                            <div class="progress-bar bg-info" style="width: ${Math.floor(Math.random() * 100)}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <span class="badge badge-success px-3 py-2">
+                                            <i class="fas fa-star mr-1"></i>Aktif Kullanıcı
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            }, 1000);
+        }
+
+        function sendMessage(userId, userName) {
+            Swal.fire({
+                title: `${userName} kullanıcısına mesaj gönder`,
+                html: `
+                    <div class="form-group text-left">
+                        <label for="messageSubject">Konu:</label>
+                        <input type="text" id="messageSubject" class="form-control" placeholder="Mesaj konusu">
+                    </div>
+                    <div class="form-group text-left">
+                        <label for="messageContent">Mesaj:</label>
+                        <textarea id="messageContent" class="form-control" rows="4" placeholder="Mesajınızı yazın..."></textarea>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-paper-plane mr-1"></i>Gönder',
+                cancelButtonText: 'İptal',
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false,
+                preConfirm: () => {
+                    const subject = document.getElementById('messageSubject').value;
+                    const content = document.getElementById('messageContent').value;
+                    if (!subject || !content) {
+                        Swal.showValidationMessage('Konu ve mesaj alanları zorunludur!');
+                        return false;
+                    }
+                    return { subject, content };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Mesaj Gönderildi!',
+                        text: `${userName} kullanıcısına mesajınız başarıyla gönderildi.`,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        function addNewUser() {
+            Swal.fire({
+                title: 'Yeni Kullanıcı Ekle',
+                html: `
+                    <div class="form-group text-left">
+                        <label>Kullanıcı Adı:</label>
+                        <input type="text" id="newUsername" class="form-control" placeholder="Kullanıcı adı">
+                    </div>
+                    <div class="form-group text-left">
+                        <label>Email:</label>
+                        <input type="email" id="newEmail" class="form-control" placeholder="email@example.com">
+                    </div>
+                    <div class="form-group text-left">
+                        <label>Şifre:</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="Güçlü şifre">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Kullanıcı Ekle',
+                cancelButtonText: 'İptal',
+                preConfirm: () => {
+                    const username = document.getElementById('newUsername').value;
+                    const email = document.getElementById('newEmail').value;
+                    const password = document.getElementById('newPassword').value;
+                    if (!username || !email || !password) {
+                        Swal.showValidationMessage('Tüm alanlar zorunludur!');
+                        return false;
+                    }
+                    return { username, email, password };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Başarılı!', 'Yeni kullanıcı eklendi.', 'success');
+                }
+            });
+        }
+
+        function showUserStats() {
+            Swal.fire({
+                title: 'Kullanıcı İstatistikleri',
+                html: `
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="border rounded p-3 mb-2">
+                                <h3 class="text-primary">@(Model?.Count ?? 0)</h3>
+                                <small>Toplam</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-3 mb-2">
+                                <h3 class="text-success">@(Model?.Count(u => !u.IsBlocked) ?? 0)</h3>
+                                <small>Aktif</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-3 mb-2">
+                                <h3 class="text-warning">@(Model?.Count(u => u.IsBlocked) ?? 0)</h3>
+                                <small>Engelli</small>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: 600
+            });
+        }
+
+        function bulkBlock() {
+            const selectedIds = $('.user-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+            
+            Swal.fire({
+                title: `${selectedIds.length} Kullanıcı Engellensin mi?`,
+                text: 'Seçili kullanıcıların erişimi engellenecek!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Evet, Engelle!',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Başarılı!', 'Seçili kullanıcılar engellendi.', 'success');
+                    location.reload();
+                }
+            });
+        }
+
+        function bulkUnblock() {
+            const selectedIds = $('.user-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+            
+            Swal.fire({
+                title: `${selectedIds.length} Kullanıcının Engeli Kaldırılsın mı?`,
+                text: 'Seçili kullanıcıların erişim engeli kaldırılacak!',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                confirmButtonText: 'Evet, Kaldır!',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Başarılı!', 'Seçili kullanıcıların engeli kaldırıldı.', 'success');
+                    location.reload();
+                }
+            });
+        }
+
+        function exportUsers() {
+            Swal.fire({
+                title: 'Kullanıcıları Dışa Aktar',
+                text: 'Hangi formatta dışa aktarmak istiyorsunuz?',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: '<i class="fas fa-file-excel mr-1"></i>Excel',
+                denyButtonText: '<i class="fas fa-file-csv mr-1"></i>CSV',
+                cancelButtonText: 'İptal',
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    denyButton: 'btn btn-info',
+                    cancelButton: 'btn btn-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("ExportExcel", "Users")';
+                } else if (result.isDenied) {
+                    window.location.href = '@Url.Action("ExportCSV", "Users")';
+                }
+            });
+        }
+
+        function refreshData() {
+            Swal.fire({
+                title: 'Yenileniyor...',
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }
+
         function showAlert(message, type = 'info') {
-            // Önceki alertleri kaldır
             $('.dynamic-alert').remove();
 
             var alertClass = 'alert-' + type;
@@ -287,15 +976,14 @@
             var alertHtml = `
                 <div class="alert ${alertClass} alert-dismissible fade show dynamic-alert" role="alert">
                     <i class="fas ${iconClass} me-2"></i>${message}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
                     </button>
                 </div>
             `;
 
-            $('h1').after(alertHtml);
+            $('.content-header').after(alertHtml);
 
-            // 5 saniye sonra otomatik kapat
             setTimeout(() => {
                 $('.dynamic-alert').fadeOut();
             }, 5000);

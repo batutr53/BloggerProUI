@@ -7,6 +7,7 @@
         public string Slug { get; set; }
         public string Excerpt { get; set; }
         public string FeaturedImage { get; set; }
+        public string Author { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? PublishDate { get; set; }
         public int ViewCount { get; set; }
